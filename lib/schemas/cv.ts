@@ -9,7 +9,7 @@ export const personalSchema = z.object({
   fullName: z.string().max(120).optional().default(""),
   headline: z.string().max(160).optional().default(""),
   email: z
-    .union([z.literal(""), z.string().email()])
+    .union([z.literal(""), z.email()])
     .optional()
     .default(""),
   phone: z.string().max(40).optional().default(""),
