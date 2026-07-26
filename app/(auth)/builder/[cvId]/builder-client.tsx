@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { CvPreview } from "@/components/cv/cv-preview";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,37 +10,48 @@ import {
 } from "@/components/ui/resizable";
 import { useCvAutosave } from "@/hooks/use-cv-autosave";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePanelUrl } from "@/hooks/use-panel-url";
 import type { CvContent } from "@/lib/schemas/cv";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { type BuilderPanel, useCvStore } from "@/lib/stores/cv-store";
 import { BuilderSidebar } from "./builder-sidebar";
 import { PanelContent } from "./panels";
-import { EditorDialog } from "./panels/editor-dialog";
+import type { BuilderUser } from "./panels/panel-topbar";
 import { SaveIndicator } from "./save-indicator";
+
+// The editor dialog pulls in the calendar, slider, and every per-section form.
+// Load it lazily so its cost is paid only when the user opens an editor.
+const EditorDialog = lazy(() =>
+  import("./panels/editor-dialog").then((m) => ({ default: m.EditorDialog })),
+);
 
 export function BuilderClient({
   cvId,
   initialContent,
+  initialPanel,
+  initialUser,
 }: {
   cvId: string;
   initialContent: CvContent;
+  initialPanel?: BuilderPanel;
+  initialUser: BuilderUser;
 }) {
   const hydrate = useCvStore((s) => s.hydrate);
 
   // Hydrate the store once for this CV.
   useEffect(() => {
-    hydrate(cvId, initialContent);
-  }, [cvId, initialContent, hydrate]);
+    hydrate(cvId, initialContent, initialPanel);
+  }, [cvId, initialContent, initialPanel, hydrate]);
 
   useCvAutosave();
+  usePanelUrl();
 
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
 
-  const editor = <PanelContent />;
+  const editor = <PanelContent initialUser={initialUser} />;
 
   return (
     <div className="flex h-screen flex-col">
-      {/* Floating controls */}
       <div className="absolute right-4 top-3 z-10 flex items-center gap-3">
         <SaveIndicator />
         {isMobile ? (
@@ -63,7 +74,6 @@ export function BuilderClient({
         ) : null}
       </div>
 
-      {/* Body */}
       <div className="flex min-h-0 flex-1">
         <BuilderSidebar />
         <div className="min-h-0 flex-1">
@@ -74,12 +84,20 @@ export function BuilderClient({
               <CvPreview />
             )
           ) : (
-            <ResizablePanelGroup orientation="horizontal">
-              <ResizablePanel defaultSize="30" minSize="20" maxSize="30">
+            <ResizablePanelGroup
+              orientation="horizontal"
+              defaultLayout={{ editor: 30, preview: 70 }}
+            >
+              <ResizablePanel
+                id="editor"
+                defaultSize="30"
+                minSize="24"
+                maxSize="40"
+              >
                 {editor}
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize="50" minSize="30">
+              <ResizablePanel id="preview" defaultSize="70" minSize="40">
                 <CvPreview />
               </ResizablePanel>
             </ResizablePanelGroup>
@@ -87,7 +105,9 @@ export function BuilderClient({
         </div>
       </div>
 
-      <EditorDialog />
+      <Suspense fallback={null}>
+        <EditorDialog />
+      </Suspense>
     </div>
   );
 }

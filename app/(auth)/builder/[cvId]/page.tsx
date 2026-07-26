@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { SIGN_IN_PATH } from "@/lib/auth-routes";
 import { prisma } from "@/lib/db";
 import type { CvContent } from "@/lib/schemas/cv";
+import { type BuilderPanel, isBuilderPanel } from "@/lib/stores/cv-store";
 import { BuilderClient } from "./builder-client";
 
 /** Coerce a possibly-legacy level value (old string / number / null) to 1–5. */
@@ -15,8 +16,10 @@ function toLevel(value: unknown): number {
 
 export default async function CvBuilderPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ cvId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect(SIGN_IN_PATH);
@@ -27,6 +30,21 @@ export default async function CvBuilderPage({
   if (!cv || cv.userId !== session.user.id) {
     notFound();
   }
+
+  // Resolve the active panel from `?panel=` on the server so the correct panel
+  // renders on the first paint (no client-side "personal -> URL panel" flicker).
+  const panelParam = (await searchParams).panel;
+  const initialPanel: BuilderPanel | undefined = isBuilderPanel(panelParam)
+    ? panelParam
+    : undefined;
+
+  // Reuse the server-side session so the header renders the real user on the
+  // first paint instead of flickering through the "Pengguna" fallback.
+  const initialUser = {
+    name: session.user.name ?? "",
+    email: session.user.email ?? "",
+    image: session.user.image ?? null,
+  };
 
   const initialContent: CvContent = {
     title: cv.title,
@@ -91,5 +109,16 @@ export default async function CvBuilderPage({
     })),
   };
 
-  return <BuilderClient cvId={cvId} initialContent={initialContent} />;
+  // Key by cvId so switching CVs fully remounts the builder: the store
+  // re-hydrates from scratch and the autosave hook resets, avoiding any
+  // cross-CV state bleed or a stale debounced save firing against the new id.
+  return (
+    <BuilderClient
+      key={cvId}
+      cvId={cvId}
+      initialContent={initialContent}
+      initialPanel={initialPanel}
+      initialUser={initialUser}
+    />
+  );
 }

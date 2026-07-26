@@ -1,6 +1,12 @@
 "use client";
 
-import { CheckIcon, ChevronsUpDownIcon, LogOutIcon, PencilIcon, PlusIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronsUpDownIcon,
+  LogOutIcon,
+  PencilIcon,
+  PlusIcon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,25 +24,38 @@ import { useCvStore } from "@/lib/stores/cv-store";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
+/** Minimal user shape resolved on the server and used for the header. */
+export interface BuilderUser {
+  name: string;
+  email: string;
+  image: string | null;
+}
+
 /**
  * Sticky top bar for the editor column. Shows the user avatar, name, and the
  * current CV title as a trigger for the "Pilih CV" dialog, plus a sign-out
  * button.
  */
-export function PanelTopBar() {
+export function PanelTopBar({ initialUser }: { initialUser: BuilderUser }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
 
   const { data: session } = useSession();
-  const fullName = useCvStore((s) => s.personal.fullName);
   const title = useCvStore((s) => s.title);
+  const utils = trpc.useUtils();
 
-  // Prefer the CV's own name, then the account name, then the email.
-  const user = session?.user;
-  const displayName =
-    fullName?.trim() || user?.name?.trim() || user?.email || "Pengguna";
+  // Prefer the live client session, but fall back to the server-provided user
+  // so the header renders the real name/avatar on the first paint (no flicker
+  // through the "Pengguna" placeholder). `useSession` keeps it reactive, e.g.
+  // after the account name changes.
+  const user = session?.user ?? initialUser;
+  const displayName = user?.name?.trim() || user?.email || "Pengguna";
   const initial = displayName.charAt(0).toUpperCase();
+
+  // Warm the CV list before the switcher opens so the dialog shows data
+  // immediately instead of its spinner.
+  const prefetchCvs = () => utils.cv.list.prefetch();
 
   function handleSignOut() {
     startSignOut(async () => {
@@ -53,6 +72,8 @@ export function PanelTopBar() {
           render={
             <button
               type="button"
+              onMouseEnter={prefetchCvs}
+              onFocus={prefetchCvs}
               className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted"
             />
           }
@@ -116,7 +137,10 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
     onSuccess: () => utils.cv.list.invalidate(),
   });
   const createMutation = trpc.cv.create.useMutation({
-    onSuccess: (cv) => {
+    onSuccess: async (cv) => {
+      // Refresh the CV list so the switcher and dashboard reflect the new CV
+      // immediately, then navigate into the freshly created editor.
+      await utils.cv.list.invalidate();
       onClose();
       router.push(`/builder/${cv.id}`);
     },

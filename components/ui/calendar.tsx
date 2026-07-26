@@ -9,10 +9,18 @@ import * as React from "react";
 import {
   type DayButton,
   DayPicker,
+  type DropdownProps,
   getDefaultClassNames,
   type Locale,
 } from "react-day-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 function Calendar({
@@ -167,6 +175,7 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           );
         },
+        Dropdown: CalendarDropdown,
         DayButton: ({ ...props }) => (
           <CalendarDayButton locale={locale} {...props} />
         ),
@@ -221,6 +230,70 @@ function CalendarDayButton({
       )}
       {...props}
     />
+  );
+}
+
+/**
+ * Replaces react-day-picker's native <select> month/year dropdowns with the
+ * shadcn Select (Base UI). The native <select> renders its option list in an
+ * OS layer, which triggers outside-press / focus-out dismissal in Base UI
+ * Popover and closes the calendar before a value can be picked. Base UI's
+ * Select renders through a popover-aware portal, so it stays open.
+ */
+function CalendarDropdown({
+  options,
+  value,
+  onChange,
+  disabled,
+  "aria-label": ariaLabel,
+}: DropdownProps) {
+  const selected = options?.find((option) => option.value === Number(value));
+  // Portal the Select popup into this wrapper (inside the parent Popover's
+  // DOM) instead of <body>. Base UI's Select doesn't register itself in the
+  // Popover's FloatingTree, so a body-portaled popup reads as an outside-press
+  // and instantly closes the Popover — making the dropdown appear unclickable.
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Select
+        // Non-modal so the Select popup doesn't fight the parent Popover for
+        // pointer/focus control (which prevented it from opening at all).
+        modal={false}
+        value={value != null ? String(value) : undefined}
+        disabled={disabled}
+        onValueChange={(next) => {
+          // react-day-picker only reads `event.target.value`, so a minimal
+          // synthetic event is sufficient here.
+          onChange?.({
+            target: { value: next },
+          } as unknown as React.ChangeEvent<HTMLSelectElement>);
+        }}
+      >
+        <SelectTrigger
+          size="sm"
+          aria-label={ariaLabel}
+          className="h-7 gap-1 border-none bg-transparent px-2 font-medium shadow-none dark:bg-transparent dark:hover:bg-accent"
+        >
+          <SelectValue>{selected?.label}</SelectValue>
+        </SelectTrigger>
+        <SelectContent
+          className="max-h-72"
+          alignItemWithTrigger={false}
+          container={containerRef}
+        >
+          {options?.map((option) => (
+            <SelectItem
+              key={option.value}
+              value={String(option.value)}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 

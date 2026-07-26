@@ -1,0 +1,168 @@
+"use client";
+
+import { CheckIcon } from "lucide-react";
+import { memo, useState } from "react";
+import {
+  TEMPLATE_CATEGORIES,
+  TEMPLATES,
+  type TemplateCategory,
+  type TemplateMeta,
+} from "@/components/cv/templates";
+import { SAMPLE_CV } from "@/components/cv/templates/sample";
+import { useCvStore } from "@/lib/stores/cv-store";
+import { cn } from "@/lib/utils";
+
+/** Special "all" chip value that shows every template. */
+type Filter = TemplateCategory | "all";
+
+/**
+ * Scaled, non-interactive preview of a template rendered with sample data.
+ * The 794px-wide template is transform-scaled down to the thumbnail width so
+ * the real renderer is reused (no separate thumbnail art to maintain).
+ *
+ * Memoized on the template id: sample data never changes, so a thumbnail only
+ * needs to render once even as the panel re-renders on selection changes.
+ */
+const TemplateThumb = memo(function TemplateThumb({
+  template,
+}: {
+  template: TemplateMeta;
+}) {
+  const Template = template.component;
+  // 794px design width scaled into a ~248px-wide card interior.
+  const scale = 0.3;
+  return (
+    <div
+      className="pointer-events-none relative w-full overflow-hidden bg-white"
+      style={{ aspectRatio: "1 / 1.414" }}
+      aria-hidden
+    >
+      <div
+        className="absolute left-0 top-0 origin-top-left"
+        style={{ width: 794, transform: `scale(${scale})` }}
+      >
+        <Template cv={SAMPLE_CV} />
+      </div>
+    </div>
+  );
+});
+
+/** A selectable template card acting as a radio option. */
+function TemplateCard({
+  template,
+  selected,
+  onSelect,
+}: {
+  template: TemplateMeta;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: card needs rich content (thumbnail + text), not an <input radio>
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onSelect}
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-lg border bg-card text-left transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        selected
+          ? "border-primary ring-2 ring-primary"
+          : "hover:border-primary/50",
+      )}
+    >
+      <div className="border-b">
+        <TemplateThumb template={template} />
+      </div>
+      {selected ? (
+        <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+          <CheckIcon className="size-3.5" />
+        </span>
+      ) : null}
+      <div className="p-2.5">
+        <p className="text-sm font-semibold">{template.name}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+          {template.description}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+/** The "Template" panel: category filter chips + a grid of template cards. */
+export function TemplatePanel() {
+  const templateId = useCvStore((s) => s.templateId);
+  const setTemplateId = useCvStore((s) => s.setTemplateId);
+  const [filter, setFilter] = useState<Filter>("all");
+
+  const visible =
+    filter === "all"
+      ? TEMPLATES
+      : TEMPLATES.filter((t) => t.categories.includes(filter));
+
+  const chips: { id: Filter; label: string }[] = [
+    { id: "all", label: "Semua" },
+    ...TEMPLATE_CATEGORIES.map((c) => ({ id: c.id as Filter, label: c.label })),
+  ];
+
+  return (
+    <div>
+      <div className="border-b p-4">
+        <h2 className="text-lg font-semibold">Template</h2>
+        <p className="text-xs text-muted-foreground">
+          Pilih template sesuai preferensi Anda.
+        </p>
+      </div>
+
+      <div
+        className="flex flex-wrap gap-2 border-b p-4"
+        role="radiogroup"
+        aria-label="Filter kategori template"
+      >
+        {chips.map((chip) => {
+          const active = chip.id === filter;
+          return (
+            // biome-ignore lint/a11y/useSemanticElements: pill toggle, not a native radio input
+            <button
+              key={chip.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setFilter(chip.id)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+                active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        role="radiogroup"
+        aria-label="Pilihan template"
+        className="grid grid-cols-2 gap-3 p-4"
+      >
+        {visible.map((template) => (
+          <TemplateCard
+            key={template.id}
+            template={template}
+            selected={template.id === templateId}
+            onSelect={() => setTemplateId(template.id)}
+          />
+        ))}
+        {visible.length === 0 ? (
+          <p className="col-span-2 py-6 text-center text-sm text-muted-foreground">
+            Tidak ada template pada kategori ini.
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}

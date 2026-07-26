@@ -1,4 +1,4 @@
-# CV Maker AI — repo guide
+# Zyvo — repo guide
 
 ## Stack
 - **Next.js 16** App Router with Turbopack — do NOT guess APIs from older versions; check `node_modules/next/dist/docs/` first
@@ -13,16 +13,16 @@
 - **Biome v2** for linting/formatting (VCS-aware, respects `.gitignore`)
 - **PostHog** for analytics; **Upstash Redis** for caching; **Puppeteer-core + @sparticuz/chromium** for PDF export
 
-## Key commands (use pnpm)
+## Key commands (use `bun`)
 | Command | Action |
 |---------|--------|
-| `pnpm dev` | Dev server (port 3000) |
-| `pnpm build` | Production build |
-| `pnpm lint` | Biome check |
-| `pnpm format` | Biome format --write |
-| `pnpm db:push` | Push Prisma schema to MongoDB |
-| `pnpm db:generate` | Regenerate Prisma Client |
-| `pnpm db:studio` | Open Prisma Studio |
+| `bun dev` | Dev server (port 3000) |
+| `bun build` | Production build |
+| `bun lint` | Biome check |
+| `bun format` | Biome format --write |
+| `bun db:push` | Push Prisma schema to MongoDB |
+| `bun db:generate` | Regenerate Prisma Client |
+| `bun db:studio` | Open Prisma Studio |
 
 `postinstall` hook auto-runs `prisma generate`.
 

@@ -10,12 +10,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { RouterOutputs } from "@/lib/trpc/client";
 import { trpc } from "@/lib/trpc/client";
 
-export function DashboardClient() {
+export function DashboardClient({
+  initialCvs,
+}: {
+  initialCvs: RouterOutputs["cv"]["list"];
+}) {
   const router = useRouter();
   const utils = trpc.useUtils();
-  const { data: cvs, isLoading } = trpc.cv.list.useQuery();
+  const { data: cvs, isLoading } = trpc.cv.list.useQuery(undefined, {
+    initialData: initialCvs,
+  });
 
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => router.push(`/builder/${cv.id}`),

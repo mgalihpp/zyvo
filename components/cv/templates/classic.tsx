@@ -1,28 +1,16 @@
-import type { CvContent } from "@/lib/schemas/cv";
-
-function formatDateRange(start?: string, end?: string, current?: boolean) {
-  const from = start?.trim();
-  const to = current ? "Present" : end?.trim();
-  if (from && to) return `${from} – ${to}`;
-  return from || to || "";
-}
+import { formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Classic ATS-friendly CV template. Single column, semantic headings, no
  * multi-column tricks that break ATS parsers. Rendered from live CV content.
  */
-export function ClassicTemplate({ cv }: { cv: CvContent }) {
+export function ClassicTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
-  const contactLine = [p.email, p.phone, p.location]
-    .filter(Boolean)
-    .join("  •  ");
-  const linkLine = [p.website, p.linkedin, p.github]
-    .filter(Boolean)
-    .join("  •  ");
+  const contactLine = join([p.email, p.phone, p.location]);
+  const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
     <article className="mx-auto w-full max-w-[794px] bg-white p-10 text-[13px] leading-relaxed text-neutral-800 shadow-sm">
-      {/* Header */}
       <header className="border-b border-neutral-300 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
           {p.fullName || "Your Name"}
@@ -38,19 +26,16 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         ) : null}
       </header>
 
-      {/* Summary */}
       {cv.summary?.trim() ? (
         <Section title="Summary">
           <p className="whitespace-pre-line text-neutral-700">{cv.summary}</p>
         </Section>
       ) : null}
 
-      {/* Experience */}
       {cv.experience.length > 0 ? (
         <Section title="Experience">
           <div className="space-y-3">
             {cv.experience.map((exp, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-neutral-900">
@@ -80,12 +65,10 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         </Section>
       ) : null}
 
-      {/* Education */}
       {cv.education.length > 0 ? (
         <Section title="Education">
           <div className="space-y-3">
             {cv.education.map((edu, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-neutral-900">
@@ -96,7 +79,7 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
                   </span>
                 </div>
                 <p className="text-neutral-700">
-                  {[edu.degree, edu.field].filter(Boolean).join(", ")}
+                  {join([edu.degree, edu.field], ", ")}
                   {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
                 </p>
               </div>
@@ -105,48 +88,45 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         </Section>
       ) : null}
 
-      {/* Skills */}
       {cv.skills.length > 0 ? (
         <Section title="Skills">
           <p className="text-neutral-700">
-            {cv.skills
-              .filter((s) => s.name.trim())
-              .map((s) => s.name)
-              .join("  •  ")}
+            {join(
+              cv.skills.map((s) => s.name),
+              "  •  ",
+            )}
           </p>
         </Section>
       ) : null}
 
-      {/* Interpersonal skills */}
       {cv.interpersonal.length > 0 ? (
         <Section title="Interpersonal Skills">
           <p className="text-neutral-700">
-            {cv.interpersonal
-              .filter((s) => s.name.trim())
-              .map((s) => s.name)
-              .join("  •  ")}
+            {join(
+              cv.interpersonal.map((s) => s.name),
+              "  •  ",
+            )}
           </p>
         </Section>
       ) : null}
 
-      {/* Languages */}
       {cv.languages.length > 0 ? (
         <Section title="Languages">
           <p className="text-neutral-700">
-            {cv.languages
-              .filter((l) => l.name.trim())
-              .map((l) => (l.level?.trim() ? `${l.name} (${l.level})` : l.name))
-              .join("  •  ")}
+            {join(
+              cv.languages.map((l) =>
+                l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+              ),
+              "  •  ",
+            )}
           </p>
         </Section>
       ) : null}
 
-      {/* Projects */}
       {cv.projects.length > 0 ? (
         <Section title="Projects">
           <div className="space-y-3">
             {cv.projects.map((proj, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-neutral-900">
@@ -178,12 +158,10 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         </Section>
       ) : null}
 
-      {/* Certifications */}
       {cv.certifications.length > 0 ? (
         <Section title="Certifications">
           <div className="space-y-2">
             {cv.certifications.map((cert, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-neutral-900">
@@ -215,12 +193,10 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         </Section>
       ) : null}
 
-      {/* Organizations */}
       {cv.organizations.length > 0 ? (
         <Section title="Organizations">
           <div className="space-y-3">
             {cv.organizations.map((org, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-neutral-900">
@@ -249,12 +225,10 @@ export function ClassicTemplate({ cv }: { cv: CvContent }) {
         </Section>
       ) : null}
 
-      {/* Custom sections */}
       {cv.custom.length > 0 ? (
         <Section title="Additional">
           <div className="space-y-3">
             {cv.custom.map((item, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: read-only preview render
               <div key={i}>
                 <h3 className="font-semibold text-neutral-900">
                   {item.title || "Item"}

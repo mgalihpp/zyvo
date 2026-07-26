@@ -1,9 +1,20 @@
 "use client";
 
+import { lazy, Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCvStore } from "@/lib/stores/cv-store";
-import { ContentPanel } from "./content-panel";
-import { PanelTopBar } from "./panel-topbar";
+import { type BuilderUser, PanelTopBar } from "./panel-topbar";
 import { PersonalForm } from "./personal-form";
+
+// Heavy panels are code-split: the sections panel pulls in dnd-kit and the
+// template panel renders five full template previews. Loading them on demand
+// keeps the initial editor bundle small.
+const ContentPanel = lazy(() =>
+  import("./content-panel").then((m) => ({ default: m.ContentPanel })),
+);
+const TemplatePanel = lazy(() =>
+  import("./template-panel").then((m) => ({ default: m.TemplatePanel })),
+);
 
 /** Non-sticky heading rendered at the top of each panel's scrollable body. */
 function PanelHeader({ title, note }: { title: string; note?: string }) {
@@ -11,6 +22,23 @@ function PanelHeader({ title, note }: { title: string; note?: string }) {
     <div className="border-b p-4">
       <h2 className="text-lg font-semibold">{title}</h2>
       {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
+    </div>
+  );
+}
+
+/** Fallback shown while a lazily-loaded panel chunk is fetched. */
+function PanelSkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-3 w-56" />
+      </div>
+      <div className="space-y-4 p-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
     </div>
   );
 }
@@ -49,13 +77,16 @@ function ActivePanel() {
     case "personal":
       return <PersonalPanel />;
     case "sections":
-      return <ContentPanel />;
+      return (
+        <Suspense fallback={<PanelSkeleton />}>
+          <ContentPanel />
+        </Suspense>
+      );
     case "template":
       return (
-        <Placeholder
-          title="Template"
-          note="Pemilihan template akan hadir di sini."
-        />
+        <Suspense fallback={<PanelSkeleton />}>
+          <TemplatePanel />
+        </Suspense>
       );
     case "typography":
       return (
@@ -66,7 +97,10 @@ function ActivePanel() {
       );
     case "colors":
       return (
-        <Placeholder title="Warna" note="Pengaturan warna akan hadir di sini." />
+        <Placeholder
+          title="Warna"
+          note="Pengaturan warna akan hadir di sini."
+        />
       );
     case "ai":
       return (
@@ -85,10 +119,10 @@ function ActivePanel() {
  * Editor column: a single scroll container with a sticky CV switcher top bar
  * followed by the active panel (whose own header scrolls with the content).
  */
-export function PanelContent() {
+export function PanelContent({ initialUser }: { initialUser: BuilderUser }) {
   return (
     <div className="h-full overflow-auto scrollbar-thin">
-      <PanelTopBar />
+      <PanelTopBar initialUser={initialUser} />
       <ActivePanel />
     </div>
   );

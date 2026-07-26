@@ -37,6 +37,24 @@ export type BuilderPanel =
   | "ai"
   | "export";
 
+/** All valid panel ids, in rail order. Shared by server + client. */
+export const VALID_PANELS: readonly BuilderPanel[] = [
+  "personal",
+  "sections",
+  "template",
+  "typography",
+  "colors",
+  "ai",
+  "export",
+];
+
+/** Type guard for a `?panel=` value coming from an untrusted source (URL). */
+export function isBuilderPanel(value: unknown): value is BuilderPanel {
+  return (
+    typeof value === "string" && VALID_PANELS.includes(value as BuilderPanel)
+  );
+}
+
 /** List-backed sections that open an item editor dialog. */
 export type EditorSection =
   | "summary"
@@ -87,7 +105,11 @@ export interface CvState extends CvContent {
   closeEditor: () => void;
 
   // lifecycle
-  hydrate: (cvId: string, content: CvContent) => void;
+  hydrate: (
+    cvId: string,
+    content: CvContent,
+    initialPanel?: BuilderPanel,
+  ) => void;
   setStep: (step: number) => void;
   setSaveStatus: (status: SaveStatus) => void;
   markSaved: () => void;
@@ -225,7 +247,7 @@ export const useCvStore = create<CvState>((set, get) => ({
   openEditor: (editorTarget) => set({ editorTarget }),
   closeEditor: () => set({ editorTarget: null }),
 
-  hydrate: (cvId, content) =>
+  hydrate: (cvId, content, initialPanel) =>
     set({
       cvId,
       ...content,
@@ -233,6 +255,9 @@ export const useCvStore = create<CvState>((set, get) => ({
       saveStatus: "idle",
       lastSavedAt: null,
       revision: 0,
+      // Adopt the panel resolved on the server (from `?panel=`) so the correct
+      // panel renders on the first paint — no client-side flicker.
+      ...(initialPanel ? { activePanel: initialPanel } : {}),
     }),
 
   setStep: (step) => set({ currentStep: step }),
