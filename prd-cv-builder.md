@@ -85,19 +85,20 @@ Aplikasi Pembuat CV adalah platform pembuatan CV berbasis web yang intuitif dan 
 
 ### Backend
 - **API Layer**: Next.js API Routes + `trpc` (RPC) untuk pengetikan end-to-end dan caching permintaan. Setiap fitur menempatkan endpoint-nya di folder `api` dan router tRPC di folder `trpc`.
-- **Fungsi Server**: Node.js Serverless Function di Vercel untuk autentikasi, validasi email, pengiriman email (menggunakan Resend), dan proses yang butuh runtime penuh (lihat catatan ekspor PDF di bawah).
-- **Autentikasi**: NextAuth.js (Google, GitHub, email/password) dengan token JWT sesi aman.
+- **Fungsi Server**: Node.js Serverless Function di Vercel untuk autentikasi, validasi, dan proses yang butuh runtime penuh (lihat catatan ekspor PDF di bawah).
+- **Autentikasi**: Better Auth (Google, GitHub, email/password) dengan token JWT sesi aman.
+- **Middleware**: `proxy.ts` (Next.js 16) untuk pembatasan tingkat rate dan pembersihan header.
 - **Middleware**: `proxy.ts` (Next.js 16) untuk pembatasan tingkat rate dan pembersihan header.
 
 ### Database
 - **Database**: MongoDB Atlas (cluster gratis untuk pengembangan, pembayaran sesuai penggunaan untuk produksi). Skema untuk `User`, `CV`, `Template`, `ResumeVersion`, `ShareLink`.
 - **ORM**: `Prisma` (dengan Prisma MongoDB connector) untuk memodelkan skema di sisi server, migrasi, dan type-safe query. Skema didefinisikan di `schema.prisma`, lalu di-generate jadi Prisma Client untuk dipakai di router tRPC. Semua akses database dilakukan lewat backend/tRPC — tidak ada akses langsung dari client ke MongoDB.
-- **Caching**: Redis Atlas untuk menyimpan token sesi dan memperbarui cache dengan cepat untuk pertanyaan yang sering diajukan.
+- **Caching**: Upstash Redis untuk menyimpan token sesi dan memperbarui cache dengan cepat untuk pertanyaan yang sering diajukan.
 
 ### Deployment & Infrastruktur
 - **Hosting**: Platform Vercel (GitHub Actions CI/CD). Memberikan Built-in CDN Edge, time-to-first-byte (TTFB) yang rendah.
 - **Env**: Variabel environment dipisahkan melalui `vercel env`.
-- **Observability**: `Next.js Analytics` (kedalaman halaman, pengalaman navigasi), `Sentry` untuk pelacakan error, `Vercel Analytics` untuk performa Edge.
+- **Observability**: `PostHog` untuk analytics, session replay, dan pelacakan event.
 - **Keamanan**: CSP, header `X-Frame-Options`, strict rate limiting, enkripsi TLS di seluruh lalu lintas.
 
 ### Alasan Memilih Tech Stack
@@ -205,7 +206,7 @@ Aplikasi Pembuat CV adalah platform pembuatan CV berbasis web yang intuitif dan 
 
 | Endpoint | Metode | Deskripsi |
 |----------|--------|-------------|
-| `/api/auth/signin` | POST | Otentikasi email/password, Google, GitHub (NextAuth.js) |
+| `/api/auth/signin` | POST | Otentikasi email/password, Google, GitHub (Better Auth) |
 | `/api/cv` | POST | Buat CV baru |
 | `/api/cv/{id}` | GET/PUT | Ambil/perbarui metadata dan bagian CV |
 | `/api/cv/{id}/section/{sectionKey}` | PATCH | Pembaruan bagian real-time |
@@ -213,7 +214,6 @@ Aplikasi Pembuat CV adalah platform pembuatan CV berbasis web yang intuitif dan 
 | `/api/cv/{id}/export` | POST | Mulai pembuatan PDF/DOCX (lihat catatan implementasi ekspor) |
 | `/api/share/{token}` | GET | Tampilkan pratinjau CV yang dapat diedit atau tidak dapat diedit |
 | `/api/webhook/resume-submitted` | POST | Menerima pengiriman webhook dari portal perekrutan eksternal (misalnya, ATS) |
-| `/api/email/send` | POST | Kirim email dengan CV yang dilampirkan (menggunakan Resend) |
 | `/api/integration/linkedin` | GET | Otorisasi OAuth untuk LinkedIn, lalu sinkronkan profil |
 
 > Catatan implementasi ekspor PDF: Puppeteer tidak berjalan di Vercel Edge Runtime karena butuh binary Chromium headless penuh. Gunakan Node.js Serverless Function dengan `puppeteer-core` + `@sparticuz/chromium`, atau servis eksternal (mis. Browserless, PDFShift) sebagai alternatif yang lebih ringan dikelola.
