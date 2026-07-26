@@ -2,11 +2,10 @@
 
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { CvContent } from "@/lib/schemas/cv";
-import { useCvStore } from "@/lib/stores/cv-store";
+import type { CvContent } from "@/features/cv/schemas/cv";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { getTemplate } from "./templates";
 
-/** Paper-shaped placeholder shown while the active template chunk loads. */
 function PreviewSkeleton() {
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -15,7 +14,6 @@ function PreviewSkeleton() {
   );
 }
 
-/** Renders the currently edited CV using the selected template. */
 export function CvPreview() {
   // Select each field individually so the store returns stable references and
   // avoids the "getServerSnapshot should be cached" infinite loop.

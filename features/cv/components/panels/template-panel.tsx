@@ -7,12 +7,11 @@ import {
   TEMPLATES,
   type TemplateCategory,
   type TemplateMeta,
-} from "@/components/cv/templates";
-import { SAMPLE_CV } from "@/components/cv/templates/sample";
-import { useCvStore } from "@/lib/stores/cv-store";
+} from "@/features/cv/components/templates";
+import { SAMPLE_CV } from "@/features/cv/components/templates/sample";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
-/** Special "all" chip value that shows every template. */
 type Filter = TemplateCategory | "all";
 
 /**
@@ -47,7 +46,6 @@ const TemplateThumb = memo(function TemplateThumb({
   );
 });
 
-/** A selectable template card acting as a radio option. */
 function TemplateCard({
   template,
   selected,
@@ -90,7 +88,6 @@ function TemplateCard({
   );
 }
 
-/** The "Template" panel: category filter chips + a grid of template cards. */
 export function TemplatePanel() {
   const templateId = useCvStore((s) => s.templateId);
   const setTemplateId = useCvStore((s) => s.setTemplateId);

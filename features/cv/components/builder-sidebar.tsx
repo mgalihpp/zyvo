@@ -18,7 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type BuilderPanel, useCvStore } from "@/lib/stores/cv-store";
+import type { BuilderPanel } from "@/features/cv/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
 interface SidebarItem {
@@ -37,7 +38,6 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "export", label: "Unduh", icon: DownloadIcon },
 ];
 
-/** Left icon rail for switching between builder panels. */
 export function BuilderSidebar() {
   const router = useRouter();
   const activePanel = useCvStore((s) => s.activePanel);

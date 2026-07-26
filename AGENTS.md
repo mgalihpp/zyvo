@@ -9,7 +9,7 @@
 - **Better Auth** — handler at `app/api/auth/[...all]/route.ts`, proxy check in `proxy.ts` (Next.js 16's renamed middleware)
 - **MongoDB** via **Prisma** (`provider: "mongodb"`) — CV sections are embedded MongoDB composite types, not relational
 - **Zustand** for CV builder state + custom 800ms debounced autosave hook
-- **Zod** schemas in `lib/schemas/cv.ts` — single source of truth for tRPC input validation and react-hook-form
+- **Zod** schemas in `features/cv/schemas/cv.ts` — single source of truth for tRPC input validation and react-hook-form
 - **Biome v2** for linting/formatting (VCS-aware, respects `.gitignore`)
 - **PostHog** for analytics; **Upstash Redis** for caching; **Puppeteer-core + @sparticuz/chromium** for PDF export
 
@@ -31,11 +31,15 @@
 - **`app/(auth)/builder/`** — CV dashboard; **`app/(auth)/builder/[cvId]/`** — editor
 - **`app/api/auth/[...all]/route.ts`** — Better Auth handler (captures all auth endpoints)
 - **`app/api/trpc/[trpc]/route.ts`** — tRPC fetch handler
-- **`server/trpc/routers/cv.ts`** — CRUD for CVs (ownership-enforced via `userId` match, no formal Prisma relation to User)
-- **`lib/stores/cv-store.ts`** — Zustand store holding all CV content + builder UI state
-- **`lib/schemas/cv.ts`** — Zod schemas + empty defaults for every CV section
-- **`hooks/use-cv-autosave.ts`** — subscribes to store `revision`, debounces 800ms, calls `trpc.cv.update`
-- **`components/cv/templates/`** — CV render templates (only `classic` currently)
+- **`features/`** — feature/module-based code. Each feature owns its `components/`, `hooks/`, `schemas/`, `stores/`, `server/`, `lib/`.
+- **`features/cv/server/cv-router.ts`** — CRUD for CVs (ownership-enforced via `userId` match, no formal Prisma relation to User); mounted in `server/trpc/routers/_app.ts`
+- **`features/cv/stores/cv-store.ts`** — Zustand store holding all CV content + builder UI state
+- **`features/cv/schemas/cv.ts`** — Zod schemas + empty defaults for every CV section
+- **`features/cv/hooks/use-cv-autosave.ts`** — subscribes to store `revision`, debounces 800ms, calls `trpc.cv.update`
+- **`features/cv/components/`** — CV builder/dashboard components + `panels/` + `templates/` (only `classic` currently)
+- **`features/auth/lib/`** — Better Auth server/client config + shared route guards (`auth.ts`, `auth-client.ts`, `auth-routes.ts`)
+- **`app/(auth)/builder/**/page.tsx`** — thin route entry points; logic lives in `features/cv`
+- **`server/trpc/`** — tRPC core (`trpc.ts`, `context.ts`, `server.ts`) + root router `routers/_app.ts` (mounts per-feature routers)
 - **`proxy.ts`** — Next.js 16 proxy (replaces `middleware.ts`); optimistic auth check via session cookie
 
 ## Conventions
@@ -44,5 +48,5 @@
 - `@/*` path alias maps to project root
 - CSS: `globals.css` uses `@import "tailwindcss"` + `@theme inline {}` for design tokens + `@utility` for custom utilities
 - Validate with Zod on both tRPC input (server) and react-hook-form resolver (client)
-- shadcn components in `components/ui/`, CV-specific in `components/cv/`
+- shadcn components in `components/ui/`; feature code lives under `features/<feature>/`
 - Dev-only: `<Agentation />` renders in `layout.tsx` when `NODE_ENV === "development"`

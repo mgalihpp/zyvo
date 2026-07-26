@@ -1,7 +1,7 @@
 import "server-only";
 
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { auth } from "@/features/auth/lib/auth";
 import { prisma } from "@/lib/db";
 import { appRouter } from "@/server/trpc/routers/_app";
 import { createCallerFactory } from "@/server/trpc/trpc";

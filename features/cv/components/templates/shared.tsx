@@ -1,6 +1,5 @@
-import type { CvContent } from "@/lib/schemas/cv";
+import type { CvContent } from "@/features/cv/schemas/cv";
 
-/** Props every CV template component receives. */
 export interface TemplateProps {
   cv: CvContent;
 }
@@ -17,7 +16,6 @@ export function formatDateRange(
   return from || to || "";
 }
 
-/** Joins truthy, trimmed parts with a separator. */
 export function join(parts: (string | undefined)[], sep = "  •  ") {
   return parts
     .map((p) => p?.trim())

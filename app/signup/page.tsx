@@ -21,8 +21,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn, signUp } from "@/lib/auth-client";
-import { DEFAULT_AUTH_REDIRECT } from "@/lib/auth-routes";
+import { signIn, signUp } from "@/features/auth/lib/auth-client";
+import { DEFAULT_AUTH_REDIRECT } from "@/features/auth/lib/auth-routes";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

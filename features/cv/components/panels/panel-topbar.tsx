@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { signOut, useSession } from "@/lib/auth-client";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { signOut, useSession } from "@/features/auth/lib/auth-client";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 

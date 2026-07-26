@@ -1,11 +1,14 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { SIGN_IN_PATH } from "@/lib/auth-routes";
+import { auth } from "@/features/auth/lib/auth";
+import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
+import { BuilderClient } from "@/features/cv/components/builder-client";
+import type { CvContent } from "@/features/cv/schemas/cv";
+import {
+  type BuilderPanel,
+  isBuilderPanel,
+} from "@/features/cv/stores/cv-store";
 import { prisma } from "@/lib/db";
-import type { CvContent } from "@/lib/schemas/cv";
-import { type BuilderPanel, isBuilderPanel } from "@/lib/stores/cv-store";
-import { BuilderClient } from "./builder-client";
 
 /** Coerce a possibly-legacy level value (old string / number / null) to 1–5. */
 function toLevel(value: unknown): number {

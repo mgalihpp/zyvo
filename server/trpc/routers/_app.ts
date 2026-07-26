@@ -1,9 +1,9 @@
+import { cvRouter } from "@/features/cv/server/cv-router";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/trpc/trpc";
-import { cvRouter } from "./cv";
 
 export const appRouter = createTRPCRouter({
   /** Health check — available without authentication. */

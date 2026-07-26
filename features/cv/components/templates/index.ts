@@ -25,7 +25,6 @@ const FreshGraduateLazy = lazy(() =>
   })),
 );
 
-/** All templates, in picker display order. */
 export const TEMPLATES: TemplateMeta[] = [
   {
     id: "classic",
@@ -69,7 +68,6 @@ export const TEMPLATES: TemplateMeta[] = [
   },
 ];
 
-/** id -> template lookup. */
 export const TEMPLATE_REGISTRY: TemplateRegistry = TEMPLATES.reduce(
   (acc, t) => {
     acc[t.id] = t;
@@ -81,7 +79,6 @@ export const TEMPLATE_REGISTRY: TemplateRegistry = TEMPLATES.reduce(
 /** Default template id used when a CV references an unknown/missing template. */
 export const DEFAULT_TEMPLATE_ID = "classic";
 
-/** Resolves a template by id, falling back to the default. */
 export function getTemplate(id: string | undefined): TemplateMeta {
   return (
     (id ? TEMPLATE_REGISTRY[id] : undefined) ??

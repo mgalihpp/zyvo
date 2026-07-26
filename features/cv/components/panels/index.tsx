@@ -2,7 +2,7 @@
 
 import { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { type BuilderUser, PanelTopBar } from "./panel-topbar";
 import { PersonalForm } from "./personal-form";
 
@@ -16,7 +16,6 @@ const TemplatePanel = lazy(() =>
   import("./template-panel").then((m) => ({ default: m.TemplatePanel })),
 );
 
-/** Non-sticky heading rendered at the top of each panel's scrollable body. */
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
     <div className="border-b p-4">
@@ -26,7 +25,6 @@ function PanelHeader({ title, note }: { title: string; note?: string }) {
   );
 }
 
-/** Fallback shown while a lazily-loaded panel chunk is fetched. */
 function PanelSkeleton() {
   return (
     <div>
@@ -43,7 +41,6 @@ function PanelSkeleton() {
   );
 }
 
-/** Simple placeholder for panels that are not built yet. */
 function Placeholder({ title, note }: { title: string; note: string }) {
   return (
     <div>
@@ -69,7 +66,6 @@ function PersonalPanel() {
   );
 }
 
-/** Renders the panel body matching the sidebar's active selection. */
 function ActivePanel() {
   const activePanel = useCvStore((s) => s.activePanel);
 

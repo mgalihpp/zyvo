@@ -1,4 +1,4 @@
-import type { CvContent } from "@/lib/schemas/cv";
+import type { CvContent } from "@/features/cv/schemas/cv";
 
 /**
  * Static sample CV used to render template thumbnails in the picker. Kept small

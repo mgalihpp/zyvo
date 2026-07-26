@@ -25,7 +25,10 @@ export function DashboardClient({
   });
 
   const createMutation = trpc.cv.create.useMutation({
-    onSuccess: (cv) => router.push(`/builder/${cv.id}`),
+    onSuccess: (cv) => {
+      utils.cv.list.invalidate();
+      router.push(`/builder/${cv.id}`);
+    },
   });
   const deleteMutation = trpc.cv.delete.useMutation({
     onSuccess: () => utils.cv.list.invalidate(),

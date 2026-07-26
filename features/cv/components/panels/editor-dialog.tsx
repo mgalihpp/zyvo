@@ -45,8 +45,9 @@ import {
   type OrganizationInput,
   type ProjectInput,
   type SkillInput,
-} from "@/lib/schemas/cv";
-import { type EditorSection, useCvStore } from "@/lib/stores/cv-store";
+} from "@/features/cv/schemas/cv";
+import type { EditorSection } from "@/features/cv/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { AiToolbar, InfoBanner, TipsBanner } from "./_ai-tools";
 
 const SECTION_TITLES: Record<EditorSection, string> = {
@@ -199,7 +200,7 @@ type ListSection = Exclude<EditorSection, "summary">;
 
 /** Static config binding a section to its empty value, add, and update fns. */
 function useSectionConfig(section: ListSection) {
-  const store = useCvStore();
+  const store = useCvStore((s) => s);
 
   const config = {
     experience: {
