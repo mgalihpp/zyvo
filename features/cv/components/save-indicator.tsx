@@ -1,10 +1,9 @@
 "use client";
 
 import { CheckIcon, CircleAlertIcon, LoaderIcon } from "lucide-react";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
-/** Shows the current autosave status. */
 export function SaveIndicator() {
   const status = useCvStore((s) => s.saveStatus);
 

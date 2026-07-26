@@ -46,7 +46,6 @@ export const skillSchema = z.object({
   level: levelSchema,
 });
 
-/** Interpersonal skills are a plain list of names (no proficiency level). */
 export const interpersonalSchema = z.object({
   name: z.string().min(1, "Name is required").max(80),
 });
@@ -85,7 +84,6 @@ export const customSchema = z.object({
   description: z.string().max(2000).optional().default(""),
 });
 
-/** Full editable CV content (everything except server-managed metadata). */
 export const cvContentSchema = z.object({
   title: z.string().min(1, "Title is required").max(160),
   templateId: z.string().max(60).default("classic"),
@@ -102,7 +100,6 @@ export const cvContentSchema = z.object({
   custom: z.array(customSchema).default([]),
 });
 
-/** Partial patch used by autosave (any subset of the content fields). */
 export const cvUpdateSchema = cvContentSchema.partial();
 
 export type PersonalInput = z.infer<typeof personalSchema>;
@@ -118,7 +115,6 @@ export type CustomInput = z.infer<typeof customSchema>;
 export type CvContent = z.infer<typeof cvContentSchema>;
 export type CvUpdate = z.infer<typeof cvUpdateSchema>;
 
-/** Empty defaults for a fresh CV draft. */
 export const emptyPersonal: PersonalInput = {
   fullName: "",
   headline: "",

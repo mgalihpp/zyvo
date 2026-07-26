@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { cvContentSchema, cvUpdateSchema } from "@/lib/schemas/cv";
+import { cvContentSchema, cvUpdateSchema } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 /**
@@ -8,7 +8,6 @@ import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
  * ownership on every read/write.
  */
 export const cvRouter = createTRPCRouter({
-  /** List all CVs owned by the current user (newest first). */
   list: protectedProcedure.query(async ({ ctx }) => {
     return ctx.prisma.cV.findMany({
       where: { userId: ctx.session.user.id },
@@ -23,7 +22,6 @@ export const cvRouter = createTRPCRouter({
     });
   }),
 
-  /** Fetch a single CV by id (ownership enforced). */
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -36,7 +34,6 @@ export const cvRouter = createTRPCRouter({
       return cv;
     }),
 
-  /** Create a new CV. Accepts an optional partial content payload. */
   create: protectedProcedure
     .input(cvContentSchema.partial().optional())
     .mutation(async ({ ctx, input }) => {
@@ -58,7 +55,6 @@ export const cvRouter = createTRPCRouter({
       return cv;
     }),
 
-  /** Patch a CV. Used by the debounced autosave — accepts any subset. */
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: cvUpdateSchema }))
     .mutation(async ({ ctx, input }) => {
@@ -80,7 +76,6 @@ export const cvRouter = createTRPCRouter({
       return updated;
     }),
 
-  /** Delete a CV (ownership enforced). */
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {

@@ -33,7 +33,7 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
 /** A draggable, clickable row for a single list item within a section. */

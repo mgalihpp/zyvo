@@ -5,7 +5,7 @@ import {
   isAuthPath,
   isProtectedPath,
   SIGN_IN_PATH,
-} from "@/lib/auth-routes";
+} from "@/features/auth/lib/auth-routes";
 
 /**
  * Proxy (Next.js 16's renamed Middleware) runs on every matched request.

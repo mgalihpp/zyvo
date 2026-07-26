@@ -30,11 +30,8 @@ export const TEMPLATE_CATEGORIES: TemplateCategoryMeta[] = [
 
 export interface TemplateMeta {
   id: string;
-  /** Human-facing name shown in the picker. */
   name: string;
-  /** Short description shown under the name. */
   description: string;
-  /** Categories this template belongs to (drives the filter chips). */
   categories: TemplateCategory[];
   /**
    * Eager renderer. Used by the template picker, which renders every template

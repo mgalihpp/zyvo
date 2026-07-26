@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/lib/auth-client";
+import { signOut } from "@/features/auth/lib/auth-client";
 
 export function SignOutButton() {
   const router = useRouter();

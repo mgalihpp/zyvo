@@ -2,7 +2,7 @@
 
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useCvStore } from "@/lib/stores/cv-store";
+import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 
 /** Personal/contact info form (rendered inside the "Informasi Pribadi" panel). */
 export function PersonalForm() {

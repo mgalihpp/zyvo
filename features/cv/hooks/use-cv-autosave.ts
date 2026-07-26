@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useCvStore } from "@/lib/stores/cv-store";
+import {
+  useCvStore,
+  useCvStoreApi,
+} from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
 
 const DEBOUNCE_MS = 800;
@@ -11,6 +14,7 @@ const DEBOUNCE_MS = 800;
  * debounce. Save status is written back into the store so UI can reflect it.
  */
 export function useCvAutosave() {
+  const storeApi = useCvStoreApi();
   const cvId = useCvStore((s) => s.cvId);
   const revision = useCvStore((s) => s.revision);
   const updateMutation = trpc.cv.update.useMutation();
@@ -31,13 +35,13 @@ export function useCvAutosave() {
     if (timerRef.current) clearTimeout(timerRef.current);
 
     timerRef.current = setTimeout(() => {
-      const store = useCvStore.getState();
+      const store = storeApi.getState();
       store.setSaveStatus("saving");
       mutateRef.current(
         { id: cvId, data: store.getContent() },
         {
-          onSuccess: () => useCvStore.getState().markSaved(),
-          onError: () => useCvStore.getState().setSaveStatus("error"),
+          onSuccess: () => storeApi.getState().markSaved(),
+          onError: () => storeApi.getState().setSaveStatus("error"),
         },
       );
     }, DEBOUNCE_MS);

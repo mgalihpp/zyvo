@@ -1,11 +1,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
-import { auth } from "@/lib/auth";
-import { SIGN_IN_PATH } from "@/lib/auth-routes";
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { auth } from "@/features/auth/lib/auth";
+import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
+import { DashboardClient } from "@/features/cv/components/dashboard-client";
 import { getServerTrpc } from "@/server/trpc/server";
-import { DashboardClient } from "./dashboard-client";
-import { SignOutButton } from "./sign-out-button";
 
 export default async function BuilderPage() {
   const session = await auth.api.getSession({ headers: await headers() });

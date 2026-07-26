@@ -10,10 +10,6 @@ export const createTRPCRouter = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const publicProcedure = t.procedure;
 
-/**
- * Protected procedure: throws UNAUTHORIZED when there is no active session.
- * Narrows `ctx.session` / `ctx.session.user` to non-null for downstream use.
- */
 export const protectedProcedure = t.procedure.use(function isAuthed(opts) {
   const { session } = opts.ctx;
 

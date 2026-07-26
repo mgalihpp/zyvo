@@ -21,8 +21,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth-client";
-import { DEFAULT_AUTH_REDIRECT } from "@/lib/auth-routes";
+import { signIn } from "@/features/auth/lib/auth-client";
+import { DEFAULT_AUTH_REDIRECT } from "@/features/auth/lib/auth-routes";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),

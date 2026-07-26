@@ -1,18 +1,19 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useState } from "react";
-import { CvPreview } from "@/components/cv/cv-preview";
+import { lazy, Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useCvAutosave } from "@/hooks/use-cv-autosave";
+import { CvPreview } from "@/features/cv/components/cv-preview";
+import { useCvAutosave } from "@/features/cv/hooks/use-cv-autosave";
+import { usePanelUrl } from "@/features/cv/hooks/use-panel-url";
+import type { CvContent } from "@/features/cv/schemas/cv";
+import type { BuilderPanel } from "@/features/cv/stores/cv-store";
+import { CvStoreProvider } from "@/features/cv/stores/cv-store-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { usePanelUrl } from "@/hooks/use-panel-url";
-import type { CvContent } from "@/lib/schemas/cv";
-import { type BuilderPanel, useCvStore } from "@/lib/stores/cv-store";
 import { BuilderSidebar } from "./builder-sidebar";
 import { PanelContent } from "./panels";
 import type { BuilderUser } from "./panels/panel-topbar";
@@ -35,13 +36,18 @@ export function BuilderClient({
   initialPanel?: BuilderPanel;
   initialUser: BuilderUser;
 }) {
-  const hydrate = useCvStore((s) => s.hydrate);
+  // Per-request store seeded with SSR data so the first paint already has the
+  // real CV. The page keys this component by cvId, so switching CVs remounts.
+  return (
+    <CvStoreProvider
+      init={{ cvId, content: initialContent, activePanel: initialPanel }}
+    >
+      <BuilderLayout initialUser={initialUser} />
+    </CvStoreProvider>
+  );
+}
 
-  // Hydrate the store once for this CV.
-  useEffect(() => {
-    hydrate(cvId, initialContent, initialPanel);
-  }, [cvId, initialContent, initialPanel, hydrate]);
-
+function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
   useCvAutosave();
   usePanelUrl();
 
