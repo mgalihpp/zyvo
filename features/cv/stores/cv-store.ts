@@ -216,250 +216,254 @@ export const createCvStore = (init?: CvStoreInit) =>
 
     activePanel: init?.activePanel ?? "personal",
     sidebarCollapsed: false,
-  setActivePanel: (activePanel) => set({ activePanel }),
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+    setActivePanel: (activePanel) => set({ activePanel }),
+    toggleSidebar: () =>
+      set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
-  editorTarget: null,
-  openEditor: (editorTarget) => set({ editorTarget }),
-  closeEditor: () => set({ editorTarget: null }),
+    editorTarget: null,
+    openEditor: (editorTarget) => set({ editorTarget }),
+    closeEditor: () => set({ editorTarget: null }),
 
-  setStep: (step) => set({ currentStep: step }),
-  setSaveStatus: (saveStatus) => set({ saveStatus }),
-  markSaved: () => set({ saveStatus: "saved", lastSavedAt: Date.now() }),
+    setStep: (step) => set({ currentStep: step }),
+    setSaveStatus: (saveStatus) => set({ saveStatus }),
+    markSaved: () => set({ saveStatus: "saved", lastSavedAt: Date.now() }),
 
-  setTitle: (title) => set((s) => ({ title, ...touch()(s) })),
-  setTemplateId: (templateId) => set((s) => ({ templateId, ...touch()(s) })),
-  setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
+    setTitle: (title) => set((s) => ({ title, ...touch()(s) })),
+    setTemplateId: (templateId) => set((s) => ({ templateId, ...touch()(s) })),
+    setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
 
-  setPersonal: (patch) =>
-    set((s) => ({ personal: { ...s.personal, ...patch }, ...touch()(s) })),
+    setPersonal: (patch) =>
+      set((s) => ({ personal: { ...s.personal, ...patch }, ...touch()(s) })),
 
-  addExperience: (value) =>
-    set((s) => ({
-      experience: [...s.experience, { ...emptyExperience, ...value }],
-      ...touch()(s),
-    })),
-  updateExperience: (index, patch) =>
-    set((s) => ({
-      experience: s.experience.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeExperience: (index) =>
-    set((s) => ({
-      experience: s.experience.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderExperience: (from, to) =>
-    set((s) => ({
-      experience: moveItem(s.experience, from, to),
-      ...touch()(s),
-    })),
+    addExperience: (value) =>
+      set((s) => ({
+        experience: [...s.experience, { ...emptyExperience, ...value }],
+        ...touch()(s),
+      })),
+    updateExperience: (index, patch) =>
+      set((s) => ({
+        experience: s.experience.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeExperience: (index) =>
+      set((s) => ({
+        experience: s.experience.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderExperience: (from, to) =>
+      set((s) => ({
+        experience: moveItem(s.experience, from, to),
+        ...touch()(s),
+      })),
 
-  addEducation: (value) =>
-    set((s) => ({
-      education: [...s.education, { ...emptyEducation, ...value }],
-      ...touch()(s),
-    })),
-  updateEducation: (index, patch) =>
-    set((s) => ({
-      education: s.education.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeEducation: (index) =>
-    set((s) => ({
-      education: s.education.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderEducation: (from, to) =>
-    set((s) => ({
-      education: moveItem(s.education, from, to),
-      ...touch()(s),
-    })),
+    addEducation: (value) =>
+      set((s) => ({
+        education: [...s.education, { ...emptyEducation, ...value }],
+        ...touch()(s),
+      })),
+    updateEducation: (index, patch) =>
+      set((s) => ({
+        education: s.education.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeEducation: (index) =>
+      set((s) => ({
+        education: s.education.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderEducation: (from, to) =>
+      set((s) => ({
+        education: moveItem(s.education, from, to),
+        ...touch()(s),
+      })),
 
-  addSkill: (value) =>
-    set((s) => ({
-      skills: [...s.skills, { ...emptySkill, ...value }],
-      ...touch()(s),
-    })),
-  updateSkill: (index, patch) =>
-    set((s) => ({
-      skills: s.skills.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeSkill: (index) =>
-    set((s) => ({
-      skills: s.skills.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderSkill: (from, to) =>
-    set((s) => ({
-      skills: moveItem(s.skills, from, to),
-      ...touch()(s),
-    })),
+    addSkill: (value) =>
+      set((s) => ({
+        skills: [...s.skills, { ...emptySkill, ...value }],
+        ...touch()(s),
+      })),
+    updateSkill: (index, patch) =>
+      set((s) => ({
+        skills: s.skills.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeSkill: (index) =>
+      set((s) => ({
+        skills: s.skills.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderSkill: (from, to) =>
+      set((s) => ({
+        skills: moveItem(s.skills, from, to),
+        ...touch()(s),
+      })),
 
-  addInterpersonal: (value) =>
-    set((s) => ({
-      interpersonal: [...s.interpersonal, { ...emptyInterpersonal, ...value }],
-      ...touch()(s),
-    })),
-  updateInterpersonal: (index, patch) =>
-    set((s) => ({
-      interpersonal: s.interpersonal.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeInterpersonal: (index) =>
-    set((s) => ({
-      interpersonal: s.interpersonal.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderInterpersonal: (from, to) =>
-    set((s) => ({
-      interpersonal: moveItem(s.interpersonal, from, to),
-      ...touch()(s),
-    })),
+    addInterpersonal: (value) =>
+      set((s) => ({
+        interpersonal: [
+          ...s.interpersonal,
+          { ...emptyInterpersonal, ...value },
+        ],
+        ...touch()(s),
+      })),
+    updateInterpersonal: (index, patch) =>
+      set((s) => ({
+        interpersonal: s.interpersonal.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeInterpersonal: (index) =>
+      set((s) => ({
+        interpersonal: s.interpersonal.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderInterpersonal: (from, to) =>
+      set((s) => ({
+        interpersonal: moveItem(s.interpersonal, from, to),
+        ...touch()(s),
+      })),
 
-  addLanguage: (value) =>
-    set((s) => ({
-      languages: [...s.languages, { ...emptyLanguage, ...value }],
-      ...touch()(s),
-    })),
-  updateLanguage: (index, patch) =>
-    set((s) => ({
-      languages: s.languages.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeLanguage: (index) =>
-    set((s) => ({
-      languages: s.languages.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderLanguage: (from, to) =>
-    set((s) => ({
-      languages: moveItem(s.languages, from, to),
-      ...touch()(s),
-    })),
+    addLanguage: (value) =>
+      set((s) => ({
+        languages: [...s.languages, { ...emptyLanguage, ...value }],
+        ...touch()(s),
+      })),
+    updateLanguage: (index, patch) =>
+      set((s) => ({
+        languages: s.languages.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeLanguage: (index) =>
+      set((s) => ({
+        languages: s.languages.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderLanguage: (from, to) =>
+      set((s) => ({
+        languages: moveItem(s.languages, from, to),
+        ...touch()(s),
+      })),
 
-  addCertification: (value) =>
-    set((s) => ({
-      certifications: [
-        ...s.certifications,
-        { ...emptyCertification, ...value },
-      ],
-      ...touch()(s),
-    })),
-  updateCertification: (index, patch) =>
-    set((s) => ({
-      certifications: s.certifications.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeCertification: (index) =>
-    set((s) => ({
-      certifications: s.certifications.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderCertification: (from, to) =>
-    set((s) => ({
-      certifications: moveItem(s.certifications, from, to),
-      ...touch()(s),
-    })),
+    addCertification: (value) =>
+      set((s) => ({
+        certifications: [
+          ...s.certifications,
+          { ...emptyCertification, ...value },
+        ],
+        ...touch()(s),
+      })),
+    updateCertification: (index, patch) =>
+      set((s) => ({
+        certifications: s.certifications.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeCertification: (index) =>
+      set((s) => ({
+        certifications: s.certifications.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderCertification: (from, to) =>
+      set((s) => ({
+        certifications: moveItem(s.certifications, from, to),
+        ...touch()(s),
+      })),
 
-  addOrganization: (value) =>
-    set((s) => ({
-      organizations: [...s.organizations, { ...emptyOrganization, ...value }],
-      ...touch()(s),
-    })),
-  updateOrganization: (index, patch) =>
-    set((s) => ({
-      organizations: s.organizations.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeOrganization: (index) =>
-    set((s) => ({
-      organizations: s.organizations.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderOrganization: (from, to) =>
-    set((s) => ({
-      organizations: moveItem(s.organizations, from, to),
-      ...touch()(s),
-    })),
+    addOrganization: (value) =>
+      set((s) => ({
+        organizations: [...s.organizations, { ...emptyOrganization, ...value }],
+        ...touch()(s),
+      })),
+    updateOrganization: (index, patch) =>
+      set((s) => ({
+        organizations: s.organizations.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeOrganization: (index) =>
+      set((s) => ({
+        organizations: s.organizations.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderOrganization: (from, to) =>
+      set((s) => ({
+        organizations: moveItem(s.organizations, from, to),
+        ...touch()(s),
+      })),
 
-  addProject: (value) =>
-    set((s) => ({
-      projects: [...s.projects, { ...emptyProject, ...value }],
-      ...touch()(s),
-    })),
-  updateProject: (index, patch) =>
-    set((s) => ({
-      projects: s.projects.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeProject: (index) =>
-    set((s) => ({
-      projects: s.projects.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderProject: (from, to) =>
-    set((s) => ({
-      projects: moveItem(s.projects, from, to),
-      ...touch()(s),
-    })),
+    addProject: (value) =>
+      set((s) => ({
+        projects: [...s.projects, { ...emptyProject, ...value }],
+        ...touch()(s),
+      })),
+    updateProject: (index, patch) =>
+      set((s) => ({
+        projects: s.projects.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeProject: (index) =>
+      set((s) => ({
+        projects: s.projects.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderProject: (from, to) =>
+      set((s) => ({
+        projects: moveItem(s.projects, from, to),
+        ...touch()(s),
+      })),
 
-  addCustom: (value) =>
-    set((s) => ({
-      custom: [...s.custom, { ...emptyCustom, ...value }],
-      ...touch()(s),
-    })),
-  updateCustom: (index, patch) =>
-    set((s) => ({
-      custom: s.custom.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-      ...touch()(s),
-    })),
-  removeCustom: (index) =>
-    set((s) => ({
-      custom: s.custom.filter((_, i) => i !== index),
-      ...touch()(s),
-    })),
-  reorderCustom: (from, to) =>
-    set((s) => ({
-      custom: moveItem(s.custom, from, to),
-      ...touch()(s),
-    })),
+    addCustom: (value) =>
+      set((s) => ({
+        custom: [...s.custom, { ...emptyCustom, ...value }],
+        ...touch()(s),
+      })),
+    updateCustom: (index, patch) =>
+      set((s) => ({
+        custom: s.custom.map((item, i) =>
+          i === index ? { ...item, ...patch } : item,
+        ),
+        ...touch()(s),
+      })),
+    removeCustom: (index) =>
+      set((s) => ({
+        custom: s.custom.filter((_, i) => i !== index),
+        ...touch()(s),
+      })),
+    reorderCustom: (from, to) =>
+      set((s) => ({
+        custom: moveItem(s.custom, from, to),
+        ...touch()(s),
+      })),
 
-  getContent: () => {
-    const s = get();
-    return {
-      title: s.title,
-      templateId: s.templateId,
-      personal: s.personal,
-      summary: s.summary,
-      experience: s.experience,
-      education: s.education,
-      skills: s.skills,
-      interpersonal: s.interpersonal,
-      languages: s.languages,
-      certifications: s.certifications,
-      organizations: s.organizations,
-      projects: s.projects,
-      custom: s.custom,
-    };
-  },
+    getContent: () => {
+      const s = get();
+      return {
+        title: s.title,
+        templateId: s.templateId,
+        personal: s.personal,
+        summary: s.summary,
+        experience: s.experience,
+        education: s.education,
+        skills: s.skills,
+        interpersonal: s.interpersonal,
+        languages: s.languages,
+        certifications: s.certifications,
+        organizations: s.organizations,
+        projects: s.projects,
+        custom: s.custom,
+      };
+    },
   }));
