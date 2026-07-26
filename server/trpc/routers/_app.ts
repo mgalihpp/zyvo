@@ -3,6 +3,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/trpc/trpc";
+import { cvRouter } from "./cv";
 
 export const appRouter = createTRPCRouter({
   /** Health check — available without authentication. */
@@ -14,6 +15,8 @@ export const appRouter = createTRPCRouter({
   me: protectedProcedure.query(({ ctx }) => {
     return ctx.session.user;
   }),
+
+  cv: cvRouter,
 });
 
 export type AppRouter = typeof appRouter;

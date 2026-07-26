@@ -1,11 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
+import type * as React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -43,10 +42,57 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  scrollable = false,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
+  /**
+   * When true, the popup flows inside a scrollable viewport instead of being
+   * fixed-centered. Long content extends past the viewport and the page
+   * scrolls to reveal it (Base UI "outside scroll" pattern).
+   */
+  scrollable?: boolean;
 }) {
+  const closeButton = showCloseButton ? (
+    <DialogPrimitive.Close
+      data-slot="dialog-close"
+      render={
+        <Button
+          variant="ghost"
+          className="absolute top-2 right-2"
+          size="icon-sm"
+        />
+      }
+    >
+      <XIcon />
+      <span className="sr-only">Close</span>
+    </DialogPrimitive.Close>
+  ) : null;
+
+  if (scrollable) {
+    return (
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogPrimitive.Viewport
+          data-slot="dialog-viewport"
+          className="fixed inset-0 z-50 flex flex-col items-center overflow-y-auto p-4"
+        >
+          <DialogPrimitive.Popup
+            data-slot="dialog-content"
+            className={cn(
+              "relative my-auto grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-xl bg-popover p-4 text-xs/relaxed text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-sm data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+              className,
+            )}
+            {...props}
+          >
+            {children}
+            {closeButton}
+          </DialogPrimitive.Popup>
+        </DialogPrimitive.Viewport>
+      </DialogPortal>
+    );
+  }
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -59,21 +105,7 @@ function DialogContent({
         {...props}
       >
         {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            render={
-              <Button
-                variant="ghost"
-                className="absolute top-2 right-2"
-                size="icon-sm"
-              />
-            }
-          >
-            <XIcon />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
-        )}
+        {closeButton}
       </DialogPrimitive.Popup>
     </DialogPortal>
   );

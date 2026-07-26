@@ -70,3 +70,105 @@ model Verification {
 
   @@map("verification")
 }
+
+// ==========================================================================
+// CV Builder models
+// `userId` references `user._id` (a String id managed by Better Auth), so no
+// formal Prisma relation is declared to avoid coupling with the auth schema.
+// CV sections are embedded documents (MongoDB composite types).
+// ==========================================================================
+
+model CV {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String
+  title         String          @default("Untitled CV")
+  templateId    String          @default("classic")
+  personal      Personal?
+  summary       String?
+  experience    Experience[]
+  education      Education[]
+  skills        Skill[]
+  interpersonal Interpersonal[]
+  languages     Language[]
+  certifications Certification[]
+  organizations Organization[]
+  projects      Project[]
+  custom        Custom[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([userId])
+  @@map("cv")
+}
+
+type Personal {
+  fullName String?
+  headline String?
+  email    String?
+  phone    String?
+  location String?
+  website  String?
+  linkedin String?
+  github   String?
+}
+
+type Experience {
+  company     String
+  role        String
+  location    String?
+  startDate   String?
+  endDate     String?
+  current     Boolean @default(false)
+  description String?
+}
+
+type Education {
+  school    String
+  degree    String?
+  field     String?
+  startDate String?
+  endDate   String?
+  gpa       String?
+}
+
+type Skill {
+  name  String
+  level Int?
+}
+
+type Interpersonal {
+  name String
+}
+
+type Language {
+  name  String
+  level String?
+}
+
+type Certification {
+  name        String
+  issuer      String?
+  date        String?
+  url         String?
+  description String?
+}
+
+type Organization {
+  name        String
+  role        String?
+  date        String?
+  description String?
+}
+
+type Project {
+  name        String
+  type        String?
+  date        String?
+  skill       String?
+  description String?
+}
+
+type Custom {
+  title       String
+  description String?
+}
