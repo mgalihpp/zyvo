@@ -15,6 +15,9 @@ const ContentPanel = lazy(() =>
 const TemplatePanel = lazy(() =>
   import("./template-panel").then((m) => ({ default: m.TemplatePanel })),
 );
+const TypographyPanel = lazy(() =>
+  import("./typography-panel").then((m) => ({ default: m.TypographyPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -121,10 +124,9 @@ function ActivePanel() {
       );
     case "typography":
       return (
-        <Placeholder
-          title="Tipografi"
-          note="Pengaturan font akan hadir di sini."
-        />
+        <Suspense fallback={<Placeholder title="Tipografi" note="Memuat…" />}>
+          <TypographyPanel />
+        </Suspense>
       );
     case "colors":
       return (
