@@ -1,9 +1,4 @@
 import { lazy } from "react";
-import { ClassicTemplate } from "./classic";
-import { FreshGraduateTemplate } from "./fresh-graduate";
-import { MinimalTemplate } from "./minimal";
-import { ModernTemplate } from "./modern";
-import { ProfessionalTemplate } from "./professional";
 import type { TemplateMeta, TemplateRegistry } from "./registry";
 
 // Lazy renderers used by the live preview (one active template at a time).
@@ -31,7 +26,6 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Classic",
     description: "Satu kolom, ramah ATS, rapi dan netral.",
     categories: ["ats", "professional", "one-column"],
-    component: ClassicTemplate,
     lazyComponent: ClassicLazy,
   },
   {
@@ -39,7 +33,6 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Modern",
     description: "Dua kolom dengan sidebar gelap untuk kontak & keahlian.",
     categories: ["professional", "two-column", "new"],
-    component: ModernTemplate,
     lazyComponent: ModernLazy,
   },
   {
@@ -47,7 +40,6 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Professional",
     description: "Header berwarna dengan aksen, cocok untuk profesional.",
     categories: ["professional", "one-column", "new"],
-    component: ProfessionalTemplate,
     lazyComponent: ProfessionalLazy,
   },
   {
@@ -55,7 +47,6 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Minimal",
     description: "Bersih dan lapang, judul di tengah. Ramah ATS.",
     categories: ["ats", "one-column", "professional"],
-    component: MinimalTemplate,
     lazyComponent: MinimalLazy,
   },
   {
@@ -63,7 +54,6 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Fresh Graduate",
     description: "Menonjolkan pendidikan & keahlian untuk pemula.",
     categories: ["fresh-graduate", "two-column", "new"],
-    component: FreshGraduateTemplate,
     lazyComponent: FreshGraduateLazy,
   },
 ];

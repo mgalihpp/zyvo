@@ -52,7 +52,7 @@ export function BuilderSidebar() {
         <Tooltip>
           <TooltipTrigger
             type="button"
-            onClick={() => router.push("/builder")}
+            onClick={() => router.push("/dashboard")}
             aria-label="Kembali"
             className="mb-2 flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >

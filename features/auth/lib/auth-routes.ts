@@ -4,13 +4,13 @@
  * verification done inside protected pages.
  */
 
-export const protectedRoutes = ["/builder"] as const;
+export const protectedRoutes = ["/dashboard", "/builder"] as const;
 
 export const authRoutes = ["/signin", "/signup"] as const;
 
 export const SIGN_IN_PATH = "/signin";
 
-export const DEFAULT_AUTH_REDIRECT = "/builder";
+export const DEFAULT_AUTH_REDIRECT = "/dashboard";
 
 export function isProtectedPath(pathname: string): boolean {
   return protectedRoutes.some(

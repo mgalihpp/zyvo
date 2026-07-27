@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { signOut, useSession } from "@/features/auth/lib/auth-client";
+import { EditableTitle } from "@/features/cv/components/editable-title";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ export function PanelTopBar({ initialUser }: { initialUser: BuilderUser }) {
 
   const { data: session } = useSession();
   const title = useCvStore((s) => s.title);
+  const setTitle = useCvStore((s) => s.setTitle);
   const utils = trpc.useUtils();
 
   // Prefer the live client session, but fall back to the server-provided user
@@ -66,15 +68,16 @@ export function PanelTopBar({ initialUser }: { initialUser: BuilderUser }) {
   }
 
   return (
-    <div className="sticky top-0 z-20 flex items-center gap-1 border-b bg-background/95 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
+    <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background/95 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
           render={
             <button
               type="button"
+              aria-label="Pilih CV"
               onMouseEnter={prefetchCvs}
               onFocus={prefetchCvs}
-              className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted"
+              className="group flex shrink-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-muted"
             />
           }
         >
@@ -90,19 +93,24 @@ export function PanelTopBar({ initialUser }: { initialUser: BuilderUser }) {
               {initial}
             </div>
           )}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight">
-              {displayName}
-            </p>
-            <p className="truncate text-xs font-medium text-primary">
-              {title?.trim() || "Untitled CV"}
-            </p>
-          </div>
           <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
         </DialogTrigger>
 
         <CvSwitcherDialog onClose={() => setOpen(false)} />
       </Dialog>
+
+      {/* CV title is the primary, click-to-edit element; the user's name drops
+          to a subtext under it. */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* No inline save indicator here — the global SaveIndicator covers it. */}
+        <EditableTitle
+          value={title}
+          onCommit={setTitle}
+          ariaLabel="Ubah judul CV"
+          className="text-sm font-semibold leading-tight text-foreground"
+        />
+        <p className="truncate text-xs text-muted-foreground">{displayName}</p>
+      </div>
 
       <button
         type="button"
@@ -204,46 +212,47 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
                   {isActive ? <CheckIcon className="size-3" /> : null}
                 </span>
 
-                <button
-                  type="button"
-                  onClick={() => switchTo(cv.id)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  {isEditing ? (
-                    <Input
-                      autoFocus
-                      value={draftName}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => setDraftName(e.target.value)}
-                      onBlur={() => commitRename(cv.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") commitRename(cv.id);
-                        if (e.key === "Escape") setEditingId(null);
-                      }}
-                      className="mt-1 h-7 text-sm"
-                    />
-                  ) : (
-                    <>
-                      <span
-                        className={cn(
-                          "block truncate text-sm font-semibold",
-                          isActive ? "text-primary" : "text-foreground",
-                        )}
-                      >
-                        {label || "Untitled CV"}
-                      </span>
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        {isActive ? "Sedang dibuka · " : ""}
-                        Diperbarui{" "}
-                        {new Date(cv.updatedAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </>
-                  )}
-                </button>
+                {isEditing ? (
+                  // Rendered as a sibling of the switch button (never nested
+                  // inside it): an <input> inside a <button> is invalid HTML and
+                  // caused typing/clicks to activate the button → switchTo →
+                  // onClose, closing the dialog mid-edit.
+                  <Input
+                    autoFocus
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onBlur={() => commitRename(cv.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") commitRename(cv.id);
+                      if (e.key === "Escape") setEditingId(null);
+                    }}
+                    className="h-7 min-w-0 flex-1 text-sm"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => switchTo(cv.id)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <span
+                      className={cn(
+                        "block truncate text-sm font-semibold",
+                        isActive ? "text-primary" : "text-foreground",
+                      )}
+                    >
+                      {label || "Untitled CV"}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                      {isActive ? "Sedang dibuka · " : ""}
+                      Diperbarui{" "}
+                      {new Date(cv.updatedAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </button>
+                )}
 
                 {!isEditing ? (
                   <button

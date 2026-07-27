@@ -9,6 +9,8 @@ import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
  */
 export const cvRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
+    // Content sections are included so the dashboard can render a live preview
+    // thumbnail per card without a second round-trip.
     return ctx.prisma.cV.findMany({
       where: { userId: ctx.session.user.id },
       orderBy: { updatedAt: "desc" },
@@ -18,6 +20,17 @@ export const cvRouter = createTRPCRouter({
         templateId: true,
         updatedAt: true,
         createdAt: true,
+        personal: true,
+        summary: true,
+        experience: true,
+        education: true,
+        skills: true,
+        interpersonal: true,
+        languages: true,
+        certifications: true,
+        organizations: true,
+        projects: true,
+        custom: true,
       },
     });
   }),
@@ -74,6 +87,40 @@ export const cvRouter = createTRPCRouter({
       });
 
       return updated;
+    }),
+
+  /**
+   * Deep-copy a CV. Embedded section arrays are plain JSON on the Mongo doc, so
+   * a spread copies them wholesale — no per-field mapping needed.
+   */
+  duplicate: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const src = await ctx.prisma.cV.findUnique({ where: { id: input.id } });
+
+      if (!src || src.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      // Drop identity/timestamp fields; carry over the rest.
+      const {
+        id: _id,
+        userId: _userId,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        ...content
+      } = src;
+
+      const copy = await ctx.prisma.cV.create({
+        data: {
+          ...content,
+          userId: ctx.session.user.id,
+          title: `${src.title} (Salinan)`,
+        },
+        select: { id: true },
+      });
+
+      return copy;
     }),
 
   delete: protectedProcedure
