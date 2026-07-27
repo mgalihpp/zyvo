@@ -11,6 +11,7 @@ import type {
   PersonalInput,
   ProjectInput,
   SkillInput,
+  Typography,
 } from "@/features/cv/schemas/cv";
 import {
   emptyCertification,
@@ -23,6 +24,7 @@ import {
   emptyPersonal,
   emptyProject,
   emptySkill,
+  emptyTypography,
 } from "@/features/cv/schemas/cv";
 
 export type SaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
@@ -95,6 +97,7 @@ export interface CvState extends CvContent {
   setTitle: (title: string) => void;
   setTemplateId: (templateId: string) => void;
   setSummary: (summary: string) => void;
+  setTypography: (patch: Partial<Typography>) => void;
 
   setPersonal: (patch: Partial<PersonalInput>) => void;
 
@@ -158,6 +161,7 @@ export interface CvState extends CvContent {
 const emptyContent: CvContent = {
   title: "Untitled CV",
   templateId: "classic",
+  typography: { ...emptyTypography },
   personal: { ...emptyPersonal },
   summary: "",
   experience: [],
@@ -231,6 +235,11 @@ export const createCvStore = (init?: CvStoreInit) =>
     setTitle: (title) => set((s) => ({ title, ...touch()(s) })),
     setTemplateId: (templateId) => set((s) => ({ templateId, ...touch()(s) })),
     setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
+    setTypography: (patch) =>
+      set((s) => ({
+        typography: { ...s.typography, ...patch },
+        ...touch()(s),
+      })),
 
     setPersonal: (patch) =>
       set((s) => ({ personal: { ...s.personal, ...patch }, ...touch()(s) })),
@@ -453,6 +462,7 @@ export const createCvStore = (init?: CvStoreInit) =>
       return {
         title: s.title,
         templateId: s.templateId,
+        typography: s.typography,
         personal: s.personal,
         summary: s.summary,
         experience: s.experience,
