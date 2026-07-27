@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
@@ -52,15 +52,24 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
   usePanelUrl();
 
   const isMobile = useIsMobile();
+  // `useIsMobile` reports false during SSR and the first client render, so we
+  // can't tell "desktop" from "not measured yet". Until mounted, render a
+  // CSS-responsive neutral shell (editor + preview via `md:` classes) that
+  // looks right on every viewport — this avoids the mobile flash of the
+  // desktop resizable split before hydration corrects it.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
 
   const editor = <PanelContent initialUser={initialUser} />;
+  const preview = <CvPreview />;
 
   return (
     <div className="flex h-screen flex-col">
       <div className="absolute right-4 top-3 z-10 flex items-center gap-3">
         <SaveIndicator />
-        {isMobile ? (
+        {mounted && isMobile ? (
           <div className="flex rounded-md border bg-background p-0.5">
             <Button
               size="sm"
@@ -83,28 +92,38 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
       <div className="flex min-h-0 flex-1">
         <BuilderSidebar />
         <div className="min-h-0 flex-1">
-          {isMobile ? (
+          {!mounted ? (
+            // Pre-hydration shell: responsive via CSS only. Editor is full width
+            // on mobile; the preview joins on md+. Mirrors the final layout so
+            // the swap to the resizable group / tabs isn't a visible shift.
+            <div className="flex h-full">
+              <div className="h-full w-full md:w-auto md:min-w-[24%] md:max-w-[40%] md:basis-[24%] md:border-r">
+                {editor}
+              </div>
+              <div className="hidden h-full flex-1 md:block">{preview}</div>
+            </div>
+          ) : isMobile ? (
             mobileTab === "edit" ? (
               editor
             ) : (
-              <CvPreview />
+              preview
             )
           ) : (
             <ResizablePanelGroup
               orientation="horizontal"
-              defaultLayout={{ editor: 30, preview: 70 }}
+              defaultLayout={{ editor: 24, preview: 76 }}
             >
               <ResizablePanel
                 id="editor"
-                defaultSize="30"
+                defaultSize="24"
                 minSize="24"
                 maxSize="40"
               >
                 {editor}
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel id="preview" defaultSize="70" minSize="40">
-                <CvPreview />
+              <ResizablePanel id="preview" defaultSize="76" minSize="40">
+                {preview}
               </ResizablePanel>
             </ResizablePanelGroup>
           )}

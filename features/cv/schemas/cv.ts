@@ -84,9 +84,37 @@ export const customSchema = z.object({
   description: z.string().max(2000).optional().default(""),
 });
 
+export const FONT_IDS = [
+  "geist",
+  "inter",
+  "roboto",
+  "lato",
+  "merriweather",
+  "lora",
+  "source-serif",
+  "jetbrains-mono",
+] as const;
+
+export type FontId = (typeof FONT_IDS)[number];
+
+export const typographySchema = z.object({
+  fontHeading: z.enum(FONT_IDS).default("geist"),
+  fontBody: z.enum(FONT_IDS).default("geist"),
+  scale: z.number().min(0.85).max(1.15).default(1),
+  lineHeight: z.number().min(1.2).max(1.8).default(1.5),
+  letterSpacing: z.number().min(-0.02).max(0.05).default(0),
+});
+
 export const cvContentSchema = z.object({
   title: z.string().min(1, "Title is required").max(160),
   templateId: z.string().max(60).default("classic"),
+  typography: typographySchema.default({
+    fontHeading: "geist",
+    fontBody: "geist",
+    scale: 1,
+    lineHeight: 1.5,
+    letterSpacing: 0,
+  }),
   personal: personalSchema,
   summary: z.string().max(3000).optional().default(""),
   experience: z.array(experienceSchema).default([]),
@@ -112,6 +140,7 @@ export type CertificationInput = z.infer<typeof certificationSchema>;
 export type OrganizationInput = z.infer<typeof organizationSchema>;
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type CustomInput = z.infer<typeof customSchema>;
+export type Typography = z.infer<typeof typographySchema>;
 export type CvContent = z.infer<typeof cvContentSchema>;
 export type CvUpdate = z.infer<typeof cvUpdateSchema>;
 
@@ -175,3 +204,11 @@ export const emptyProject: ProjectInput = {
 };
 
 export const emptyCustom: CustomInput = { title: "", description: "" };
+
+export const emptyTypography: Typography = {
+  fontHeading: "geist",
+  fontBody: "geist",
+  scale: 1,
+  lineHeight: 1.5,
+  letterSpacing: 0,
+};

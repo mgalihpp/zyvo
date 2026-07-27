@@ -10,21 +10,21 @@ export function MinimalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-white p-12 text-[13px] font-light leading-relaxed text-neutral-700 shadow-sm">
+    <article className="mx-auto w-full max-w-[794px] bg-white p-12 font-light text-neutral-700 shadow-sm">
       <header className="text-center">
-        <h1 className="text-3xl font-normal tracking-[0.1em] text-neutral-900 uppercase">
+        <h1 className="text-[2em] font-normal tracking-[0.1em] text-neutral-900 uppercase font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
         </h1>
         {p.headline ? (
-          <p className="mt-1 text-sm tracking-wide text-neutral-500">
+          <p className="mt-1 text-[0.92em] tracking-wide text-neutral-500">
             {p.headline}
           </p>
         ) : null}
         {contactLine ? (
-          <p className="mt-3 text-xs text-neutral-500">{contactLine}</p>
+          <p className="mt-3 text-[0.85em] text-neutral-500">{contactLine}</p>
         ) : null}
         {linkLine ? (
-          <p className="mt-1 text-xs text-neutral-500">{linkLine}</p>
+          <p className="mt-1 text-[0.85em] text-neutral-500">{linkLine}</p>
         ) : null}
       </header>
 
@@ -43,12 +43,14 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                   <h3 className="font-medium text-neutral-900">
                     {join([exp.role, exp.company], ", ") || "Role"}
                   </h3>
-                  <span className="shrink-0 text-xs text-neutral-400">
+                  <span className="shrink-0 text-[0.85em] text-neutral-400">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>
                 {exp.location ? (
-                  <p className="text-xs text-neutral-400">{exp.location}</p>
+                  <p className="text-[0.85em] text-neutral-400">
+                    {exp.location}
+                  </p>
                 ) : null}
                 {exp.description ? (
                   <p className="mt-1 whitespace-pre-line">{exp.description}</p>
@@ -68,7 +70,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                   <h3 className="font-medium text-neutral-900">
                     {edu.school || "School"}
                   </h3>
-                  <span className="shrink-0 text-xs text-neutral-400">
+                  <span className="shrink-0 text-[0.85em] text-neutral-400">
                     {formatDateRange(edu.startDate, edu.endDate)}
                   </span>
                 </div>
@@ -92,7 +94,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                     {proj.name || "Project"}
                   </h3>
                   {proj.date ? (
-                    <span className="shrink-0 text-xs text-neutral-400">
+                    <span className="shrink-0 text-[0.85em] text-neutral-400">
                       {proj.date}
                     </span>
                   ) : null}
@@ -168,7 +170,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                     {join([org.role, org.name], ", ") || "Organization"}
                   </h3>
                   {org.date ? (
-                    <span className="shrink-0 text-xs text-neutral-400">
+                    <span className="shrink-0 text-[0.85em] text-neutral-400">
                       {org.date}
                     </span>
                   ) : null}
@@ -215,7 +217,7 @@ function Section({
 }) {
   return (
     <section className="mt-6">
-      <h2 className="mb-3 text-center text-[0.7rem] font-normal uppercase tracking-[0.25em] text-neutral-400">
+      <h2 className="mb-3 text-center text-[0.7em] font-normal uppercase tracking-[0.25em] text-neutral-400 font-[family-name:var(--cv-font-heading)]">
         <span className="inline-block border-t border-neutral-300 pt-2">
           {title}
         </span>

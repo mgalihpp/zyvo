@@ -11,21 +11,21 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-white p-10 text-[13px] leading-relaxed text-neutral-800 shadow-sm">
+    <article className="mx-auto w-full max-w-[794px] bg-white p-10 text-neutral-800 shadow-sm">
       <header className="border-b-2 border-emerald-600 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
+        <h1 className="text-[1.6em] font-bold tracking-tight text-neutral-900 font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
         </h1>
         {p.headline ? (
-          <p className="mt-0.5 text-sm font-medium text-emerald-700">
+          <p className="mt-0.5 text-[0.92em] font-medium text-emerald-700">
             {p.headline}
           </p>
         ) : null}
         {contactLine ? (
-          <p className="mt-2 text-xs text-neutral-600">{contactLine}</p>
+          <p className="mt-2 text-[0.85em] text-neutral-600">{contactLine}</p>
         ) : null}
         {linkLine ? (
-          <p className="mt-1 text-xs text-neutral-600">{linkLine}</p>
+          <p className="mt-1 text-[0.85em] text-neutral-600">{linkLine}</p>
         ) : null}
       </header>
 
@@ -48,7 +48,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                     <p className="text-neutral-700">
                       {join([edu.degree, edu.field], ", ")}
                     </p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-[0.85em] text-neutral-500">
                       {formatDateRange(edu.startDate, edu.endDate)}
                       {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
                     </p>
@@ -66,7 +66,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                   .map((s, i) => (
                     <span
                       key={i}
-                      className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs text-emerald-800 print:[print-color-adjust:exact]"
+                      className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.85em] text-emerald-800 print:[print-color-adjust:exact]"
                     >
                       {s.name}
                     </span>
@@ -127,10 +127,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                     <h3 className="font-semibold text-neutral-900">
                       {exp.role || "Role"}
                     </h3>
-                    <p className="text-xs font-medium text-neutral-600">
+                    <p className="text-[0.85em] font-medium text-neutral-600">
                       {join([exp.company, exp.location])}
                     </p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-[0.85em] text-neutral-500">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </p>
                     {exp.description ? (
@@ -153,7 +153,9 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       {proj.name || "Project"}
                     </h3>
                     {proj.date ? (
-                      <p className="text-xs text-neutral-500">{proj.date}</p>
+                      <p className="text-[0.85em] text-neutral-500">
+                        {proj.date}
+                      </p>
                     ) : null}
                     {proj.description ? (
                       <p className="mt-0.5 whitespace-pre-line text-neutral-700">
@@ -175,7 +177,9 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       {join([org.role, org.name], " — ") || "Organization"}
                     </h3>
                     {org.date ? (
-                      <p className="text-xs text-neutral-500">{org.date}</p>
+                      <p className="text-[0.85em] text-neutral-500">
+                        {org.date}
+                      </p>
                     ) : null}
                     {org.description ? (
                       <p className="mt-0.5 whitespace-pre-line text-neutral-700">
@@ -221,7 +225,7 @@ function Section({
 }) {
   return (
     <section className="mt-5">
-      <h2 className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-700">
+      <h2 className="mb-2 text-[0.85em] font-bold uppercase tracking-widest text-emerald-700 font-[family-name:var(--cv-font-heading)]">
         {title}
       </h2>
       {children}

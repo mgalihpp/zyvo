@@ -8,6 +8,7 @@ import {
   type TemplateCategory,
   type TemplateMeta,
 } from "@/features/cv/components/templates";
+import { getEagerTemplate } from "@/features/cv/components/templates/eager";
 import { SAMPLE_CV } from "@/features/cv/components/templates/sample";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,7 @@ const TemplateThumb = memo(function TemplateThumb({
 }: {
   template: TemplateMeta;
 }) {
-  const Template = template.component;
+  const Template = getEagerTemplate(template.id);
   // 794px design width scaled into a ~248px-wide card interior.
   const scale = 0.3;
   return (

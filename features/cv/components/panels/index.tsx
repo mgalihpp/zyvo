@@ -15,6 +15,9 @@ const ContentPanel = lazy(() =>
 const TemplatePanel = lazy(() =>
   import("./template-panel").then((m) => ({ default: m.TemplatePanel })),
 );
+const TypographyPanel = lazy(() =>
+  import("./typography-panel").then((m) => ({ default: m.TypographyPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -25,17 +28,82 @@ function PanelHeader({ title, note }: { title: string; note?: string }) {
   );
 }
 
-function PanelSkeleton() {
+/** Fallback for the lazy sections panel: header + a stack of section cards. */
+function SectionsSkeleton() {
   return (
     <div>
       <div className="space-y-2 border-b p-4">
-        <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-3 w-56" />
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-64" />
       </div>
       <div className="space-y-4 p-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
+        {["a", "b", "c", "d", "e", "f"].map((id) => (
+          <div key={id} className="overflow-hidden rounded-lg border">
+            <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
+              <Skeleton className="size-4 shrink-0 rounded" />
+              <Skeleton className="h-4 flex-1 max-w-32" />
+              <Skeleton className="size-7 shrink-0 rounded-md" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Fallback for the lazy template panel: header + filter chips + card grid. */
+function TemplateGridSkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-56" />
+      </div>
+      <div className="flex flex-wrap gap-2 border-b p-4">
+        {["all", "a", "b", "c", "d", "e", "f"].map((id) => (
+          <Skeleton key={id} className="h-6 w-16 rounded-full" />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {["a", "b", "c", "d"].map((id) => (
+          <div key={id} className="overflow-hidden rounded-lg border">
+            <Skeleton className="aspect-[1/1.414] w-full rounded-none" />
+            <div className="space-y-1.5 p-2.5">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Fallback for the lazy typography panel: header + 2 selects, 3 sliders, reset. */
+function TypographySkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-56" />
+      </div>
+      <div className="space-y-6 p-4">
+        {["font-heading", "font-body"].map((id) => (
+          <div key={id} className="space-y-1.5">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-9 w-full rounded-md" />
+          </div>
+        ))}
+        {["scale", "line-height", "letter-spacing"].map((id) => (
+          <div key={id} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-3 w-10" />
+            </div>
+            <Skeleton className="h-4 w-full rounded-full" />
+          </div>
+        ))}
+        <Skeleton className="h-8 w-full rounded-md" />
       </div>
     </div>
   );
@@ -74,22 +142,21 @@ function ActivePanel() {
       return <PersonalPanel />;
     case "sections":
       return (
-        <Suspense fallback={<PanelSkeleton />}>
+        <Suspense fallback={<SectionsSkeleton />}>
           <ContentPanel />
         </Suspense>
       );
     case "template":
       return (
-        <Suspense fallback={<PanelSkeleton />}>
+        <Suspense fallback={<TemplateGridSkeleton />}>
           <TemplatePanel />
         </Suspense>
       );
     case "typography":
       return (
-        <Placeholder
-          title="Tipografi"
-          note="Pengaturan font akan hadir di sini."
-        />
+        <Suspense fallback={<TypographySkeleton />}>
+          <TypographyPanel />
+        </Suspense>
       );
     case "colors":
       return (

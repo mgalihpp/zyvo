@@ -1,4 +1,5 @@
 import type { CvContent } from "@/features/cv/schemas/cv";
+import { emptyTypography } from "@/features/cv/schemas/cv";
 
 /**
  * Static sample CV used to render template thumbnails in the picker. Kept small
@@ -7,6 +8,7 @@ import type { CvContent } from "@/features/cv/schemas/cv";
 export const SAMPLE_CV: CvContent = {
   title: "Sample",
   templateId: "classic",
+  typography: { ...emptyTypography },
   personal: {
     fullName: "Cecily Bakker",
     headline: "Digital Marketing Specialist",

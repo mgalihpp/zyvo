@@ -11,19 +11,19 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-white text-[13px] leading-relaxed text-neutral-800 shadow-sm">
+    <article className="mx-auto w-full max-w-[794px] bg-white text-neutral-800 shadow-sm">
       <header className="bg-sky-800 px-10 py-8 text-white print:[print-color-adjust:exact]">
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-[1.6em] font-bold tracking-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
         </h1>
         {p.headline ? (
-          <p className="mt-1 text-sm text-sky-100">{p.headline}</p>
+          <p className="mt-1 text-[0.92em] text-sky-100">{p.headline}</p>
         ) : null}
         {contactLine ? (
-          <p className="mt-3 text-xs text-sky-100">{contactLine}</p>
+          <p className="mt-3 text-[0.85em] text-sky-100">{contactLine}</p>
         ) : null}
         {linkLine ? (
-          <p className="mt-1 text-xs text-sky-100">{linkLine}</p>
+          <p className="mt-1 text-[0.85em] text-sky-100">{linkLine}</p>
         ) : null}
       </header>
 
@@ -49,12 +49,14 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                         </span>
                       ) : null}
                     </h3>
-                    <span className="shrink-0 text-xs text-neutral-500">
+                    <span className="shrink-0 text-[0.85em] text-neutral-500">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
                   {exp.location ? (
-                    <p className="text-xs text-neutral-500">{exp.location}</p>
+                    <p className="text-[0.85em] text-neutral-500">
+                      {exp.location}
+                    </p>
                   ) : null}
                   {exp.description ? (
                     <p className="mt-1 whitespace-pre-line text-neutral-700">
@@ -76,7 +78,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                     <h3 className="font-semibold text-neutral-900">
                       {edu.school || "School"}
                     </h3>
-                    <span className="shrink-0 text-xs text-neutral-500">
+                    <span className="shrink-0 text-[0.85em] text-neutral-500">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
@@ -106,7 +108,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                       ) : null}
                     </h3>
                     {proj.date ? (
-                      <span className="shrink-0 text-xs text-neutral-500">
+                      <span className="shrink-0 text-[0.85em] text-neutral-500">
                         {proj.date}
                       </span>
                     ) : null}
@@ -130,7 +132,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                 .map((s, i) => (
                   <span
                     key={i}
-                    className="rounded bg-sky-50 px-2 py-0.5 text-xs text-sky-800 print:[print-color-adjust:exact]"
+                    className="rounded bg-sky-50 px-2 py-0.5 text-[0.85em] text-sky-800 print:[print-color-adjust:exact]"
                   >
                     {s.name}
                   </span>
@@ -196,7 +198,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                       ) : null}
                     </h3>
                     {org.date ? (
-                      <span className="shrink-0 text-xs text-neutral-500">
+                      <span className="shrink-0 text-[0.85em] text-neutral-500">
                         {org.date}
                       </span>
                     ) : null}
@@ -244,7 +246,7 @@ function Section({
 }) {
   return (
     <section className="mt-5 first:mt-0">
-      <h2 className="mb-2 inline-block border-b-2 border-sky-800 pb-0.5 text-xs font-bold uppercase tracking-widest text-sky-800">
+      <h2 className="mb-2 inline-block border-b-2 border-sky-800 pb-0.5 text-[0.85em] font-bold uppercase tracking-widest text-sky-800 font-[family-name:var(--cv-font-heading)]">
         {title}
       </h2>
       {children}
