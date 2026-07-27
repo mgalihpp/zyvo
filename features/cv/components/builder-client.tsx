@@ -97,7 +97,7 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
             // on mobile; the preview joins on md+. Mirrors the final layout so
             // the swap to the resizable group / tabs isn't a visible shift.
             <div className="flex h-full">
-              <div className="h-full w-full md:w-auto md:min-w-[24%] md:max-w-[40%] md:basis-[30%] md:border-r">
+              <div className="h-full w-full md:w-auto md:min-w-[24%] md:max-w-[40%] md:basis-[24%] md:border-r">
                 {editor}
               </div>
               <div className="hidden h-full flex-1 md:block">{preview}</div>
@@ -111,18 +111,18 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
           ) : (
             <ResizablePanelGroup
               orientation="horizontal"
-              defaultLayout={{ editor: 30, preview: 70 }}
+              defaultLayout={{ editor: 24, preview: 76 }}
             >
               <ResizablePanel
                 id="editor"
-                defaultSize="30"
+                defaultSize="24"
                 minSize="24"
                 maxSize="40"
               >
                 {editor}
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel id="preview" defaultSize="70" minSize="40">
+              <ResizablePanel id="preview" defaultSize="76" minSize="40">
                 {preview}
               </ResizablePanel>
             </ResizablePanelGroup>

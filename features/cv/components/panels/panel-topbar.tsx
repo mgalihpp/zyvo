@@ -69,48 +69,77 @@ export function PanelTopBar({ initialUser }: { initialUser: BuilderUser }) {
 
   return (
     <div className="sticky top-0 z-20 flex items-center gap-2 border-b bg-background/95 px-2 py-2 backdrop-blur supports-backdrop-filter:bg-background/80">
+      {/* Avatar/chevron and the email subtext are both triggers for the "Pilih
+          CV" dialog, wrapped in one `group` so they share a hover state and
+          read as a single unit. The CV title stays a separate click-to-edit
+          button (can't nest buttons), sitting between them. */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger
-          render={
-            <button
-              type="button"
-              aria-label="Pilih CV"
-              onMouseEnter={prefetchCvs}
-              onFocus={prefetchCvs}
-              className="group flex shrink-0 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-muted"
+        <div className="group flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 py-1 transition-colors hover:bg-muted">
+          <DialogTrigger
+            render={
+              <button
+                type="button"
+                aria-label="Pilih CV"
+                onMouseEnter={prefetchCvs}
+                onFocus={prefetchCvs}
+                className="flex shrink-0 items-center gap-1.5 rounded-md outline-none"
+              />
+            }
+          >
+            {user?.image ? (
+              // biome-ignore lint/performance/noImgElement: small avatar from auth provider
+              <img
+                src={user.image}
+                alt=""
+                className="size-9 shrink-0 rounded-full object-cover shadow-sm"
+              />
+            ) : (
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground shadow-sm">
+                {initial}
+              </div>
+            )}
+          </DialogTrigger>
+
+          <div className="flex min-w-0 flex-1 flex-col">
+            {/* No inline save indicator here — the global SaveIndicator covers it. */}
+            <EditableTitle
+              value={title}
+              onCommit={setTitle}
+              ariaLabel="Ubah judul CV"
+              className="text-sm font-semibold leading-tight text-foreground"
             />
-          }
-        >
-          {user?.image ? (
-            // biome-ignore lint/performance/noImgElement: small avatar from auth provider
-            <img
-              src={user.image}
-              alt=""
-              className="size-9 shrink-0 rounded-full object-cover shadow-sm"
-            />
-          ) : (
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-sm font-semibold text-primary-foreground shadow-sm">
-              {initial}
-            </div>
-          )}
-          <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-        </DialogTrigger>
+            <DialogTrigger
+              render={
+                <button
+                  type="button"
+                  aria-label="Pilih CV"
+                  onMouseEnter={prefetchCvs}
+                  onFocus={prefetchCvs}
+                  className="truncate text-left text-xs text-muted-foreground outline-none"
+                />
+              }
+            >
+              {user?.email || displayName}
+            </DialogTrigger>
+          </div>
+
+          <DialogTrigger
+            render={
+              <button
+                type="button"
+                aria-label="Pilih CV"
+                onMouseEnter={prefetchCvs}
+                onFocus={prefetchCvs}
+                className="shrink-0 rounded-md outline-none"
+              />
+            }
+          >
+            <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+          </DialogTrigger>
+        </div>
 
         <CvSwitcherDialog onClose={() => setOpen(false)} />
       </Dialog>
-
-      {/* CV title is the primary, click-to-edit element; the user's name drops
-          to a subtext under it. */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* No inline save indicator here — the global SaveIndicator covers it. */}
-        <EditableTitle
-          value={title}
-          onCommit={setTitle}
-          ariaLabel="Ubah judul CV"
-          className="text-sm font-semibold leading-tight text-foreground"
-        />
-        <p className="truncate text-xs text-muted-foreground">{displayName}</p>
-      </div>
 
       <button
         type="button"

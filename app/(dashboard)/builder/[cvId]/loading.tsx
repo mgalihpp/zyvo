@@ -31,8 +31,8 @@ export default function CvBuilderLoading() {
           ))}
         </div>
 
-        {/* Editor column: full width on mobile, ~30% (24–40%) on desktop. */}
-        <div className="flex w-full shrink-0 flex-col border-r md:w-auto md:min-w-[24%] md:max-w-[40%] md:basis-[30%]">
+        {/* Editor column: full width on mobile, 24% (24–40%) on desktop. */}
+        <div className="flex w-full shrink-0 flex-col border-r md:w-auto md:min-w-[24%] md:max-w-[40%] md:basis-[24%]">
           {/* Sticky top bar: avatar + name/title + sign-out. */}
           <div className="flex items-center gap-1 border-b px-2 py-2">
             <div className="flex flex-1 items-center gap-3 px-2 py-1.5">
