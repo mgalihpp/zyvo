@@ -56,7 +56,7 @@ export default async function CvBuilderPage({
     typography: typographySchema
       .catch(typographySchema.parse({}))
       .parse(cv.typography ?? {}),
-    colors: colorsSchema.catch(colorsSchema.parse({})).parse({}),
+    colors: colorsSchema.catch(colorsSchema.parse({})).parse(cv.colors ?? {}),
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",

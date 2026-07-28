@@ -1,14 +1,14 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
+import { PRESETS } from "@/features/cv/lib/color-presets";
 import {
-  hexToRgb,
-  relativeLuminance,
   contrastRatio,
+  hexToRgb,
   passesAA,
   passesAALarge,
   readableOn,
+  relativeLuminance,
 } from "@/features/cv/lib/contrast";
-import { PRESETS } from "@/features/cv/lib/color-presets";
 
 describe("hexToRgb", () => {
   it("converts black", () => {

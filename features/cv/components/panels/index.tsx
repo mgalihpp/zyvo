@@ -18,6 +18,9 @@ const TemplatePanel = lazy(() =>
 const TypographyPanel = lazy(() =>
   import("./typography-panel").then((m) => ({ default: m.TypographyPanel })),
 );
+const ColorsPanel = lazy(() =>
+  import("./colors-panel").then((m) => ({ default: m.ColorsPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -109,6 +112,35 @@ function TypographySkeleton() {
   );
 }
 
+/** Fallback for the lazy colors panel: header + tabs + preset card grid. */
+function ColorsSkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-56" />
+      </div>
+      <div className="border-b p-4">
+        <Skeleton className="h-9 w-full rounded-md" />
+      </div>
+      <div className="grid grid-cols-2 gap-3 p-4">
+        {["a", "b", "c", "d"].map((id) => (
+          <div key={id} className="overflow-hidden rounded-lg border">
+            <div className="flex gap-1 p-3">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="size-5 rounded" />
+              ))}
+            </div>
+            <div className="border-t p-2.5">
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Placeholder({ title, note }: { title: string; note: string }) {
   return (
     <div>
@@ -160,10 +192,9 @@ function ActivePanel() {
       );
     case "colors":
       return (
-        <Placeholder
-          title="Warna"
-          note="Pengaturan warna akan hadir di sini."
-        />
+        <Suspense fallback={<ColorsSkeleton />}>
+          <ColorsPanel />
+        </Suspense>
       );
     case "ai":
       return (

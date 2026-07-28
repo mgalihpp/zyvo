@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { readableOn } from "@/features/cv/lib/contrast";
 import { FONT_REGISTRY } from "@/features/cv/lib/fonts";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
@@ -22,6 +23,8 @@ export function CvPreview() {
   const templateId = useCvStore((s) => s.templateId);
   const typography = useCvStore((s) => s.typography);
   const colors = useCvStore((s) => s.colors);
+  const draftColors = useCvStore((s) => s.draftColors);
+  const activePanel = useCvStore((s) => s.activePanel);
   const personal = useCvStore((s) => s.personal);
   const summary = useCvStore((s) => s.summary);
   const experience = useCvStore((s) => s.experience);
@@ -34,11 +37,15 @@ export function CvPreview() {
   const projects = useCvStore((s) => s.projects);
   const custom = useCvStore((s) => s.custom);
 
+  // Live-preview uncommitted color edits while the colors panel is open.
+  const effectiveColors =
+    activePanel === "colors" && draftColors ? draftColors : colors;
+
   const content: CvContent = {
     title,
     templateId,
     typography,
-    colors,
+    colors: effectiveColors,
     personal,
     summary,
     experience,
@@ -66,6 +73,12 @@ export function CvPreview() {
               fontSize: `${13 * typography.scale}px`,
               lineHeight: typography.lineHeight,
               letterSpacing: `${typography.letterSpacing}em`,
+              "--cv-color-bg": effectiveColors.background,
+              "--cv-color-heading": effectiveColors.heading,
+              "--cv-color-text": effectiveColors.text,
+              "--cv-color-link": effectiveColors.link,
+              "--cv-color-accent": effectiveColors.accent,
+              "--cv-color-on-accent": readableOn(effectiveColors.accent),
             } as React.CSSProperties
           }
         >

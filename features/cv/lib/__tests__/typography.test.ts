@@ -1,12 +1,12 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { FONT_REGISTRY } from "@/features/cv/lib/fonts";
 import {
   cvContentSchema,
   emptyTypography,
   FONT_IDS,
   typographySchema,
 } from "@/features/cv/schemas/cv";
-import { FONT_REGISTRY } from "@/features/cv/lib/fonts";
 
 test("emptyTypography parses and matches defaults", () => {
   const parsed = typographySchema.parse(emptyTypography);
