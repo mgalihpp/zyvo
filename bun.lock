@@ -12,7 +12,7 @@
         "@hookform/resolvers": "^5.4.3",
         "@prisma/client": "^6.0.0",
         "@shadcn/react": "^0.2.1",
-        "@sparticuz/chromium": "^149.0.0",
+        "@sparticuz/chromium-min": "149",
         "@tanstack/react-query": "^5",
         "@tanstack/react-query-devtools": "^5.101.4",
         "@trpc/client": "^11.18.0",
@@ -345,7 +345,7 @@
 
     "@sindresorhus/merge-streams": ["@sindresorhus/merge-streams@4.0.0", "", {}, "sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ=="],
 
-    "@sparticuz/chromium": ["@sparticuz/chromium@149.0.0", "", { "dependencies": { "tar-fs": "^3.1.2" } }, "sha512-2NECBVKlUA9xIUXb4fT8OoGKdAJs+I2tNYscO8FwcxCKCWA7FmpPI0fdVxGJoIJglrFZYn+4YEJqChq4rdrxQg=="],
+    "@sparticuz/chromium-min": ["@sparticuz/chromium-min@149.0.0", "", { "dependencies": { "tar-fs": "^3.1.2" } }, "sha512-/+QWJ6jDQnm/U7BITWVVcoe1CbuyW13pjonFpfBY67ZxePbaY/j4Ho+//n82AoGwugdkVVOYGY00KzMJzfYQdg=="],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 

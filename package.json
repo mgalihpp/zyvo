@@ -21,7 +21,7 @@
     "@hookform/resolvers": "^5.4.3",
     "@prisma/client": "^6.0.0",
     "@shadcn/react": "^0.2.1",
-    "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "149",
     "@tanstack/react-query": "^5",
     "@tanstack/react-query-devtools": "^5.101.4",
     "@trpc/client": "^11.18.0",

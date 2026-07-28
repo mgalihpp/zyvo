@@ -1,6 +1,6 @@
 import "server-only";
 import { existsSync } from "node:fs";
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
 import puppeteer, { type LaunchOptions } from "puppeteer-core";
 
 export type ExportFormat = "pdf" | "png";
@@ -18,9 +18,17 @@ const LOCAL_CHROME_PATHS = [
   "/usr/bin/chromium",
 ];
 
+// chromium-min ships no binary; download the matching pack tar at runtime.
+// Must match the installed @sparticuz/chromium-min version (149). Override via
+// env if you self-host the tar closer to the function region.
+const REMOTE_CHROMIUM_PACK =
+  process.env.CHROMIUM_PACK_URL ??
+  "https://github.com/Sparticuz/chromium/releases/download/v149.0.0/chromium-v149.0.0-pack.x64.tar";
+
 async function launchOptions(): Promise<LaunchOptions> {
   if (process.env.NODE_ENV === "production") {
-    const executablePath = await chromium.executablePath();
+    // Downloads + extracts to /tmp on cold start; reuses it on warm starts.
+    const executablePath = await chromium.executablePath(REMOTE_CHROMIUM_PACK);
     if (!executablePath) {
       throw new Error("Chromium binary not available in this environment");
     }
@@ -42,7 +50,7 @@ async function launchOptions(): Promise<LaunchOptions> {
  * `cookie` is the caller's raw Cookie header, forwarded so the print route's
  * auth check passes as the same user.
  *
- * Production uses @sparticuz/chromium's bundled binary; local dev falls back
+ * Production downloads @sparticuz/chromium-min's remote pack tar; local dev falls back
  * to an installed Chrome/Edge (override with CHROME_PATH).
  */
 export async function renderCvDocument({
