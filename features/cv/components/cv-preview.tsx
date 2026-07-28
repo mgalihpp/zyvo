@@ -2,8 +2,7 @@
 
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { readableOn } from "@/features/cv/lib/contrast";
-import { FONT_REGISTRY } from "@/features/cv/lib/fonts";
+import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { getTemplate } from "./templates";
@@ -64,24 +63,7 @@ export function CvPreview() {
   return (
     <div className="h-full overflow-auto bg-neutral-100 p-6 dark:bg-neutral-900">
       <Suspense fallback={<PreviewSkeleton />}>
-        <div
-          style={
-            {
-              "--cv-font-heading": `var(${FONT_REGISTRY[typography.fontHeading].cssVar})`,
-              "--cv-font-body": `var(${FONT_REGISTRY[typography.fontBody].cssVar})`,
-              fontFamily: "var(--cv-font-body)",
-              fontSize: `${13 * typography.scale}px`,
-              lineHeight: typography.lineHeight,
-              letterSpacing: `${typography.letterSpacing}em`,
-              "--cv-color-bg": effectiveColors.background,
-              "--cv-color-heading": effectiveColors.heading,
-              "--cv-color-text": effectiveColors.text,
-              "--cv-color-link": effectiveColors.link,
-              "--cv-color-accent": effectiveColors.accent,
-              "--cv-color-on-accent": readableOn(effectiveColors.accent),
-            } as React.CSSProperties
-          }
-        >
+        <div style={cvRootStyle({ typography, colors: effectiveColors })}>
           <Template cv={content} />
         </div>
       </Suspense>
