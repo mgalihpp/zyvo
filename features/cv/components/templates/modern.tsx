@@ -15,7 +15,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto grid w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] print:min-h-[297mm] print:grid-cols-[34%_1fr] print:[print-color-adjust:exact]">
+    <article className="mx-auto grid min-h-[1123px] w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] sm:grid-rows-[1fr] print:min-h-[297mm] print:grid-cols-[34%_1fr] print:grid-rows-[1fr] print:[print-color-adjust:exact]">
       <aside className="bg-[var(--cv-color-accent)] p-6 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
         <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}

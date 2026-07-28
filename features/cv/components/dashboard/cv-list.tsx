@@ -2,7 +2,8 @@
 
 import {
   CopyIcon,
-  FileTextIcon,
+  DownloadIcon,
+  Loader2Icon,
   MoreVerticalIcon,
   PencilIcon,
   PlusIcon,
@@ -21,7 +22,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import { EditableTitle } from "@/features/cv/components/editable-title";
 import type { CvContent } from "@/features/cv/schemas/cv";
@@ -38,7 +39,15 @@ import { trpc } from "@/lib/trpc/client";
 
 type Cv = RouterOutputs["cv"]["list"][number];
 
-function formatDate(value: Date | string) {
+function formatRelative(value: Date | string) {
+  const diff = Date.now() - new Date(value).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "baru saja";
+  if (mins < 60) return `${mins} menit lalu`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} jam lalu`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days} hari lalu`;
   return new Date(value).toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -52,6 +61,7 @@ function CvCard({
   onDuplicate,
   onDelete,
   onRename,
+  onDownload,
   busy,
 }: {
   cv: Cv;
@@ -59,6 +69,7 @@ function CvCard({
   onDuplicate: () => void;
   onDelete: () => void;
   onRename: (title: string) => Promise<unknown>;
+  onDownload: () => void;
   busy: boolean;
 }) {
   const [renameStatus, setRenameStatus] = useState<SaveStatus>("idle");
@@ -75,31 +86,36 @@ function CvCard({
   }
 
   return (
-    <Card
-      size="sm"
-      className="group cursor-pointer pt-0 transition-shadow hover:ring-primary/40 hover:shadow-md"
-      onClick={onEdit}
-    >
-      {/* Live preview thumbnail. `cv` carries the full content via cv.list. */}
-      <div className="overflow-hidden border-b bg-muted">
+    <div className="group flex flex-col gap-2">
+      {/* Portrait thumbnail */}
+      <div
+        className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md hover:ring-2 hover:ring-primary/30"
+        onClick={onEdit}
+      >
         <CvThumbnail
           cv={cv as unknown as CvContent}
           className="w-full"
-          aspectRatio="4 / 3"
+          aspectRatio="1 / 1.414"
         />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 p-6 text-center opacity-0 transition-all duration-200 group-hover/thumb:bg-black/60 group-hover/thumb:opacity-100">
+          <span className="text-lg font-bold text-white">
+            VIEW RESUME &nbsp;&rarr;
+          </span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 px-(--card-spacing)">
+      {/* Meta row below thumbnail */}
+      <div className="flex items-start justify-between gap-1 px-0.5">
         <div className="min-w-0 flex-1">
           <EditableTitle
             value={cv.title}
             onCommit={handleRename}
             status={renameStatus}
             ariaLabel="Ubah nama CV"
-            className="text-sm font-medium"
+            className="text-sm font-semibold leading-tight"
           />
-          <p className="mt-0.5 truncate text-xs text-primary">
-            Dibuat pada {formatDate(cv.createdAt)}
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            edited {formatRelative(cv.updatedAt ?? cv.createdAt)} • A4
           </p>
         </div>
 
@@ -110,7 +126,7 @@ function CvCard({
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Aksi CV"
-                className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100"
+                className="mt-0.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100"
                 onClick={(e) => e.stopPropagation()}
               />
             }
@@ -138,6 +154,15 @@ function CvCard({
               Duplikat CV
             </DropdownMenuItem>
             <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDownload();
+              }}
+            >
+              <DownloadIcon />
+              Unduh CV
+            </DropdownMenuItem>
+            <DropdownMenuItem
               variant="destructive"
               onClick={(e) => {
                 e.stopPropagation();
@@ -150,7 +175,7 @@ function CvCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -171,6 +196,7 @@ export function CvList({
   });
 
   const [pendingDelete, setPendingDelete] = useState<Cv | null>(null);
+  const [downloading, setDownloading] = useState<Cv | null>(null);
 
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => {
@@ -207,32 +233,63 @@ export function CvList({
 
   const items = limit ? cvs?.slice(0, limit) : cvs;
 
+  async function handleDownload(cv: Cv) {
+    setDownloading(cv);
+    try {
+      const res = await fetch(`/api/cv/${cv.id}/export?format=pdf`);
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const dispo = res.headers.get("Content-Disposition") ?? "";
+      const name = dispo.match(/filename="([^"]+)"/)?.[1] ?? "cv.pdf";
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.add({
+        title: "Gagal mengunduh CV",
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setDownloading(null);
+    }
+  }
+
+  // "New resume" card — dashed border, centered + icon
   const newCard = showNewButton ? (
-    <button
-      type="button"
-      onClick={() => createMutation.mutate(undefined)}
-      disabled={createMutation.isPending}
-      className="flex min-h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed bg-muted/30 p-6 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
-    >
-      <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <PlusIcon className="size-5" />
-      </span>
-      Buat CV Baru
-    </button>
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={() => createMutation.mutate(undefined)}
+        disabled={createMutation.isPending}
+        style={{ aspectRatio: "1 / 1.414" }}
+        className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
+      >
+        <span className="flex size-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
+          <PlusIcon className="size-5" />
+        </span>
+        New resume
+      </button>
+      {/* spacer so grid rows align */}
+      <div className="h-9" />
+    </div>
   ) : null;
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {["a", "b", "c"].map((id) => (
-          <div key={id} className="overflow-hidden rounded-xl border bg-card">
-            <Skeleton className="aspect-[4/3] w-full rounded-none" />
-            <div className="flex items-center gap-2 p-4">
-              <div className="flex-1 space-y-1.5">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-              <Skeleton className="size-6 shrink-0 rounded-md" />
+          <div key={id} className="flex flex-col gap-2">
+            <Skeleton
+              className="w-full rounded-lg"
+              style={{ aspectRatio: "1 / 1.414" }}
+            />
+            <div className="space-y-1.5 px-0.5">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="mt-2 h-8 w-8" />
             </div>
           </div>
         ))}
@@ -242,29 +299,15 @@ export function CvList({
 
   if (!items || items.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed p-12 text-center">
-        <FileTextIcon className="mx-auto size-8 text-muted-foreground" />
-        <p className="mt-3 text-sm font-medium">Belum ada CV</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Buat CV pertama Anda untuk memulai.
-        </p>
-        {showNewButton ? (
-          <div className="mt-4 flex justify-center">
-            <Button
-              onClick={() => createMutation.mutate(undefined)}
-              loading={createMutation.isPending}
-            >
-              <PlusIcon /> CV Baru
-            </Button>
-          </div>
-        ) : null}
+      <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {newCard}
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {newCard}
         {items.map((cv) => (
           <CvCard
@@ -280,6 +323,7 @@ export function CvList({
             onRename={(title) =>
               renameMutation.mutateAsync({ id: cv.id, data: { title } })
             }
+            onDownload={() => handleDownload(cv)}
           />
         ))}
       </div>
@@ -314,6 +358,22 @@ export function CvList({
               Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={downloading !== null}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Menyiapkan unduhan…</AlertDialogTitle>
+            <AlertDialogDescription>
+              {downloading
+                ? `CV "${downloading.title}" sedang diproses. File akan segera diunduh.`
+                : "CV sedang diproses."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-center py-4">
+            <Loader2Icon className="size-8 animate-spin text-primary" />
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

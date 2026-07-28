@@ -20,6 +20,8 @@ export const cvRouter = createTRPCRouter({
         templateId: true,
         updatedAt: true,
         createdAt: true,
+        colors: true,
+        typography: true,
         personal: true,
         summary: true,
         experience: true,

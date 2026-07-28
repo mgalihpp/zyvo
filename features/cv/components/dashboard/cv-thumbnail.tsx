@@ -7,6 +7,8 @@ import type { CvContent } from "@/features/cv/schemas/cv";
 
 /** A4 render width (px) the templates are designed against. */
 const RENDER_WIDTH = 794;
+/** A4 render height (px) at RENDER_WIDTH — keeps thumbnails a full page tall. */
+const RENDER_HEIGHT = 1123;
 
 /**
  * Scaled-down live render of a CV/template used as a card thumbnail. The inner
@@ -24,7 +26,7 @@ export const CvThumbnail = memo(function CvThumbnail({
   aspectRatio?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.25);
+  const [scale, setScale] = useState<number | null>(null);
   const Template = getEagerTemplate(cv.templateId);
 
   useLayoutEffect(() => {
@@ -41,17 +43,16 @@ export const CvThumbnail = memo(function CvThumbnail({
     <div
       ref={containerRef}
       className={`overflow-hidden ${className ?? ""}`}
-      // Skip rendering the full A4 template for off-screen cards; the box keeps
-      // its size via aspect-ratio so scrolling stays stable. Cuts mount cost on
-      // long CV lists / template grids.
-      style={{ aspectRatio, contentVisibility: "auto" }}
+      style={{ aspectRatio }}
       aria-hidden
     >
       <div
-        className="pointer-events-none origin-top-left overflow-hidden bg-white"
+        className="pointer-events-none origin-top-left overflow-hidden bg-white [&>article]:min-h-full"
         style={{
           width: RENDER_WIDTH,
-          transform: `scale(${scale})`,
+          height: RENDER_HEIGHT,
+          visibility: scale === null ? "hidden" : "visible",
+          transform: `scale(${scale ?? 0.25})`,
           ...cvRootStyle(cv),
         }}
       >

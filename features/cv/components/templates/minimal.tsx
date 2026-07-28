@@ -12,7 +12,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-[var(--cv-color-bg)] p-12 font-light text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-12 font-light text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="text-center">
         <h1 className="text-[2em] font-normal tracking-[0.1em] text-[var(--cv-color-heading)] uppercase font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}

@@ -3,10 +3,8 @@
 import {
   ChevronsUpDownIcon,
   FileTextIcon,
-  HomeIcon,
   LayoutTemplateIcon,
   LogOutIcon,
-  PlusIcon,
   SettingsIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +12,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,12 +32,14 @@ import {
 import { signOut } from "@/features/auth/lib/auth-client";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
 import { ProBanner } from "@/features/cv/components/dashboard/pro-banner";
-import { trpc } from "@/lib/trpc/client";
 
 const NAV_ITEMS = [
-  { label: "Beranda", href: "/dashboard", icon: HomeIcon },
-  { label: "Kelola CV", href: "/dashboard/cvs", icon: FileTextIcon },
-  { label: "Template", href: "/dashboard/templates", icon: LayoutTemplateIcon },
+  { label: "Resume", href: "/dashboard", icon: FileTextIcon },
+  {
+    label: "Templates",
+    href: "/dashboard/templates",
+    icon: LayoutTemplateIcon,
+  },
   { label: "Pengaturan", href: "/dashboard/settings", icon: SettingsIcon },
 ] as const;
 
@@ -56,15 +55,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const utils = trpc.useUtils();
   const [isSigningOut, startSignOut] = useTransition();
-
-  const createMutation = trpc.cv.create.useMutation({
-    onSuccess: (cv) => {
-      utils.cv.list.invalidate();
-      router.push(`/builder/${cv.id}`);
-    },
-  });
 
   const handleSignOut = () => {
     startSignOut(async () => {
@@ -77,27 +68,17 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="gap-3 p-2">
-        <BrandLogo className="mx-auto group-data-[collapsible=icon]:hidden" />
+        <BrandLogo
+          width={128}
+          height={42}
+          className="mx-auto h-10 w-auto max-w-40 group-data-[collapsible=icon]:hidden"
+        />
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="pt-4">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className="mb-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
-                  onClick={() => createMutation.mutate(undefined)}
-                  loading={createMutation.isPending}
-                >
-                  <PlusIcon />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    CV Baru
-                  </span>
-                </Button>
-              </SidebarMenuItem>
               {NAV_ITEMS.map((item) => {
                 // Exact match for /dashboard so it isn't active on sub-routes.
                 const isActive =
