@@ -153,3 +153,22 @@
     background-color: var(--muted-foreground);
   }
 }
+
+/* Keep CV entries and headings intact across PDF/print page breaks. Scoped to
+ * the print route wrapper so the editor UI is unaffected. Templates own their
+ * own inner padding, so @page has no margin (full-bleed sidebars reach the
+ * paper edge). */
+@page {
+  margin: 0;
+}
+[data-print-root] section {
+  break-inside: auto;
+}
+[data-print-root] h1,
+[data-print-root] h2,
+[data-print-root] h3 {
+  break-after: avoid;
+}
+[data-print-root] [data-entry] {
+  break-inside: avoid;
+}

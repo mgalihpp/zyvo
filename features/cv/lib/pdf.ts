@@ -1,16 +1,49 @@
 import "server-only";
+import { existsSync } from "node:fs";
 import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
+import puppeteer, { type LaunchOptions } from "puppeteer-core";
 
 export type ExportFormat = "pdf" | "png";
+
+// Local dev has no @sparticuz binary (it ships a Linux/serverless build), so
+// fall back to a Chrome/Edge already installed on the machine.
+const LOCAL_CHROME_PATHS = [
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/usr/bin/google-chrome",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/chromium",
+];
+
+async function launchOptions(): Promise<LaunchOptions> {
+  if (process.env.NODE_ENV === "production") {
+    const executablePath = await chromium.executablePath();
+    if (!executablePath) {
+      throw new Error("Chromium binary not available in this environment");
+    }
+    return { args: chromium.args, executablePath, headless: "shell" };
+  }
+
+  const executablePath =
+    process.env.CHROME_PATH ?? LOCAL_CHROME_PATHS.find((p) => existsSync(p));
+  if (!executablePath) {
+    throw new Error(
+      "No local Chrome/Edge found. Install Chrome or set CHROME_PATH.",
+    );
+  }
+  return { executablePath, headless: true };
+}
 
 /**
  * Render the print route at `url` to PDF or PNG bytes using headless Chromium.
  * `cookie` is the caller's raw Cookie header, forwarded so the print route's
  * auth check passes as the same user.
  *
- * Serverless-only: relies on @sparticuz/chromium's bundled binary. Throws a
- * readable error when no executable resolves (e.g. plain local dev).
+ * Production uses @sparticuz/chromium's bundled binary; local dev falls back
+ * to an installed Chrome/Edge (override with CHROME_PATH).
  */
 export async function renderCvDocument({
   url,
@@ -21,16 +54,7 @@ export async function renderCvDocument({
   format: ExportFormat;
   cookie: string;
 }): Promise<Uint8Array> {
-  const executablePath = await chromium.executablePath();
-  if (!executablePath) {
-    throw new Error("Chromium binary not available in this environment");
-  }
-
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath,
-    headless: "shell",
-  });
+  const browser = await puppeteer.launch(await launchOptions());
 
   try {
     const page = await browser.newPage();
