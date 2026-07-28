@@ -21,6 +21,7 @@ export function CvPreview() {
   const title = useCvStore((s) => s.title);
   const templateId = useCvStore((s) => s.templateId);
   const typography = useCvStore((s) => s.typography);
+  const colors = useCvStore((s) => s.colors);
   const personal = useCvStore((s) => s.personal);
   const summary = useCvStore((s) => s.summary);
   const experience = useCvStore((s) => s.experience);
@@ -37,6 +38,7 @@ export function CvPreview() {
     title,
     templateId,
     typography,
+    colors,
     personal,
     summary,
     experience,
