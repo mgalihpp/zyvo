@@ -3,6 +3,8 @@ import { formatDateRange, join, type TemplateProps } from "./shared";
 /**
  * Minimal single-column template. Centered header, generous whitespace, thin
  * rules. ATS-safe (single column, semantic headings, real text).
+ *
+ * Colors come from the `--cv-color-*` CSS vars set on the preview wrapper.
  */
 export function MinimalTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
@@ -10,21 +12,25 @@ export function MinimalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-white p-12 font-light text-neutral-700 shadow-sm">
+    <article className="mx-auto w-full max-w-[794px] bg-[var(--cv-color-bg)] p-12 font-light text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="text-center">
-        <h1 className="text-[2em] font-normal tracking-[0.1em] text-neutral-900 uppercase font-[family-name:var(--cv-font-heading)]">
+        <h1 className="text-[2em] font-normal tracking-[0.1em] text-[var(--cv-color-heading)] uppercase font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
         </h1>
         {p.headline ? (
-          <p className="mt-1 text-[0.92em] tracking-wide text-neutral-500">
+          <p className="mt-1 text-[0.92em] tracking-wide text-[var(--cv-color-text)] opacity-70">
             {p.headline}
           </p>
         ) : null}
         {contactLine ? (
-          <p className="mt-3 text-[0.85em] text-neutral-500">{contactLine}</p>
+          <p className="mt-3 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+            {contactLine}
+          </p>
         ) : null}
         {linkLine ? (
-          <p className="mt-1 text-[0.85em] text-neutral-500">{linkLine}</p>
+          <p className="mt-1 text-[0.85em] text-[var(--cv-color-link)]">
+            {linkLine}
+          </p>
         ) : null}
       </header>
 
@@ -40,15 +46,15 @@ export function MinimalTemplate({ cv }: TemplateProps) {
             {cv.experience.map((exp, i) => (
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-medium text-neutral-900">
+                  <h3 className="font-medium text-[var(--cv-color-heading)]">
                     {join([exp.role, exp.company], ", ") || "Role"}
                   </h3>
-                  <span className="shrink-0 text-[0.85em] text-neutral-400">
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>
                 {exp.location ? (
-                  <p className="text-[0.85em] text-neutral-400">
+                  <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {exp.location}
                   </p>
                 ) : null}
@@ -67,10 +73,10 @@ export function MinimalTemplate({ cv }: TemplateProps) {
             {cv.education.map((edu, i) => (
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-medium text-neutral-900">
+                  <h3 className="font-medium text-[var(--cv-color-heading)]">
                     {edu.school || "School"}
                   </h3>
-                  <span className="shrink-0 text-[0.85em] text-neutral-400">
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(edu.startDate, edu.endDate)}
                   </span>
                 </div>
@@ -90,11 +96,11 @@ export function MinimalTemplate({ cv }: TemplateProps) {
             {cv.projects.map((proj, i) => (
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-medium text-neutral-900">
+                  <h3 className="font-medium text-[var(--cv-color-heading)]">
                     {proj.name || "Project"}
                   </h3>
                   {proj.date ? (
-                    <span className="shrink-0 text-[0.85em] text-neutral-400">
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                       {proj.date}
                     </span>
                   ) : null}
@@ -150,7 +156,9 @@ export function MinimalTemplate({ cv }: TemplateProps) {
           <div className="space-y-1">
             {cv.certifications.map((c, i) => (
               <p key={i}>
-                <span className="font-medium text-neutral-900">{c.name}</span>
+                <span className="font-medium text-[var(--cv-color-heading)]">
+                  {c.name}
+                </span>
                 {join([c.issuer, c.date])
                   ? ` — ${join([c.issuer, c.date])}`
                   : ""}
@@ -166,11 +174,11 @@ export function MinimalTemplate({ cv }: TemplateProps) {
             {cv.organizations.map((org, i) => (
               <div key={i}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-medium text-neutral-900">
+                  <h3 className="font-medium text-[var(--cv-color-heading)]">
                     {join([org.role, org.name], ", ") || "Organization"}
                   </h3>
                   {org.date ? (
-                    <span className="shrink-0 text-[0.85em] text-neutral-400">
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                       {org.date}
                     </span>
                   ) : null}
@@ -191,7 +199,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
           <div className="space-y-3">
             {cv.custom.map((item, i) => (
               <div key={i}>
-                <h3 className="font-medium text-neutral-900">
+                <h3 className="font-medium text-[var(--cv-color-heading)]">
                   {item.title || "Item"}
                 </h3>
                 {item.description ? (
@@ -217,8 +225,8 @@ function Section({
 }) {
   return (
     <section className="mt-6">
-      <h2 className="mb-3 text-center text-[0.7em] font-normal uppercase tracking-[0.25em] text-neutral-400 font-[family-name:var(--cv-font-heading)]">
-        <span className="inline-block border-t border-neutral-300 pt-2">
+      <h2 className="mb-3 text-center text-[0.7em] font-normal uppercase tracking-[0.25em] text-[var(--cv-color-accent)] opacity-80 font-[family-name:var(--cv-font-heading)]">
+        <span className="inline-block border-t border-[var(--cv-color-accent)] pt-2 opacity-100">
           {title}
         </span>
       </h2>

@@ -4,7 +4,7 @@ import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
 import { BuilderClient } from "@/features/cv/components/builder-client";
 import type { CvContent } from "@/features/cv/schemas/cv";
-import { typographySchema } from "@/features/cv/schemas/cv";
+import { colorsSchema, typographySchema } from "@/features/cv/schemas/cv";
 import {
   type BuilderPanel,
   isBuilderPanel,
@@ -56,6 +56,7 @@ export default async function CvBuilderPage({
     typography: typographySchema
       .catch(typographySchema.parse({}))
       .parse(cv.typography ?? {}),
+    colors: colorsSchema.catch(colorsSchema.parse({})).parse(cv.colors ?? {}),
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",

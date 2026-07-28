@@ -7,22 +7,25 @@ import { formatDateRange, join, type TemplateProps } from "./shared";
  *
  * The two columns collapse to a single column on narrow viewports so the
  * preview stays readable on phones; print/PDF keeps the two-column layout.
+ *
+ * Colors come from the `--cv-color-*` CSS vars set on the preview wrapper. The
+ * accent sidebar uses `--cv-color-on-accent` (derived readable text color).
  */
 export function ModernTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto grid w-full max-w-[794px] grid-cols-1 bg-white text-neutral-800 shadow-sm sm:grid-cols-[34%_1fr] print:grid-cols-[34%_1fr]">
-      <aside className="bg-neutral-900 p-6 text-neutral-200 print:bg-neutral-900 print:[print-color-adjust:exact]">
-        <h1 className="text-[1.35em] font-bold leading-tight text-white font-[family-name:var(--cv-font-heading)]">
+    <article className="mx-auto grid w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] print:grid-cols-[34%_1fr] print:[print-color-adjust:exact]">
+      <aside className="bg-[var(--cv-color-accent)] p-6 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
+        <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
         </h1>
         {p.headline ? (
-          <p className="mt-1 text-[0.92em] text-neutral-400">{p.headline}</p>
+          <p className="mt-1 text-[0.92em] opacity-70">{p.headline}</p>
         ) : null}
 
         <SideSection title="Contact">
-          <ul className="space-y-1 break-words text-[0.85em] text-neutral-300">
+          <ul className="space-y-1 break-words text-[0.85em] opacity-85">
             {p.email ? <li>{p.email}</li> : null}
             {p.phone ? <li>{p.phone}</li> : null}
             {p.location ? <li>{p.location}</li> : null}
@@ -39,15 +42,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
                 .filter((s) => s.name.trim())
                 .map((s, i) => (
                   <li key={i}>
-                    <span className="text-[0.85em] text-neutral-200">
-                      {s.name}
-                    </span>
+                    <span className="text-[0.85em] opacity-90">{s.name}</span>
                     <span
-                      className="mt-1 flex h-1 overflow-hidden rounded-full bg-neutral-700"
+                      className="mt-1 flex h-1 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/25"
                       aria-hidden
                     >
                       <span
-                        className="h-full rounded-full bg-neutral-300"
+                        className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
                         // level 1 (expert) = 100%, 5 (beginner) = 20%
                         style={{ width: `${((6 - s.level) / 5) * 100}%` }}
                       />
@@ -60,7 +61,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
 
         {cv.interpersonal.length > 0 ? (
           <SideSection title="Interpersonal">
-            <p className="text-[0.85em] text-neutral-300">
+            <p className="text-[0.85em] opacity-85">
               {join(
                 cv.interpersonal.map((s) => s.name),
                 ", ",
@@ -71,14 +72,14 @@ export function ModernTemplate({ cv }: TemplateProps) {
 
         {cv.languages.length > 0 ? (
           <SideSection title="Languages">
-            <ul className="space-y-1 text-[0.85em] text-neutral-300">
+            <ul className="space-y-1 text-[0.85em] opacity-85">
               {cv.languages
                 .filter((l) => l.name.trim())
                 .map((l, i) => (
                   <li key={i} className="flex justify-between gap-2">
                     <span>{l.name}</span>
                     {l.level ? (
-                      <span className="text-neutral-500">{l.level}</span>
+                      <span className="opacity-70">{l.level}</span>
                     ) : null}
                   </li>
                 ))}
@@ -88,14 +89,12 @@ export function ModernTemplate({ cv }: TemplateProps) {
 
         {cv.certifications.length > 0 ? (
           <SideSection title="Certifications">
-            <ul className="space-y-2 text-[0.85em] text-neutral-300">
+            <ul className="space-y-2 text-[0.85em] opacity-85">
               {cv.certifications.map((c, i) => (
                 <li key={i}>
-                  <p className="font-medium text-neutral-200">{c.name}</p>
+                  <p className="font-medium opacity-100">{c.name}</p>
                   {join([c.issuer, c.date]) ? (
-                    <p className="text-neutral-500">
-                      {join([c.issuer, c.date])}
-                    </p>
+                    <p className="opacity-70">{join([c.issuer, c.date])}</p>
                   ) : null}
                 </li>
               ))}
@@ -107,7 +106,9 @@ export function ModernTemplate({ cv }: TemplateProps) {
       <div className="p-8">
         {cv.summary?.trim() ? (
           <MainSection title="Profile">
-            <p className="whitespace-pre-line text-neutral-700">{cv.summary}</p>
+            <p className="whitespace-pre-line text-[var(--cv-color-text)]">
+              {cv.summary}
+            </p>
           </MainSection>
         ) : null}
 
@@ -117,18 +118,18 @@ export function ModernTemplate({ cv }: TemplateProps) {
               {cv.experience.map((exp, i) => (
                 <div key={i}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-neutral-900">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Role"}
                     </h3>
-                    <span className="shrink-0 text-[0.85em] text-neutral-500">
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  <p className="text-[0.85em] font-medium text-neutral-600">
+                  <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
                     {join([exp.company, exp.location])}
                   </p>
                   {exp.description ? (
-                    <p className="mt-1 whitespace-pre-line text-neutral-700">
+                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
                       {exp.description}
                     </p>
                   ) : null}
@@ -144,23 +145,23 @@ export function ModernTemplate({ cv }: TemplateProps) {
               {cv.projects.map((proj, i) => (
                 <div key={i}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-neutral-900">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {proj.name || "Project"}
                       {proj.type ? (
-                        <span className="font-normal text-neutral-600">
+                        <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
                           — {proj.type}
                         </span>
                       ) : null}
                     </h3>
                     {proj.date ? (
-                      <span className="shrink-0 text-[0.85em] text-neutral-500">
+                      <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                         {proj.date}
                       </span>
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-neutral-700">
+                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
                       {proj.description}
                     </p>
                   ) : null}
@@ -176,14 +177,14 @@ export function ModernTemplate({ cv }: TemplateProps) {
               {cv.education.map((edu, i) => (
                 <div key={i}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-neutral-900">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {edu.school || "School"}
                     </h3>
-                    <span className="shrink-0 text-[0.85em] text-neutral-500">
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-neutral-700">
+                  <p className="text-[var(--cv-color-text)]">
                     {join([edu.degree, edu.field], ", ")}
                     {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
                   </p>
@@ -199,23 +200,23 @@ export function ModernTemplate({ cv }: TemplateProps) {
               {cv.organizations.map((org, i) => (
                 <div key={i}>
                   <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-neutral-900">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {org.role || "Role"}
                       {org.name ? (
-                        <span className="font-normal text-neutral-600">
+                        <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
                           — {org.name}
                         </span>
                       ) : null}
                     </h3>
                     {org.date ? (
-                      <span className="shrink-0 text-[0.85em] text-neutral-500">
+                      <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                         {org.date}
                       </span>
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-1 whitespace-pre-line text-neutral-700">
+                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
                       {org.description}
                     </p>
                   ) : null}
@@ -230,11 +231,11 @@ export function ModernTemplate({ cv }: TemplateProps) {
             <div className="space-y-3">
               {cv.custom.map((item, i) => (
                 <div key={i}>
-                  <h3 className="font-semibold text-neutral-900">
+                  <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {item.title || "Item"}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-neutral-700">
+                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
                       {item.description}
                     </p>
                   ) : null}
@@ -257,7 +258,7 @@ function SideSection({
 }) {
   return (
     <section className="mt-5">
-      <h2 className="mb-2 text-[0.65em] font-bold uppercase tracking-widest text-neutral-500 font-[family-name:var(--cv-font-heading)]">
+      <h2 className="mb-2 text-[0.65em] font-bold uppercase tracking-widest opacity-60 font-[family-name:var(--cv-font-heading)]">
         {title}
       </h2>
       {children}
@@ -274,7 +275,7 @@ function MainSection({
 }) {
   return (
     <section className="mt-5 first:mt-0">
-      <h2 className="mb-2 border-b border-neutral-200 pb-1 text-[0.85em] font-bold uppercase tracking-widest text-neutral-700 font-[family-name:var(--cv-font-heading)]">
+      <h2 className="mb-2 border-b border-[var(--cv-color-accent)]/30 pb-1 text-[0.85em] font-bold uppercase tracking-widest text-[var(--cv-color-accent)] font-[family-name:var(--cv-font-heading)]">
         {title}
       </h2>
       {children}

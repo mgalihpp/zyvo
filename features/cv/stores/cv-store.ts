@@ -2,6 +2,7 @@ import { createStore } from "zustand/vanilla";
 import type {
   CertificationInput,
   CustomInput,
+  CvColors,
   CvContent,
   EducationInput,
   ExperienceInput,
@@ -15,6 +16,7 @@ import type {
 } from "@/features/cv/schemas/cv";
 import {
   emptyCertification,
+  emptyColors,
   emptyCustom,
   emptyEducation,
   emptyExperience,
@@ -74,6 +76,9 @@ export interface EditorTarget {
 }
 
 export interface CvState extends CvContent {
+  /** Uncommitted color edits (live preview); null when there is no draft. */
+  draftColors: CvColors | null;
+
   cvId: string | null;
   currentStep: number;
   saveStatus: SaveStatus;
@@ -98,6 +103,11 @@ export interface CvState extends CvContent {
   setTemplateId: (templateId: string) => void;
   setSummary: (summary: string) => void;
   setTypography: (patch: Partial<Typography>) => void;
+
+  setColors: (colors: CvColors) => void;
+  setDraftColors: (colors: CvColors) => void;
+  commitColors: () => void;
+  resetColors: () => void;
 
   setPersonal: (patch: Partial<PersonalInput>) => void;
 
@@ -162,6 +172,7 @@ const emptyContent: CvContent = {
   title: "Untitled CV",
   templateId: "classic",
   typography: { ...emptyTypography },
+  colors: { ...emptyColors },
   personal: { ...emptyPersonal },
   summary: "",
   experience: [],
@@ -212,6 +223,8 @@ export type CvStore = ReturnType<typeof createCvStore>;
 export const createCvStore = (init?: CvStoreInit) =>
   createStore<CvState>((set, get) => ({
     ...(init?.content ?? emptyContent),
+    colors: init?.content?.colors ?? emptyColors,
+    draftColors: null,
     cvId: init?.cvId ?? null,
     currentStep: 0,
     saveStatus: "idle",
@@ -240,6 +253,19 @@ export const createCvStore = (init?: CvStoreInit) =>
         typography: { ...s.typography, ...patch },
         ...touch()(s),
       })),
+
+    setColors: (colors) => set((s) => ({ colors, ...touch()(s) })),
+    setDraftColors: (draftColors) => set({ draftColors, saveStatus: "dirty" }),
+    commitColors: () =>
+      set((s) => {
+        if (!s.draftColors) return {};
+        return {
+          colors: s.draftColors,
+          draftColors: null,
+          ...touch()(s),
+        };
+      }),
+    resetColors: () => set({ draftColors: null }),
 
     setPersonal: (patch) =>
       set((s) => ({ personal: { ...s.personal, ...patch }, ...touch()(s) })),
@@ -463,6 +489,7 @@ export const createCvStore = (init?: CvStoreInit) =>
         title: s.title,
         templateId: s.templateId,
         typography: s.typography,
+        colors: s.colors,
         personal: s.personal,
         summary: s.summary,
         experience: s.experience,

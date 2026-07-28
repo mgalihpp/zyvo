@@ -84,6 +84,7 @@ model CV {
   title         String          @default("Untitled CV")
   templateId    String          @default("classic")
   typography    Typography?
+  colors        Colors?
   personal      Personal?
   summary       String?
   experience    Experience[]
@@ -108,6 +109,15 @@ type Typography {
   scale         Float
   lineHeight    Float
   letterSpacing Float
+}
+
+type Colors {
+  presetId   String
+  background String
+  heading    String
+  text       String
+  link       String
+  accent     String
 }
 
 type Personal {

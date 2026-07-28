@@ -105,6 +105,29 @@ export const typographySchema = z.object({
   letterSpacing: z.number().min(-0.02).max(0.05).default(0),
 });
 
+export const COLORS_PRESETS = [
+  "professional",
+  "modern",
+  "colorful",
+  "dark",
+  "neutral",
+] as const;
+export type ColorsPresetId = (typeof COLORS_PRESETS)[number];
+
+const hexColor = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color")
+  .default("#ffffff");
+
+export const colorsSchema = z.object({
+  presetId: z.enum(COLORS_PRESETS).or(z.literal("custom")).default("neutral"),
+  background: hexColor.default("#ffffff"),
+  heading: hexColor.default("#171717"),
+  text: hexColor.default("#404040"),
+  link: hexColor.default("#525252"),
+  accent: hexColor.default("#171717"),
+});
+
 export const cvContentSchema = z.object({
   title: z.string().min(1, "Title is required").max(160),
   templateId: z.string().max(60).default("classic"),
@@ -114,6 +137,14 @@ export const cvContentSchema = z.object({
     scale: 1,
     lineHeight: 1.5,
     letterSpacing: 0,
+  }),
+  colors: colorsSchema.default({
+    presetId: "neutral",
+    background: "#ffffff",
+    heading: "#171717",
+    text: "#404040",
+    link: "#525252",
+    accent: "#171717",
   }),
   personal: personalSchema,
   summary: z.string().max(3000).optional().default(""),
@@ -141,6 +172,7 @@ export type OrganizationInput = z.infer<typeof organizationSchema>;
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type CustomInput = z.infer<typeof customSchema>;
 export type Typography = z.infer<typeof typographySchema>;
+export type CvColors = z.infer<typeof colorsSchema>;
 export type CvContent = z.infer<typeof cvContentSchema>;
 export type CvUpdate = z.infer<typeof cvUpdateSchema>;
 
@@ -211,4 +243,13 @@ export const emptyTypography: Typography = {
   scale: 1,
   lineHeight: 1.5,
   letterSpacing: 0,
+};
+
+export const emptyColors: CvColors = {
+  presetId: "neutral",
+  background: "#ffffff",
+  heading: "#171717",
+  text: "#404040",
+  link: "#525252",
+  accent: "#171717",
 };
