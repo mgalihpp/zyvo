@@ -172,3 +172,13 @@
 [data-print-root] [data-entry] {
   break-inside: avoid;
 }
+/* A section heading orphaned at the bottom of a page (entries flow to the next)
+ * reads as a torn section. Chromium's print engine honors break-after:avoid on
+ * the heading weakly when siblings intervene, so also forbid a break right
+ * before any section — keeps the heading glued to its first entry. */
+[data-print-root] section {
+  break-before: avoid;
+}
+[data-print-root] section:first-child {
+  break-before: auto;
+}

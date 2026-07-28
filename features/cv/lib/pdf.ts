@@ -69,10 +69,22 @@ export async function renderCvDocument({
       return new Uint8Array(buf);
     }
 
+    // Single continuous page: A4 width, height = actual content height, so the
+    // whole CV lands on one long page instead of being split across A4 sheets.
+    // Measure at A4 pixel width (210mm ≈ 794px @96dpi) so wrapping matches the
+    // PDF layout and the height is accurate.
+    await page.setViewport({ width: 794, height: 1123 });
+    const heightPx = await page.evaluate(() => {
+      const el = document.querySelector<HTMLElement>("[data-print-root]");
+      return Math.ceil((el ?? document.body).getBoundingClientRect().height);
+    });
     const buf = await page.pdf({
-      format: "a4",
+      width: "210mm",
+      // 96dpi: 1px = 1/96in; +2px guards against sub-pixel rounding overflow.
+      height: `${(heightPx + 2) / 96}in`,
       printBackground: true,
       preferCSSPageSize: false,
+      pageRanges: "1",
     });
     return new Uint8Array(buf);
   } finally {
