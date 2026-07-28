@@ -83,7 +83,12 @@ export function CvPreview() {
     if (!el) return;
     if ((e.target as HTMLElement).closest("input,textarea,button,a,select"))
       return;
-    drag.current = { x: e.clientX, y: e.clientY, left: el.scrollLeft, top: el.scrollTop };
+    drag.current = {
+      x: e.clientX,
+      y: e.clientY,
+      left: el.scrollLeft,
+      top: el.scrollTop,
+    };
     el.setPointerCapture(e.pointerId);
   };
 
