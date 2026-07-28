@@ -11,6 +11,7 @@ import {
   Roboto,
   Source_Serif_4,
 } from "next/font/google";
+import { Toaster } from "@/components/ui/toast";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import "./globals.css";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <TRPCProvider>{children}</TRPCProvider>
+        <Toaster />
         {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
     </html>

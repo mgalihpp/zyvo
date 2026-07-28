@@ -21,6 +21,9 @@ const TypographyPanel = lazy(() =>
 const ColorsPanel = lazy(() =>
   import("./colors-panel").then((m) => ({ default: m.ColorsPanel })),
 );
+const ExportPanel = lazy(() =>
+  import("./export-panel").then((m) => ({ default: m.ExportPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -141,6 +144,22 @@ function ColorsSkeleton() {
   );
 }
 
+/** Fallback for the lazy export panel: header + two full-width buttons. */
+function ExportSkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-full max-w-72" />
+      </div>
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-9 w-full rounded-md" />
+        <Skeleton className="h-9 w-full rounded-md" />
+      </div>
+    </div>
+  );
+}
+
 function Placeholder({ title, note }: { title: string; note: string }) {
   return (
     <div>
@@ -202,7 +221,9 @@ function ActivePanel() {
       );
     case "export":
       return (
-        <Placeholder title="Unduh" note="Opsi unduh PDF akan hadir di sini." />
+        <Suspense fallback={<ExportSkeleton />}>
+          <ExportPanel />
+        </Suspense>
       );
     default:
       return null;

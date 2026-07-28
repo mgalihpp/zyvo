@@ -2,6 +2,7 @@
 
 import { memo, useLayoutEffect, useRef, useState } from "react";
 import { getEagerTemplate } from "@/features/cv/components/templates/eager";
+import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import type { CvContent } from "@/features/cv/schemas/cv";
 
 /** A4 render width (px) the templates are designed against. */
@@ -51,6 +52,7 @@ export const CvThumbnail = memo(function CvThumbnail({
         style={{
           width: RENDER_WIDTH,
           transform: `scale(${scale})`,
+          ...cvRootStyle(cv),
         }}
       >
         <Template cv={cv} />

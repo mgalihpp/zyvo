@@ -91,7 +91,7 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
 
       <div className="flex min-h-0 flex-1">
         <BuilderSidebar />
-        <div className="min-h-0 flex-1">
+        <div className="min-h-0 min-w-0 flex-1">
           {!mounted ? (
             // Pre-hydration shell: responsive via CSS only. Editor is full width
             // on mobile; the preview joins on md+. Mirrors the final layout so
@@ -122,7 +122,12 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
                 {editor}
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel id="preview" defaultSize="76" minSize="40">
+              <ResizablePanel
+                id="preview"
+                defaultSize="76"
+                minSize="40"
+                className="min-w-0"
+              >
                 {preview}
               </ResizablePanel>
             </ResizablePanelGroup>

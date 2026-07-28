@@ -15,7 +15,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto grid w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] print:grid-cols-[34%_1fr] print:[print-color-adjust:exact]">
+    <article className="mx-auto grid w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] print:min-h-[297mm] print:grid-cols-[34%_1fr] print:[print-color-adjust:exact]">
       <aside className="bg-[var(--cv-color-accent)] p-6 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
         <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Your Name"}
@@ -116,7 +116,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           <MainSection title="Experience">
             <div className="space-y-3">
               {cv.experience.map((exp, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Role"}
@@ -143,7 +143,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           <MainSection title="Projects">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {proj.name || "Project"}
@@ -175,7 +175,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           <MainSection title="Education">
             <div className="space-y-3">
               {cv.education.map((edu, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {edu.school || "School"}
@@ -198,7 +198,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           <MainSection title="Organizations">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {org.role || "Role"}
@@ -230,7 +230,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           <MainSection title="Additional">
             <div className="space-y-3">
               {cv.custom.map((item, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {item.title || "Item"}
                   </h3>

@@ -46,7 +46,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Experience">
           <div className="space-y-3">
             {cv.experience.map((exp, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {exp.role || "Role"}
@@ -81,7 +81,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Education">
           <div className="space-y-3">
             {cv.education.map((edu, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {edu.school || "School"}
@@ -139,7 +139,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Projects">
           <div className="space-y-3">
             {cv.projects.map((proj, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {proj.name || "Project"}
@@ -176,7 +176,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Certifications">
           <div className="space-y-2">
             {cv.certifications.map((cert, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {cert.name || "Certification"}
@@ -213,7 +213,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Organizations">
           <div className="space-y-3">
             {cv.organizations.map((org, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {org.role || "Role"}
@@ -245,7 +245,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         <Section title="Additional">
           <div className="space-y-3">
             {cv.custom.map((item, i) => (
-              <div key={i}>
+              <div key={i} data-entry>
                 <h3 className="font-semibold text-[var(--cv-color-heading)]">
                   {item.title || "Item"}
                 </h3>

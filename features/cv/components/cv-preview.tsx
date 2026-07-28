@@ -1,12 +1,19 @@
 "use client";
 
-import { Suspense } from "react";
+import { Minus, Plus } from "lucide-react";
+import { type PointerEvent, Suspense, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { readableOn } from "@/features/cv/lib/contrast";
-import { FONT_REGISTRY } from "@/features/cv/lib/fonts";
+import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { getTemplate } from "./templates";
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+const clampZoom = (z: number) =>
+  Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100));
 
 function PreviewSkeleton() {
   return (
@@ -61,30 +68,102 @@ export function CvPreview() {
 
   const Template = getTemplate(templateId).lazyComponent;
 
+  const [zoom, setZoom] = useState(1);
+
+  // Grab-to-pan: drag anywhere on the preview to scroll. Skip when the pointer
+  // starts on a form control/link so text selection & inputs still work.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; y: number; left: number; top: number }>(
+    null,
+  );
+
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    if ((e.target as HTMLElement).closest("input,textarea,button,a,select"))
+      return;
+    drag.current = {
+      x: e.clientX,
+      y: e.clientY,
+      left: el.scrollLeft,
+      top: el.scrollTop,
+    };
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const el = scrollRef.current;
+    if (!el || !drag.current) return;
+    el.scrollLeft = drag.current.left - (e.clientX - drag.current.x);
+    el.scrollTop = drag.current.top - (e.clientY - drag.current.y);
+  };
+
+  const endDrag = (e: PointerEvent<HTMLDivElement>) => {
+    drag.current = null;
+    scrollRef.current?.releasePointerCapture(e.pointerId);
+  };
+
   return (
-    <div className="h-full overflow-auto bg-neutral-100 p-6 dark:bg-neutral-900">
-      <Suspense fallback={<PreviewSkeleton />}>
-        <div
-          style={
-            {
-              "--cv-font-heading": `var(${FONT_REGISTRY[typography.fontHeading].cssVar})`,
-              "--cv-font-body": `var(${FONT_REGISTRY[typography.fontBody].cssVar})`,
-              fontFamily: "var(--cv-font-body)",
-              fontSize: `${13 * typography.scale}px`,
-              lineHeight: typography.lineHeight,
-              letterSpacing: `${typography.letterSpacing}em`,
-              "--cv-color-bg": effectiveColors.background,
-              "--cv-color-heading": effectiveColors.heading,
-              "--cv-color-text": effectiveColors.text,
-              "--cv-color-link": effectiveColors.link,
-              "--cv-color-accent": effectiveColors.accent,
-              "--cv-color-on-accent": readableOn(effectiveColors.accent),
-            } as React.CSSProperties
-          }
+    <div className="relative h-full bg-neutral-100 dark:bg-neutral-900">
+      {/* Scroll lives on this inner box only, so zooming the CV scrolls the CV
+       * — the zoom pill sits on the non-scrolling parent and stays put. */}
+      <div
+        ref={scrollRef}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        className="h-full cursor-grab overflow-auto p-6 active:cursor-grabbing"
+      >
+        <Suspense fallback={<PreviewSkeleton />}>
+          {/* `zoom` (vs transform:scale) reflows the layout box, so the scroll
+           * container gets real width/height and both axes scroll when zoomed
+           * in. mx-auto keeps it centered when zoomed out. */}
+          <div className="mx-auto w-fit" style={{ zoom }}>
+            {/* Pin to the 794px (A4 @96dpi) print width so the preview is
+             * WYSIWYG vs the PDF and never reflows narrower when the editor
+             * panel opens. */}
+            <div
+              className="w-[794px]"
+              style={cvRootStyle({ typography, colors: effectiveColors })}
+            >
+              <Template cv={content} />
+            </div>
+          </div>
+        </Suspense>
+      </div>
+
+      <div className="absolute bottom-4 right-4 z-10 flex w-fit flex-col items-center gap-1 rounded-full border bg-background/90 p-1 shadow-md backdrop-blur">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8 rounded-full"
+          onClick={() => setZoom((z) => clampZoom(z + ZOOM_STEP))}
+          disabled={zoom >= ZOOM_MAX}
+          aria-label="Zoom in"
         >
-          <Template cv={content} />
-        </div>
-      </Suspense>
+          <Plus className="size-4" />
+        </Button>
+        <button
+          type="button"
+          className="min-w-8 text-center text-[10px] tabular-nums text-muted-foreground hover:text-foreground"
+          onClick={() => setZoom(1)}
+          aria-label="Reset zoom"
+        >
+          {Math.round(zoom * 100)}%
+        </button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="size-8 rounded-full"
+          onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))}
+          disabled={zoom <= ZOOM_MIN}
+          aria-label="Zoom out"
+        >
+          <Minus className="size-4" />
+        </Button>
+      </div>
     </div>
   );
 }
