@@ -10,6 +10,11 @@ import {
 } from "@/features/cv/components/templates";
 import { getEagerTemplate } from "@/features/cv/components/templates/eager";
 import { SAMPLE_CV } from "@/features/cv/components/templates/sample";
+import {
+  templateDefaultColors,
+  templateDefaultTypography,
+} from "@/features/cv/components/templates/template-colors";
+import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +34,13 @@ const TemplateThumb = memo(function TemplateThumb({
   template: TemplateMeta;
 }) {
   const Template = getEagerTemplate(template.id);
+  // Render the thumbnail with the template's own default palette so the picker
+  // shows each template's intended colors (not one shared neutral look).
+  const sample = {
+    ...SAMPLE_CV,
+    colors: templateDefaultColors(template.id),
+    typography: templateDefaultTypography(template.id),
+  };
   // 794px design width scaled into a ~248px-wide card interior.
   const scale = 0.3;
   return (
@@ -39,9 +51,13 @@ const TemplateThumb = memo(function TemplateThumb({
     >
       <div
         className="absolute left-0 top-0 origin-top-left"
-        style={{ width: 794, transform: `scale(${scale})` }}
+        style={{
+          width: 794,
+          transform: `scale(${scale})`,
+          ...cvRootStyle(sample),
+        }}
       >
-        <Template cv={SAMPLE_CV} />
+        <Template cv={sample} />
       </div>
     </div>
   );

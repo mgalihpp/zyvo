@@ -1,4 +1,8 @@
 import { createStore } from "zustand/vanilla";
+import {
+  templateDefaultColors,
+  templateDefaultTypography,
+} from "@/features/cv/components/templates/template-colors";
 import type {
   CertificationInput,
   CustomInput,
@@ -246,7 +250,17 @@ export const createCvStore = (init?: CvStoreInit) =>
     markSaved: () => set({ saveStatus: "saved", lastSavedAt: Date.now() }),
 
     setTitle: (title) => set((s) => ({ title, ...touch()(s) })),
-    setTemplateId: (templateId) => set((s) => ({ templateId, ...touch()(s) })),
+    // Selecting a template always applies that template's default palette and
+    // fonts. Any in-flight color draft is dropped so the panel reflects the new
+    // base.
+    setTemplateId: (templateId) =>
+      set((s) => ({
+        templateId,
+        colors: templateDefaultColors(templateId),
+        typography: templateDefaultTypography(templateId),
+        draftColors: null,
+        ...touch()(s),
+      })),
     setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
     setTypography: (patch) =>
       set((s) => ({

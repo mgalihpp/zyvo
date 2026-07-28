@@ -118,15 +118,32 @@ function CvCard({
             <MoreVerticalIcon />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
               <PencilIcon />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem disabled={busy} onClick={onDuplicate}>
+            <DropdownMenuItem
+              disabled={busy}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDuplicate();
+              }}
+            >
               <CopyIcon />
               Duplikat CV
             </DropdownMenuItem>
-            <DropdownMenuItem variant="destructive" onClick={onDelete}>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
               <Trash2Icon />
               Hapus CV
             </DropdownMenuItem>

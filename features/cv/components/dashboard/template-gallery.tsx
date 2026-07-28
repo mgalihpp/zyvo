@@ -11,6 +11,10 @@ import {
   type TemplateMeta,
 } from "@/features/cv/components/templates";
 import { SAMPLE_CV } from "@/features/cv/components/templates/sample";
+import {
+  templateDefaultColors,
+  templateDefaultTypography,
+} from "@/features/cv/components/templates/template-colors";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +33,12 @@ function TemplateCard({
     <div className="flex flex-col overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
       <div className="border-b bg-muted">
         <CvThumbnail
-          cv={{ ...SAMPLE_CV, templateId: template.id }}
+          cv={{
+            ...SAMPLE_CV,
+            templateId: template.id,
+            colors: templateDefaultColors(template.id),
+            typography: templateDefaultTypography(template.id),
+          }}
           className="w-full"
           aspectRatio="4 / 3"
         />
