@@ -21,6 +21,9 @@ const TypographyPanel = lazy(() =>
 const ColorsPanel = lazy(() =>
   import("./colors-panel").then((m) => ({ default: m.ColorsPanel })),
 );
+const ExportPanel = lazy(() =>
+  import("./export-panel").then((m) => ({ default: m.ExportPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -202,7 +205,9 @@ function ActivePanel() {
       );
     case "export":
       return (
-        <Placeholder title="Unduh" note="Opsi unduh PDF akan hadir di sini." />
+        <Suspense fallback={<Placeholder title="Unduh" note="Memuat…" />}>
+          <ExportPanel />
+        </Suspense>
       );
     default:
       return null;
