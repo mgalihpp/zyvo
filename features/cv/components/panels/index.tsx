@@ -144,6 +144,22 @@ function ColorsSkeleton() {
   );
 }
 
+/** Fallback for the lazy export panel: header + two full-width buttons. */
+function ExportSkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-full max-w-72" />
+      </div>
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-9 w-full rounded-md" />
+        <Skeleton className="h-9 w-full rounded-md" />
+      </div>
+    </div>
+  );
+}
+
 function Placeholder({ title, note }: { title: string; note: string }) {
   return (
     <div>
@@ -205,7 +221,7 @@ function ActivePanel() {
       );
     case "export":
       return (
-        <Suspense fallback={<Placeholder title="Unduh" note="Memuat…" />}>
+        <Suspense fallback={<ExportSkeleton />}>
           <ExportPanel />
         </Suspense>
       );
