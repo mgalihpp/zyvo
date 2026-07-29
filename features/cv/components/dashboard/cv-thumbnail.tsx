@@ -4,6 +4,7 @@ import { memo, useLayoutEffect, useRef, useState } from "react";
 import { getEagerTemplate } from "@/features/cv/components/templates/eager";
 import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import type { CvContent } from "@/features/cv/schemas/cv";
+import { emptyPersonal } from "@/features/cv/schemas/cv";
 
 /** A4 render width (px) the templates are designed against. */
 const RENDER_WIDTH = 794;
@@ -27,7 +28,11 @@ export const CvThumbnail = memo(function CvThumbnail({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
-  const Template = getEagerTemplate(cv.templateId);
+  // Guard against legacy MongoDB docs where `personal` was not yet stored.
+  const safeCv: CvContent = cv.personal
+    ? cv
+    : { ...cv, personal: { ...emptyPersonal } };
+  const Template = getEagerTemplate(safeCv.templateId);
 
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -53,10 +58,10 @@ export const CvThumbnail = memo(function CvThumbnail({
           height: RENDER_HEIGHT,
           visibility: scale === null ? "hidden" : "visible",
           transform: `scale(${scale ?? 0.25})`,
-          ...cvRootStyle(cv),
+          ...cvRootStyle(safeCv),
         }}
       >
-        <Template cv={cv} />
+        <Template cv={safeCv} />
       </div>
     </div>
   );

@@ -1,6 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { cvContentSchema, cvUpdateSchema } from "@/features/cv/schemas/cv";
+import {
+  cvContentSchema,
+  cvUpdateSchema,
+  emptyPersonal,
+} from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 /**
@@ -11,7 +15,7 @@ export const cvRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     // Content sections are included so the dashboard can render a live preview
     // thumbnail per card without a second round-trip.
-    return ctx.prisma.cV.findMany({
+    const rows = await ctx.prisma.cV.findMany({
       where: { userId: ctx.session.user.id },
       orderBy: { updatedAt: "desc" },
       select: {
@@ -35,6 +39,12 @@ export const cvRouter = createTRPCRouter({
         custom: true,
       },
     });
+    // Normalize legacy documents where `personal` was not yet stored (null).
+    // React Compiler trusts TypeScript types and removes optional chaining in
+    // template renders, so a null personal crashes at runtime.
+    return rows.map((cv) =>
+      cv.personal ? cv : { ...cv, personal: { ...emptyPersonal } },
+    );
   }),
 
   getById: protectedProcedure
