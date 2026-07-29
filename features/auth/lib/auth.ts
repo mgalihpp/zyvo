@@ -21,6 +21,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+  user: {
+    // Permanent account deletion; authorized by password (no email provider wired yet).
+    deleteUser: { enabled: true },
+  },
   // Must be the last plugin so it can set cookies from server actions.
   plugins: [nextCookies()],
 });

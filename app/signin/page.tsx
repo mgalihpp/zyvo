@@ -25,10 +25,10 @@ import { signIn } from "@/features/auth/lib/auth-client";
 import { DEFAULT_AUTH_REDIRECT } from "@/features/auth/lib/auth-routes";
 
 const signInSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email("Email tidak valid"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
   acceptTerms: z.boolean().refine((v) => v === true, {
-    message: "You must accept the Terms and Privacy Policy",
+    message: "Anda harus menyetujui Syarat & Ketentuan dan Kebijakan Privasi",
   }),
 });
 
@@ -75,8 +75,10 @@ function SignInForm() {
       <BrandLogo width={120} height={40} className="h-10" />
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Welcome back — sign in to continue</CardDescription>
+          <CardTitle>Masuk</CardTitle>
+          <CardDescription>
+            Selamat datang — masuk untuk melanjutkan
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -113,13 +115,13 @@ function SignInForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Kata Sandi</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
                     type="password"
                     aria-invalid={fieldState.invalid}
-                    placeholder="Min 8 characters"
+                    placeholder="Min. 8 karakter"
                     autoComplete="current-password"
                   />
                   <FieldError errors={[fieldState.error]} />
@@ -172,10 +174,10 @@ function SignInForm() {
               type="submit"
               className="w-full"
               disabled={isPending}
-              loadingText="Please wait..."
+              loadingText="Harap tunggu..."
               loading={isPending}
             >
-              Sign in
+              Masuk
             </Button>
           </form>
         </CardContent>
@@ -185,7 +187,7 @@ function SignInForm() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground">Atau</span>
             </div>
           </div>
 
@@ -196,7 +198,7 @@ function SignInForm() {
             disabled={isPending}
           >
             <GoogleIcon />
-            Continue with Google
+            Lanjutkan dengan Google
           </Button>
 
           <div className="mt-2 w-full text-center">
@@ -204,7 +206,7 @@ function SignInForm() {
               href="/signup"
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              Don&apos;t have an account? Sign up
+              Belum punya akun? Daftar
             </a>
           </div>
         </CardFooter>
@@ -218,7 +220,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <main className="flex min-h-screen items-center justify-center">
-          <p className="text-sm text-neutral-500">Loading…</p>
+          <p className="text-sm text-neutral-500">Memuat…</p>
         </main>
       }
     >

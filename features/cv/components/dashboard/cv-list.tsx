@@ -99,7 +99,7 @@ function CvCard({
         />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 p-6 text-center opacity-0 transition-all duration-200 group-hover/thumb:bg-black/60 group-hover/thumb:opacity-100">
           <span className="text-lg font-bold text-white">
-            VIEW RESUME &nbsp;&rarr;
+            LIHAT CV &nbsp;&rarr;
           </span>
         </div>
       </div>
@@ -115,7 +115,7 @@ function CvCard({
             className="text-sm font-semibold leading-tight"
           />
           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-            edited {formatRelative(cv.updatedAt ?? cv.createdAt)} • A4
+            Diperbarui {formatRelative(cv.updatedAt ?? cv.createdAt)} • A4
           </p>
         </div>
 
@@ -270,7 +270,7 @@ export function CvList({
         <span className="flex size-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
           <PlusIcon className="size-5" />
         </span>
-        New resume
+        CV Baru
       </button>
       {/* spacer so grid rows align */}
       <div className="h-9" />

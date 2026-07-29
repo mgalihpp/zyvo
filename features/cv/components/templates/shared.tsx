@@ -11,7 +11,7 @@ export function formatDateRange(
   current?: boolean,
 ) {
   const from = start?.trim();
-  const to = current ? "Present" : end?.trim();
+  const to = current ? "Sekarang" : end?.trim();
   if (from && to) return `${from} – ${to}`;
   return from || to || "";
 }

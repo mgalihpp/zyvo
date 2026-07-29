@@ -16,7 +16,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
     <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-10 text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="border-b-2 border-[var(--cv-color-accent)] pb-4">
         <h1 className="text-[1.6em] font-bold tracking-tight text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
-          {p.fullName || "Your Name"}
+          {p.fullName || "Nama Anda"}
         </h1>
         {p.headline ? (
           <p className="mt-0.5 text-[0.92em] font-medium text-[var(--cv-color-accent)]">
@@ -46,12 +46,12 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
       <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2 print:grid-cols-2">
         <div>
           {cv.education.length > 0 ? (
-            <Section title="Education">
+            <Section title="Pendidikan">
               <div className="space-y-3">
                 {cv.education.map((edu, i) => (
                   <div key={i} data-entry>
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {edu.school || "School"}
+                      {edu.school || "Institusi"}
                     </h3>
                     <p className="text-[var(--cv-color-text)]">
                       {join([edu.degree, edu.field], ", ")}
@@ -67,7 +67,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.skills.length > 0 ? (
-            <Section title="Skills">
+            <Section title="Keahlian">
               <div className="flex flex-wrap gap-1.5">
                 {cv.skills
                   .filter((s) => s.name.trim())
@@ -84,7 +84,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.interpersonal.length > 0 ? (
-            <Section title="Interpersonal">
+            <Section title="Keahlian Interpersonal">
               <p className="text-[var(--cv-color-text)]">
                 {join(
                   cv.interpersonal.map((s) => s.name),
@@ -95,7 +95,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.languages.length > 0 ? (
-            <Section title="Languages">
+            <Section title="Bahasa">
               <ul className="space-y-0.5 text-[var(--cv-color-text)]">
                 {cv.languages
                   .filter((l) => l.name.trim())
@@ -109,7 +109,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.certifications.length > 0 ? (
-            <Section title="Certifications">
+            <Section title="Sertifikasi">
               <div className="space-y-1">
                 {cv.certifications.map((c, i) => (
                   <p key={i}>
@@ -128,12 +128,12 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
 
         <div>
           {cv.experience.length > 0 ? (
-            <Section title="Experience">
+            <Section title="Pengalaman">
               <div className="space-y-3">
                 {cv.experience.map((exp, i) => (
                   <div key={i} data-entry>
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {exp.role || "Role"}
+                      {exp.role || "Posisi"}
                     </h3>
                     <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
                       {join([exp.company, exp.location])}
@@ -153,12 +153,12 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.projects.length > 0 ? (
-            <Section title="Projects">
+            <Section title="Proyek">
               <div className="space-y-3">
                 {cv.projects.map((proj, i) => (
                   <div key={i} data-entry>
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {proj.name || "Project"}
+                      {proj.name || "Proyek"}
                     </h3>
                     {proj.date ? (
                       <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-70">
@@ -177,12 +177,12 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.organizations.length > 0 ? (
-            <Section title="Organizations">
+            <Section title="Organisasi">
               <div className="space-y-3">
                 {cv.organizations.map((org, i) => (
                   <div key={i} data-entry>
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {join([org.role, org.name], " — ") || "Organization"}
+                      {join([org.role, org.name], " — ") || "Organisasi"}
                     </h3>
                     {org.date ? (
                       <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-70">
@@ -201,7 +201,7 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
           ) : null}
 
           {cv.custom.length > 0 ? (
-            <Section title="Additional">
+            <Section title="Tambahan">
               <div className="space-y-3">
                 {cv.custom.map((item, i) => (
                   <div key={i} data-entry>

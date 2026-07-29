@@ -59,7 +59,7 @@ export function PersonalForm() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="website">Website / Social Media</FieldLabel>
+          <FieldLabel htmlFor="website">Website / Media Sosial</FieldLabel>
           <Input
             id="website"
             value={personal.website ?? ""}

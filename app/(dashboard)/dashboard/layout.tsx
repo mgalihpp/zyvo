@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type React from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import {
   SidebarInset,
@@ -26,7 +27,9 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={{ "--sidebar-width": "16rem" } as React.CSSProperties}
+    >
       <AppSidebar
         userName={session.user.name ?? "Pengguna"}
         userEmail={session.user.email ?? ""}

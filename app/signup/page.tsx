@@ -25,11 +25,11 @@ import { signIn, signUp } from "@/features/auth/lib/auth-client";
 import { DEFAULT_AUTH_REDIRECT } from "@/features/auth/lib/auth-routes";
 
 const signUpSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(2, "Nama minimal 2 karakter"),
+  email: z.string().email("Email tidak valid"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
   acceptTerms: z.boolean().refine((v) => v === true, {
-    message: "You must accept the Terms and Privacy Policy",
+    message: "Anda harus menyetujui Syarat & Ketentuan dan Kebijakan Privasi",
   }),
 });
 
@@ -72,8 +72,8 @@ export default function SignUpPage() {
       <BrandLogo width={120} height={40} className="h-10" />
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>Sign up with email or Google</CardDescription>
+          <CardTitle>Buat Akun</CardTitle>
+          <CardDescription>Daftar dengan email atau Google</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -91,12 +91,12 @@ export default function SignUpPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Nama</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
                     aria-invalid={fieldState.invalid}
-                    placeholder="John Doe"
+                    placeholder="Nama Lengkap"
                   />
                   <FieldError errors={[fieldState.error]} />
                 </Field>
@@ -127,13 +127,13 @@ export default function SignUpPage() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Kata Sandi</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
                     type="password"
                     aria-invalid={fieldState.invalid}
-                    placeholder="Min 8 characters"
+                    placeholder="Min. 8 karakter"
                     autoComplete="new-password"
                   />
                   <FieldError errors={[fieldState.error]} />
@@ -186,10 +186,10 @@ export default function SignUpPage() {
               type="submit"
               className="w-full"
               disabled={isPending}
-              loadingText="Please wait..."
+              loadingText="Harap tunggu..."
               loading={isPending}
             >
-              Sign up
+              Daftar
             </Button>
           </form>
         </CardContent>
@@ -199,7 +199,7 @@ export default function SignUpPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-card px-2 text-muted-foreground">Atau</span>
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export default function SignUpPage() {
             disabled={isPending}
           >
             <GoogleIcon />
-            Continue with Google
+            Lanjutkan dengan Google
           </Button>
 
           <div className="mt-2 w-full text-center">
@@ -218,7 +218,7 @@ export default function SignUpPage() {
               href="/signin"
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              Already have an account? Sign in
+              Sudah punya akun? Masuk
             </a>
           </div>
         </CardFooter>

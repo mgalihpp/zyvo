@@ -15,7 +15,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
     <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-12 font-light text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="text-center">
         <h1 className="text-[2em] font-normal tracking-[0.1em] text-[var(--cv-color-heading)] uppercase font-[family-name:var(--cv-font-heading)]">
-          {p.fullName || "Your Name"}
+          {p.fullName || "Nama Anda"}
         </h1>
         {p.headline ? (
           <p className="mt-1 text-[0.92em] tracking-wide text-[var(--cv-color-text)] opacity-70">
@@ -35,19 +35,19 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       </header>
 
       {cv.summary?.trim() ? (
-        <Section title="Profile">
+        <Section title="Profil">
           <p className="whitespace-pre-line">{cv.summary}</p>
         </Section>
       ) : null}
 
       {cv.experience.length > 0 ? (
-        <Section title="Experience">
+        <Section title="Pengalaman">
           <div className="space-y-4">
             {cv.experience.map((exp, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {join([exp.role, exp.company], ", ") || "Role"}
+                    {join([exp.role, exp.company], ", ") || "Posisi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
@@ -68,13 +68,13 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.education.length > 0 ? (
-        <Section title="Education">
+        <Section title="Pendidikan">
           <div className="space-y-3">
             {cv.education.map((edu, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {edu.school || "School"}
+                    {edu.school || "Institusi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(edu.startDate, edu.endDate)}
@@ -91,13 +91,13 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.projects.length > 0 ? (
-        <Section title="Projects">
+        <Section title="Proyek">
           <div className="space-y-3">
             {cv.projects.map((proj, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {proj.name || "Project"}
+                    {proj.name || "Proyek"}
                   </h3>
                   {proj.date ? (
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
@@ -117,7 +117,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.skills.length > 0 ? (
-        <Section title="Skills">
+        <Section title="Keahlian">
           <p>
             {join(
               cv.skills.map((s) => s.name),
@@ -128,7 +128,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.interpersonal.length > 0 ? (
-        <Section title="Interpersonal Skills">
+        <Section title="Keahlian Interpersonal">
           <p>
             {join(
               cv.interpersonal.map((s) => s.name),
@@ -139,7 +139,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.languages.length > 0 ? (
-        <Section title="Languages">
+        <Section title="Bahasa">
           <p>
             {join(
               cv.languages.map((l) =>
@@ -152,7 +152,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.certifications.length > 0 ? (
-        <Section title="Certifications">
+        <Section title="Sertifikasi">
           <div className="space-y-1">
             {cv.certifications.map((c, i) => (
               <p key={i}>
@@ -169,13 +169,13 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.organizations.length > 0 ? (
-        <Section title="Organizations">
+        <Section title="Organisasi">
           <div className="space-y-3">
             {cv.organizations.map((org, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {join([org.role, org.name], ", ") || "Organization"}
+                    {join([org.role, org.name], ", ") || "Organisasi"}
                   </h3>
                   {org.date ? (
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
@@ -195,7 +195,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.custom.length > 0 ? (
-        <Section title="Additional">
+        <Section title="Tambahan">
           <div className="space-y-3">
             {cv.custom.map((item, i) => (
               <div key={i} data-entry>

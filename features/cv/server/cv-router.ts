@@ -55,7 +55,7 @@ export const cvRouter = createTRPCRouter({
       const cv = await ctx.prisma.cV.create({
         data: {
           userId: ctx.session.user.id,
-          title: input?.title ?? "Untitled CV",
+          title: input?.title ?? "CV Tanpa Judul",
           templateId: input?.templateId ?? "classic",
           personal: input?.personal,
           summary: input?.summary,

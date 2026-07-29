@@ -83,7 +83,7 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
               variant={mobileTab === "preview" ? "secondary" : "ghost"}
               onClick={() => setMobileTab("preview")}
             >
-              Preview
+              Pratinjau
             </Button>
           </div>
         ) : null}

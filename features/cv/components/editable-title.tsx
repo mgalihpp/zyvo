@@ -67,7 +67,7 @@ export function EditableTitle({
   onCommit,
   status = "idle",
   maxLength = 160,
-  placeholder = "Untitled CV",
+  placeholder = "CV Tanpa Judul",
   ariaLabel = "Ubah judul",
   className,
   showEditIcon = true,

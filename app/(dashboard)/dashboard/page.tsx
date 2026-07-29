@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
@@ -16,12 +17,15 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Resumes</h1>
+        <h1 className="text-3xl font-bold">CV Saya</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Resume pertama Anda gratis selamanya. Butuh lebih dari satu resume?{" "}
-          <a href="#" className="font-medium underline hover:text-foreground">
-            Upgrade your plan
-          </a>
+          CV pertama Anda gratis selamanya. Butuh lebih dari satu CV?{" "}
+          <Link
+            href="/dashboard/billing"
+            className="font-medium underline hover:text-foreground"
+          >
+            Tingkatkan paket
+          </Link>
         </p>
       </div>
 

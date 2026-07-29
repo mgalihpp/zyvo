@@ -92,7 +92,7 @@ export function ExportPanel() {
               <div className="min-w-0">
                 <p className="text-sm font-semibold">Unduh PNG</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Format gambar, cocok untuk share online
+                  Format gambar, cocok untuk dibagikan secara online
                 </p>
               </div>
             </>

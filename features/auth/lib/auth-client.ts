@@ -4,4 +4,13 @@ export const authClient = createAuthClient({
   // Defaults to the current origin in the browser; no baseURL needed for same-origin.
 });
 
-export const { signIn, signUp, signOut, useSession, getSession } = authClient;
+export const {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  getSession,
+  listAccounts,
+  changePassword,
+  deleteUser,
+} = authClient;

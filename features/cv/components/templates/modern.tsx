@@ -18,13 +18,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
     <article className="mx-auto grid min-h-[1123px] w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] sm:grid-rows-[1fr] print:min-h-[297mm] print:grid-cols-[34%_1fr] print:grid-rows-[1fr] print:[print-color-adjust:exact]">
       <aside className="bg-[var(--cv-color-accent)] p-6 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
         <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
-          {p.fullName || "Your Name"}
+          {p.fullName || "Nama Anda"}
         </h1>
         {p.headline ? (
           <p className="mt-1 text-[0.92em] opacity-70">{p.headline}</p>
         ) : null}
 
-        <SideSection title="Contact">
+        <SideSection title="Kontak">
           <ul className="space-y-1 break-words text-[0.85em] opacity-85">
             {p.email ? <li>{p.email}</li> : null}
             {p.phone ? <li>{p.phone}</li> : null}
@@ -36,7 +36,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
         </SideSection>
 
         {cv.skills.length > 0 ? (
-          <SideSection title="Skills">
+          <SideSection title="Keahlian">
             <ul className="space-y-1.5">
               {cv.skills
                 .filter((s) => s.name.trim())
@@ -60,7 +60,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.interpersonal.length > 0 ? (
-          <SideSection title="Interpersonal">
+          <SideSection title="Keahlian Interpersonal">
             <p className="text-[0.85em] opacity-85">
               {join(
                 cv.interpersonal.map((s) => s.name),
@@ -71,7 +71,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.languages.length > 0 ? (
-          <SideSection title="Languages">
+          <SideSection title="Bahasa">
             <ul className="space-y-1 text-[0.85em] opacity-85">
               {cv.languages
                 .filter((l) => l.name.trim())
@@ -88,7 +88,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.certifications.length > 0 ? (
-          <SideSection title="Certifications">
+          <SideSection title="Sertifikasi">
             <ul className="space-y-2 text-[0.85em] opacity-85">
               {cv.certifications.map((c, i) => (
                 <li key={i}>
@@ -105,7 +105,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
 
       <div className="p-8">
         {cv.summary?.trim() ? (
-          <MainSection title="Profile">
+          <MainSection title="Profil">
             <p className="whitespace-pre-line text-[var(--cv-color-text)]">
               {cv.summary}
             </p>
@@ -113,13 +113,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.experience.length > 0 ? (
-          <MainSection title="Experience">
+          <MainSection title="Pengalaman">
             <div className="space-y-3">
               {cv.experience.map((exp, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {exp.role || "Role"}
+                      {exp.role || "Posisi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
@@ -140,13 +140,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.projects.length > 0 ? (
-          <MainSection title="Projects">
+          <MainSection title="Proyek">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {proj.name || "Project"}
+                      {proj.name || "Proyek"}
                       {proj.type ? (
                         <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
@@ -172,13 +172,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.education.length > 0 ? (
-          <MainSection title="Education">
+          <MainSection title="Pendidikan">
             <div className="space-y-3">
               {cv.education.map((edu, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {edu.school || "School"}
+                      {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
@@ -195,13 +195,13 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.organizations.length > 0 ? (
-          <MainSection title="Organizations">
+          <MainSection title="Organisasi">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {org.role || "Role"}
+                      {org.role || "Posisi"}
                       {org.name ? (
                         <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
@@ -227,7 +227,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.custom.length > 0 ? (
-          <MainSection title="Additional">
+          <MainSection title="Tambahan">
             <div className="space-y-3">
               {cv.custom.map((item, i) => (
                 <div key={i} data-entry>
