@@ -8,11 +8,11 @@ export function SaveIndicator() {
   const status = useCvStore((s) => s.saveStatus);
 
   const map = {
-    idle: { label: "All changes saved", icon: null, tone: "muted" },
-    dirty: { label: "Unsaved changes", icon: null, tone: "muted" },
-    saving: { label: "Saving…", icon: "spin", tone: "muted" },
-    saved: { label: "Saved", icon: "check", tone: "ok" },
-    error: { label: "Save failed", icon: "alert", tone: "error" },
+    idle: { label: "Semua perubahan tersimpan", icon: null, tone: "muted" },
+    dirty: { label: "Perubahan belum disimpan", icon: null, tone: "muted" },
+    saving: { label: "Menyimpan…", icon: "spin", tone: "muted" },
+    saved: { label: "Tersimpan", icon: "check", tone: "ok" },
+    error: { label: "Gagal menyimpan", icon: "alert", tone: "error" },
   } as const;
 
   const { label, icon, tone } = map[status];

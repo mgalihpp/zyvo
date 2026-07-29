@@ -1,8 +1,7 @@
 "use client";
 
-import { FileTextIcon, ImageIcon } from "lucide-react";
+import { FileDownIcon, FileImageIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 
@@ -48,28 +47,57 @@ export function ExportPanel() {
           beberapa saat setelah Anda mengetik.
         </p>
       </div>
-      <div className="space-y-3 p-4">
-        <Button
+      <div className="grid gap-3 p-4">
+        <button
           type="button"
-          className="w-full"
           onClick={() => download("pdf")}
-          loading={busy === "pdf"}
           disabled={busy !== null}
+          className="group flex items-start gap-3 rounded-lg border bg-background p-4 text-left shadow-sm transition-shadow hover:shadow-md hover:ring-2 hover:ring-primary/30 disabled:pointer-events-none disabled:opacity-50"
         >
-          <FileTextIcon data-icon="inline-start" />
-          Unduh PDF
-        </Button>
-        <Button
+          {busy === "pdf" ? (
+            <div className="flex w-full items-center justify-center gap-2">
+              <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
+              <p className="text-sm font-semibold">Menyiapkan…</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600 shadow-inner dark:bg-red-950 dark:text-red-400">
+                <FileDownIcon className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Unduh PDF</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Format dokumen, cocok untuk dicetak
+                </p>
+              </div>
+            </>
+          )}
+        </button>
+        <button
           type="button"
-          variant="outline"
-          className="w-full"
           onClick={() => download("png")}
-          loading={busy === "png"}
           disabled={busy !== null}
+          className="group flex items-start gap-3 rounded-lg border bg-background p-4 text-left shadow-sm transition-shadow hover:shadow-md hover:ring-2 hover:ring-primary/30 disabled:pointer-events-none disabled:opacity-50"
         >
-          <ImageIcon data-icon="inline-start" />
-          Unduh PNG
-        </Button>
+          {busy === "png" ? (
+            <div className="flex w-full items-center justify-center gap-2">
+              <Loader2Icon className="size-5 animate-spin text-muted-foreground" />
+              <p className="text-sm font-semibold">Menyiapkan…</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600 shadow-inner dark:bg-violet-950 dark:text-violet-400">
+                <FileImageIcon className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Unduh PNG</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Format gambar, cocok untuk dibagikan secara online
+                </p>
+              </div>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

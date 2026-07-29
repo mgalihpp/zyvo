@@ -269,7 +269,7 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
                         isActive ? "text-primary" : "text-foreground",
                       )}
                     >
-                      {label || "Untitled CV"}
+                      {label || "CV Tanpa Judul"}
                     </span>
                     <span className="mt-0.5 block text-[11px] text-muted-foreground">
                       {isActive ? "Sedang dibuka · " : ""}

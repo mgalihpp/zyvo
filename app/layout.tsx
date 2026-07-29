@@ -66,7 +66,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Zyvo — AI CV Maker",
+    default: "Zyvo — Pembuat CV AI",
     template: "%s · Zyvo",
   },
   description: "Buat CV profesional dan ramah ATS dengan bantuan AI.",
@@ -79,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${roboto.variable} ${lato.variable} ${merriweather.variable} ${lora.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
       style={{ ["--font-geist" as string]: "var(--font-geist-sans)" }}
     >

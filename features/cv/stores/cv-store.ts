@@ -173,7 +173,7 @@ export interface CvState extends CvContent {
 }
 
 const emptyContent: CvContent = {
-  title: "Untitled CV",
+  title: "CV Tanpa Judul",
   templateId: "classic",
   typography: { ...emptyTypography },
   colors: { ...emptyColors },

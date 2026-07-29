@@ -154,6 +154,30 @@
   }
 }
 
+/* Shine sweep for the featured pricing card. */
+@keyframes billing-shine {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+  60%,
+  100% {
+    transform: translateX(220%) skewX(-20deg);
+  }
+}
+.billing-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--primary-foreground) 25%, transparent),
+    transparent
+  );
+  animation: billing-shine 4.5s ease-in-out infinite;
+}
+
 /* Keep CV entries and headings intact across PDF/print page breaks. Scoped to
  * the print route wrapper so the editor UI is unaffected. Templates own their
  * own inner padding, so @page has no margin (full-bleed sidebars reach the

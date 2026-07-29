@@ -10,10 +10,10 @@ export default async function TemplatesPage() {
   if (!session) redirect(SIGN_IN_PATH);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Template</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-3xl font-bold">Template</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Pilih template dan mulai buat CV Anda.
         </p>
       </div>

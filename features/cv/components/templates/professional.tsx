@@ -14,10 +14,10 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="bg-[var(--cv-color-accent)] px-10 py-8 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
         <h1 className="text-[1.6em] font-bold tracking-tight font-[family-name:var(--cv-font-heading)]">
-          {p.fullName || "Your Name"}
+          {p.fullName || "Nama Anda"}
         </h1>
         {p.headline ? (
           <p className="mt-1 text-[0.92em] opacity-80">{p.headline}</p>
@@ -32,7 +32,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
 
       <div className="px-10 py-8">
         {cv.summary?.trim() ? (
-          <Section title="Summary">
+          <Section title="Ringkasan">
             <p className="whitespace-pre-line text-[var(--cv-color-text)]">
               {cv.summary}
             </p>
@@ -40,13 +40,13 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.experience.length > 0 ? (
-          <Section title="Experience">
+          <Section title="Pengalaman">
             <div className="space-y-3">
               {cv.experience.map((exp, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {exp.role || "Role"}
+                      {exp.role || "Posisi"}
                       {exp.company ? (
                         <span className="font-normal text-[var(--cv-color-accent)]">
                           {" "}
@@ -75,13 +75,13 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.education.length > 0 ? (
-          <Section title="Education">
+          <Section title="Pendidikan">
             <div className="space-y-3">
               {cv.education.map((edu, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {edu.school || "School"}
+                      {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
@@ -98,13 +98,13 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.projects.length > 0 ? (
-          <Section title="Projects">
+          <Section title="Proyek">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {proj.name || "Project"}
+                      {proj.name || "Proyek"}
                       {proj.type ? (
                         <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
@@ -130,7 +130,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.skills.length > 0 ? (
-          <Section title="Skills">
+          <Section title="Keahlian">
             <div className="flex flex-wrap gap-1.5">
               {cv.skills
                 .filter((s) => s.name.trim())
@@ -147,7 +147,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.interpersonal.length > 0 ? (
-          <Section title="Interpersonal Skills">
+          <Section title="Keahlian Interpersonal">
             <p className="text-[var(--cv-color-text)]">
               {join(
                 cv.interpersonal.map((s) => s.name),
@@ -158,7 +158,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.languages.length > 0 ? (
-          <Section title="Languages">
+          <Section title="Bahasa">
             <p className="text-[var(--cv-color-text)]">
               {join(
                 cv.languages.map((l) =>
@@ -171,7 +171,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.certifications.length > 0 ? (
-          <Section title="Certifications">
+          <Section title="Sertifikasi">
             <div className="space-y-1">
               {cv.certifications.map((c, i) => (
                 <p key={i}>
@@ -188,13 +188,13 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.organizations.length > 0 ? (
-          <Section title="Organizations">
+          <Section title="Organisasi">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
                 <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {org.role || "Role"}
+                      {org.role || "Posisi"}
                       {org.name ? (
                         <span className="font-normal text-[var(--cv-color-text)]">
                           {" "}
@@ -220,7 +220,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
         ) : null}
 
         {cv.custom.length > 0 ? (
-          <Section title="Additional">
+          <Section title="Tambahan">
             <div className="space-y-3">
               {cv.custom.map((item, i) => (
                 <div key={i} data-entry>

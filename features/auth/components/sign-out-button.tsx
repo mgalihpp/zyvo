@@ -25,7 +25,7 @@ export function SignOutButton() {
       onClick={handleSignOut}
       disabled={isPending}
     >
-      Sign out
+      Keluar
     </Button>
   );
 }

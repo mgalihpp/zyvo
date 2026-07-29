@@ -12,10 +12,10 @@ export function ClassicTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto w-full max-w-[794px] bg-[var(--cv-color-bg)] p-10 text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-10 text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
       <header className="border-b border-[var(--cv-color-accent)] pb-4">
         <h1 className="text-[1.6em] font-bold tracking-tight text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
-          {p.fullName || "Your Name"}
+          {p.fullName || "Nama Anda"}
         </h1>
         {p.headline ? (
           <p className="mt-0.5 text-[0.92em] text-[var(--cv-color-text)] opacity-80">
@@ -35,7 +35,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       </header>
 
       {cv.summary?.trim() ? (
-        <Section title="Summary">
+        <Section title="Ringkasan">
           <p className="whitespace-pre-line text-[var(--cv-color-text)]">
             {cv.summary}
           </p>
@@ -43,13 +43,13 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.experience.length > 0 ? (
-        <Section title="Experience">
+        <Section title="Pengalaman">
           <div className="space-y-3">
             {cv.experience.map((exp, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {exp.role || "Role"}
+                    {exp.role || "Posisi"}
                     {exp.company ? (
                       <span className="font-normal text-[var(--cv-color-text)]">
                         {" "}
@@ -78,13 +78,13 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.education.length > 0 ? (
-        <Section title="Education">
+        <Section title="Pendidikan">
           <div className="space-y-3">
             {cv.education.map((edu, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {edu.school || "School"}
+                    {edu.school || "Institusi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                     {formatDateRange(edu.startDate, edu.endDate)}
@@ -101,7 +101,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.skills.length > 0 ? (
-        <Section title="Skills">
+        <Section title="Keahlian">
           <p className="text-[var(--cv-color-text)]">
             {join(
               cv.skills.map((s) => s.name),
@@ -112,7 +112,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.interpersonal.length > 0 ? (
-        <Section title="Interpersonal Skills">
+        <Section title="Keahlian Interpersonal">
           <p className="text-[var(--cv-color-text)]">
             {join(
               cv.interpersonal.map((s) => s.name),
@@ -123,7 +123,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.languages.length > 0 ? (
-        <Section title="Languages">
+        <Section title="Bahasa">
           <p className="text-[var(--cv-color-text)]">
             {join(
               cv.languages.map((l) =>
@@ -136,13 +136,13 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.projects.length > 0 ? (
-        <Section title="Projects">
+        <Section title="Proyek">
           <div className="space-y-3">
             {cv.projects.map((proj, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {proj.name || "Project"}
+                    {proj.name || "Proyek"}
                     {proj.type ? (
                       <span className="font-normal text-[var(--cv-color-text)]">
                         {" "}
@@ -173,13 +173,13 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.certifications.length > 0 ? (
-        <Section title="Certifications">
+        <Section title="Sertifikasi">
           <div className="space-y-2">
             {cv.certifications.map((cert, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {cert.name || "Certification"}
+                    {cert.name || "Sertifikasi"}
                     {cert.issuer ? (
                       <span className="font-normal text-[var(--cv-color-text)]">
                         {" "}
@@ -210,13 +210,13 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.organizations.length > 0 ? (
-        <Section title="Organizations">
+        <Section title="Organisasi">
           <div className="space-y-3">
             {cv.organizations.map((org, i) => (
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {org.role || "Role"}
+                    {org.role || "Posisi"}
                     {org.name ? (
                       <span className="font-normal text-[var(--cv-color-text)]">
                         {" "}
@@ -242,7 +242,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
       ) : null}
 
       {cv.custom.length > 0 ? (
-        <Section title="Additional">
+        <Section title="Tambahan">
           <div className="space-y-3">
             {cv.custom.map((item, i) => (
               <div key={i} data-entry>
