@@ -37,6 +37,42 @@ function PostHogPageView() {
   );
 }
 
+function PageLeaveTracker() {
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && posthog) {
+        posthog.capture("$pageleave", {
+          $current_url: window.location.href,
+          $referrer: document.referrer,
+          trigger: "visibility",
+        });
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      if (posthog) {
+        posthog.capture("$pageleave", {
+          $current_url: window.location.href,
+          $referrer: document.referrer,
+          trigger: "beforeunload",
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [posthog]);
+
+  return null;
+}
+
 function PostHogIdentify() {
   const posthog = usePostHog();
   const { data: session } = useSession();
@@ -73,11 +109,12 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
         api_host: host,
         autocapture: true,
         capture_pageview: false,
-        capture_pageleave: true,
+        capture_pageleave: false,
         persistence: "localStorage+cookie",
       }}
     >
       <PostHogPageView />
+      <PageLeaveTracker />
       <PostHogIdentify />
       {children}
     </PostHogProviderCore>

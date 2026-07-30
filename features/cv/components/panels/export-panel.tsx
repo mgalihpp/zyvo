@@ -3,6 +3,7 @@
 import { FileDownIcon, FileImageIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/components/ui/toast";
+import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 
 type Format = "pdf" | "png";
@@ -10,6 +11,7 @@ type Format = "pdf" | "png";
 export function ExportPanel() {
   const cvId = useCvStore((s) => s.cvId);
   const [busy, setBusy] = useState<Format | null>(null);
+  const analytics = useCVAnalytics();
 
   async function download(format: Format) {
     setBusy(format);
@@ -27,6 +29,7 @@ export function ExportPanel() {
       a.download = name;
       a.click();
       URL.revokeObjectURL(url);
+      analytics.track("cv_exported", { format, cv_id: cvId });
     } catch (err) {
       // base-ui toast manager: `toast.add({ title, description })`.
       toast.add({

@@ -7,6 +7,12 @@
       "skillPath": "integrate-midtrans-payments/SKILL.md",
       "computedHash": "0274d11da0ae845d4dbe6fe3e620730ef2922fed3f3ee162ce7285300837a75b"
     },
+    "posthog-instrumentation": {
+      "source": "posthog/posthog-for-claude",
+      "sourceType": "github",
+      "skillPath": "skills/posthog-instrumentation/SKILL.md",
+      "computedHash": "2651cf543b937bec0e08d50486e13ed3176ccd285477738d3edb47c356eeeac9"
+    },
     "upstash-ratelimit-js": {
       "source": "upstash/skills",
       "sourceType": "github",

@@ -10,7 +10,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import { EditableTitle } from "@/features/cv/components/editable-title";
+import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import type { SaveStatus } from "@/features/cv/stores/cv-store";
 import type { RouterOutputs } from "@/lib/trpc/client";
@@ -198,17 +199,30 @@ export function CvList({
   const [pendingDelete, setPendingDelete] = useState<Cv | null>(null);
   const [downloading, setDownloading] = useState<Cv | null>(null);
 
+  const analytics = useCVAnalytics();
+
+  useEffect(() => {
+    if (cvs) {
+      analytics.setUserProperties({ cvs_count: cvs.length });
+    }
+  }, [cvs, analytics]);
+
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => {
+      analytics.track("cv_created", { cv_id: cv.id });
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
   });
   const duplicateMutation = trpc.cv.duplicate.useMutation({
-    onSuccess: () => utils.cv.list.invalidate(),
+    onSuccess: (cv) => {
+      analytics.track("cv_duplicated", { cv_id: cv.id });
+      utils.cv.list.invalidate();
+    },
   });
   const deleteMutation = trpc.cv.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: (result) => {
+      analytics.track("cv_deleted", { cv_id: result.id });
       utils.cv.list.invalidate();
       setPendingDelete(null);
     },
@@ -247,6 +261,7 @@ export function CvList({
       a.download = name;
       a.click();
       URL.revokeObjectURL(url);
+      analytics.track("cv_exported", { cv_id: cv.id, format: "pdf" });
     } catch (err) {
       toast.add({
         title: "Gagal mengunduh CV",

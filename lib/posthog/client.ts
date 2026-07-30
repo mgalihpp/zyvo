@@ -8,7 +8,7 @@ if (typeof window !== "undefined" && apiKey && !posthog.__loaded) {
     api_host: host,
     autocapture: true,
     capture_pageview: false, // We handle pageview capture manually
-    capture_pageleave: true,
+    capture_pageleave: false,
     persistence: "localStorage+cookie",
     loaded: (ph) => {
       if (process.env.NODE_ENV === "development") {

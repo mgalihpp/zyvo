@@ -14,6 +14,7 @@ import {
   templateDefaultColors,
   templateDefaultTypography,
 } from "@/features/cv/components/templates/template-colors";
+import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
 import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
@@ -108,6 +109,7 @@ function TemplateCard({
 export function TemplatePanel() {
   const templateId = useCvStore((s) => s.templateId);
   const setTemplateId = useCvStore((s) => s.setTemplateId);
+  const analytics = useCVAnalytics();
   const [filter, setFilter] = useState<Filter>("all");
 
   const visible =
@@ -168,7 +170,13 @@ export function TemplatePanel() {
             key={template.id}
             template={template}
             selected={template.id === templateId}
-            onSelect={() => setTemplateId(template.id)}
+            onSelect={() => {
+              analytics.track("template_changed", {
+                template_id: template.id,
+                template_name: template.name,
+              });
+              setTemplateId(template.id);
+            }}
           />
         ))}
         {visible.length === 0 ? (

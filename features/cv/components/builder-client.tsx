@@ -8,6 +8,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { CvPreview } from "@/features/cv/components/cv-preview";
+import { useCVAnalyticsTracking } from "@/features/cv/hooks/use-cv-analytics-tracking";
 import { useCvAutosave } from "@/features/cv/hooks/use-cv-autosave";
 import { usePanelUrl } from "@/features/cv/hooks/use-panel-url";
 import type { CvContent } from "@/features/cv/schemas/cv";
@@ -50,6 +51,7 @@ export function BuilderClient({
 function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
   useCvAutosave();
   usePanelUrl();
+  useCVAnalyticsTracking();
 
   const isMobile = useIsMobile();
   // `useIsMobile` reports false during SSR and the first client render, so we

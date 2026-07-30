@@ -1,8 +1,8 @@
 # AI Features Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Wire 7 AI features (content improver, CV score, chat assistant, JD analyzer, cover letter, smart generator, interview prep) into Zyvo's existing CV builder using a new tRPC AI router backed by OpenRouter.
+**Goal:** Tambahkan 7 fitur AI (Content Improver, Chat Assistant, JD Analyzer, CV Score, Smart Generator, Cover Letter, Interview Prep) ke dalam builder CV yang sudah ada, via tRPC AI Router baru di `features/ai/`.
 
 **Architecture:** New `features/ai/` module mirrors the existing `features/cv/` pattern — server router, prompt files, hooks, and components all scoped to the feature. The `ai` panel in the builder sidebar already exists as a placeholder; each task fills it in incrementally. All AI calls go through `features/ai/server/ai-router.ts` mounted on the existing tRPC root.
 
