@@ -1,4 +1,5 @@
 import { authRouter } from "@/features/auth/server/auth-router";
+import { billingRouter } from "@/features/billing/server/billing-router";
 import { cvRouter } from "@/features/cv/server/cv-router";
 import {
   createTRPCRouter,
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
 
   cv: cvRouter,
   account: authRouter,
+  billing: billingRouter,
 });
 
 export type AppRouter = typeof appRouter;
