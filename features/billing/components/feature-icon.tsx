@@ -1,10 +1,16 @@
 "use client";
 
 import { CheckIcon, LockIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { FeatureValue } from "@/features/billing/lib/billing-constants";
+import { cn } from "@/lib/utils";
 
-export function FeatureIcon({ value, isPro }: { value: FeatureValue; isPro: boolean }) {
+export function FeatureIcon({
+  value,
+  isPro,
+}: {
+  value: FeatureValue;
+  isPro: boolean;
+}) {
   if (value === null)
     return (
       <LockIcon
@@ -24,7 +30,12 @@ export function FeatureIcon({ value, isPro }: { value: FeatureValue; isPro: bool
       />
     );
   return (
-    <span className={cn("text-sm font-semibold", isPro ? "text-primary-foreground" : "")}>
+    <span
+      className={cn(
+        "text-sm font-semibold",
+        isPro ? "text-primary-foreground" : "",
+      )}
+    >
       {value}
     </span>
   );

@@ -35,7 +35,12 @@ export function BillingHeader({ yearly, onYearlyChange }: BillingHeaderProps) {
           )}
         >
           Tahunan{" "}
-          <span className={cn("text-xs", yearly ? "text-background/70" : "text-primary")}>
+          <span
+            className={cn(
+              "text-xs",
+              yearly ? "text-background/70" : "text-primary",
+            )}
+          >
             Hemat 2 bulan
           </span>
         </button>

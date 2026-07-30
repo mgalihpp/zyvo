@@ -1,9 +1,9 @@
 "use client";
 
 import { lazy, Suspense, useState } from "react";
-import { PaymentModal } from "@/features/billing/components/payment-modal";
 import { BillingHeader } from "@/features/billing/components/billing-header";
 import { BillingSkeleton } from "@/features/billing/components/billing-skeleton";
+import { PaymentModal } from "@/features/billing/components/payment-modal";
 import { useSubscription } from "@/features/billing/hooks/use-billing";
 import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
 

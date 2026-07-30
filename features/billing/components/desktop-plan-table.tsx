@@ -3,13 +3,13 @@
 import { SparklesIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
 import {
   BILLING_PLANS,
   FEATURES,
   formatPrice,
 } from "@/features/billing/lib/billing-constants";
+import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
+import { cn } from "@/lib/utils";
 import { FeatureIcon } from "./feature-icon";
 
 interface DesktopPlanTableProps {
@@ -18,7 +18,11 @@ interface DesktopPlanTableProps {
   activePlan?: string | null;
 }
 
-export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanTableProps) {
+export function DesktopPlanTable({
+  yearly,
+  onUpgrade,
+  activePlan,
+}: DesktopPlanTableProps) {
   return (
     <div className="relative hidden overflow-hidden rounded-2xl border bg-card shadow-sm xl:block">
       {/* shine overlay — kolom Pro (kanan 1/4) */}
@@ -36,7 +40,10 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
           return (
             <div
               key={plan.id}
-              className={cn("relative p-6", isPro ? "bg-primary text-primary-foreground" : "")}
+              className={cn(
+                "relative p-6",
+                isPro ? "bg-primary text-primary-foreground" : "",
+              )}
             >
               {plan.popular && (
                 <Badge
@@ -55,7 +62,9 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
               <p
                 className={cn(
                   "text-xs",
-                  isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                  isPro
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground",
                 )}
               >
                 {plan.tagline}
@@ -63,12 +72,16 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
 
               <div className="mt-4">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">{formatPrice(price)}</span>
+                  <span className="text-3xl font-bold">
+                    {formatPrice(price)}
+                  </span>
                   {price > 0 && (
                     <span
                       className={cn(
                         "text-sm",
-                        isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                        isPro
+                          ? "text-primary-foreground/70"
+                          : "text-muted-foreground",
                       )}
                     >
                       /{yearly ? "tahun" : "bulan"}
@@ -79,7 +92,9 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
                   <p
                     className={cn(
                       "mt-1 text-xs",
-                      isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                      isPro
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground",
                     )}
                   >
                     100% gratis selamanya
@@ -89,10 +104,13 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
                   <p
                     className={cn(
                       "mt-1 text-xs",
-                      isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                      isPro
+                        ? "text-primary-foreground/70"
+                        : "text-muted-foreground",
                     )}
                   >
-                    {formatPrice(Math.round(plan.yearly / 12))}/bulan ditagih tahunan
+                    {formatPrice(Math.round(plan.yearly / 12))}/bulan ditagih
+                    tahunan
                   </p>
                 )}
               </div>
@@ -106,8 +124,13 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
 
       {/* Feature rows */}
       {FEATURES.map((feature) => (
-        <div key={feature.label} className="grid grid-cols-4 border-b last:border-0">
-          <div className="flex items-center p-4 text-sm text-foreground/80">{feature.label}</div>
+        <div
+          key={feature.label}
+          className="grid grid-cols-4 border-b last:border-0"
+        >
+          <div className="flex items-center p-4 text-sm text-foreground/80">
+            {feature.label}
+          </div>
           {BILLING_PLANS.map((plan) => {
             const isPro = plan.id === "pro";
             return (
@@ -141,7 +164,9 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
               <Button
                 variant={plan.ctaVariant}
                 onClick={
-                  plan.id !== "free" ? () => onUpgrade(plan.id as BillingPlanId) : undefined
+                  plan.id !== "free"
+                    ? () => onUpgrade(plan.id as BillingPlanId)
+                    : undefined
                 }
                 disabled={activePlan === plan.id}
                 className={cn(
@@ -158,7 +183,9 @@ export function DesktopPlanTable({ yearly, onUpgrade, activePlan }: DesktopPlanT
               <p
                 className={cn(
                   "text-xs",
-                  isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                  isPro
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground",
                 )}
               >
                 {plan.ctaNote}

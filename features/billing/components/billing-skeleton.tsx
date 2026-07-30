@@ -54,7 +54,10 @@ export function BillingSkeleton() {
               <Skeleton className="h-4 w-28" />
             </div>
             {[0, 1, 2].map((j) => (
-              <div key={j} className="flex items-center justify-center border-l p-4">
+              <div
+                key={j}
+                className="flex items-center justify-center border-l p-4"
+              >
                 <Skeleton className="h-4 w-16" />
               </div>
             ))}
@@ -64,7 +67,10 @@ export function BillingSkeleton() {
         <div className="grid grid-cols-4 border-t">
           <div />
           {[0, 1, 2].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-2 border-l p-5">
+            <div
+              key={i}
+              className="flex flex-col items-center gap-2 border-l p-5"
+            >
               <Skeleton className="h-9 w-full rounded-md" />
               <Skeleton className="h-3 w-24" />
             </div>
@@ -77,7 +83,10 @@ export function BillingSkeleton() {
         <Skeleton className="h-8 w-72" />
         <div className="divide-y">
           {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <div key={i} className="py-5 flex items-center justify-between gap-4">
+            <div
+              key={i}
+              className="py-5 flex items-center justify-between gap-4"
+            >
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="size-4 shrink-0 rounded" />
             </div>

@@ -38,10 +38,17 @@ export type BillingPlanItem = (typeof BILLING_PLANS)[number];
 export type BillingPlanItemId = BillingPlanItem["id"];
 export type FeatureValue = string | boolean | null;
 
-export const FEATURES: { label: string; values: Record<BillingPlanItemId, FeatureValue> }[] = [
+export const FEATURES: {
+  label: string;
+  values: Record<BillingPlanItemId, FeatureValue>;
+}[] = [
   {
     label: "Unduh PDF",
-    values: { free: "Tak terbatas", basic: "Tak terbatas", pro: "Tak terbatas" },
+    values: {
+      free: "Tak terbatas",
+      basic: "Tak terbatas",
+      pro: "Tak terbatas",
+    },
   },
   { label: "CV", values: { free: "1", basic: "3", pro: "Tak terbatas" } },
   { label: "Template Premium", values: { free: null, basic: true, pro: true } },

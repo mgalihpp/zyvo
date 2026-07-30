@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { FAQS } from "@/features/billing/lib/billing-constants";
+import { cn } from "@/lib/utils";
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);

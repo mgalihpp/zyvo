@@ -1,16 +1,21 @@
 "use client";
 
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  LockIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { useState } from "react";
-import { ChevronDownIcon, CheckIcon, LockIcon, SparklesIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
 import {
   BILLING_PLANS,
   FEATURES,
   formatPrice,
 } from "@/features/billing/lib/billing-constants";
+import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
+import { cn } from "@/lib/utils";
 
 interface MobilePlanCardProps {
   plan: (typeof BILLING_PLANS)[number];
@@ -19,7 +24,12 @@ interface MobilePlanCardProps {
   activePlan?: string | null;
 }
 
-function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardProps) {
+function MobilePlanCard({
+  plan,
+  yearly,
+  onUpgrade,
+  activePlan,
+}: MobilePlanCardProps) {
   const [open, setOpen] = useState(false);
   const isPro = plan.id === "pro";
   const price = yearly ? plan.yearly : plan.monthly;
@@ -48,7 +58,12 @@ function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardP
       )}
 
       <p className="text-lg font-bold">{plan.name}</p>
-      <p className={cn("text-xs", isPro ? "text-primary-foreground/70" : "text-muted-foreground")}>
+      <p
+        className={cn(
+          "text-xs",
+          isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+        )}
+      >
         {plan.tagline}
       </p>
 
@@ -60,7 +75,9 @@ function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardP
               <span
                 className={cn(
                   "text-sm",
-                  isPro ? "text-primary-foreground/70" : "text-muted-foreground",
+                  isPro
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground",
                 )}
               >
                 /{yearly ? "tahun" : "bulan"}
@@ -90,7 +107,11 @@ function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardP
         </div>
         <Button
           variant={plan.ctaVariant}
-          onClick={plan.id !== "free" ? () => onUpgrade(plan.id as BillingPlanId) : undefined}
+          onClick={
+            plan.id !== "free"
+              ? () => onUpgrade(plan.id as BillingPlanId)
+              : undefined
+          }
           disabled={activePlan === plan.id}
           className={cn(
             "shrink-0 font-semibold",
@@ -128,8 +149,17 @@ function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardP
           {FEATURES.map((f) => {
             const val = f.values[plan.id];
             return (
-              <li key={f.label} className="flex items-center justify-between gap-2 text-sm">
-                <span className={isPro ? "text-primary-foreground/80" : "text-muted-foreground"}>
+              <li
+                key={f.label}
+                className="flex items-center justify-between gap-2 text-sm"
+              >
+                <span
+                  className={
+                    isPro
+                      ? "text-primary-foreground/80"
+                      : "text-muted-foreground"
+                  }
+                >
                   {f.label}
                 </span>
                 <span className="font-medium">
@@ -137,7 +167,9 @@ function MobilePlanCard({ plan, yearly, onUpgrade, activePlan }: MobilePlanCardP
                     <LockIcon
                       className={cn(
                         "size-4",
-                        isPro ? "text-primary-foreground/40" : "text-muted-foreground/40",
+                        isPro
+                          ? "text-primary-foreground/40"
+                          : "text-muted-foreground/40",
                       )}
                     />
                   ) : val === true ? (
@@ -166,7 +198,11 @@ interface MobilePlanListProps {
   activePlan?: string | null;
 }
 
-export function MobilePlanList({ yearly, onUpgrade, activePlan }: MobilePlanListProps) {
+export function MobilePlanList({
+  yearly,
+  onUpgrade,
+  activePlan,
+}: MobilePlanListProps) {
   return (
     <div className="flex flex-col gap-4 xl:hidden">
       {BILLING_PLANS.map((plan) => (
