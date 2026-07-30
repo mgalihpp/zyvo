@@ -9,6 +9,9 @@ import {
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PaymentModal } from "@/features/billing/components/payment-modal";
+import { useSubscription } from "@/features/billing/hooks/use-billing";
+import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
 import { cn } from "@/lib/utils";
 
 const PLANS = [
@@ -103,7 +106,7 @@ const FAQS = [
   },
   {
     q: "Metode pembayaran apa yang didukung?",
-    a: "Kami menerima semua kartu kredit utama melalui Stripe.",
+    a: "Kami menerima GoPay, QRIS, kartu kredit, dan transfer bank (Virtual Account BCA, Mandiri, BNI, BRI).",
   },
 ];
 
@@ -181,9 +184,13 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 function MobilePlanCard({
   plan,
   yearly,
+  onUpgrade,
+  activePlan,
 }: {
   plan: (typeof PLANS)[number];
   yearly: boolean;
+  onUpgrade: (planId: BillingPlanId) => void;
+  activePlan?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const isPro = plan.id === "pro";
@@ -262,6 +269,12 @@ function MobilePlanCard({
         </div>
         <Button
           variant={plan.ctaVariant}
+          onClick={
+            plan.id !== "free"
+              ? () => onUpgrade(plan.id as BillingPlanId)
+              : undefined
+          }
+          disabled={activePlan === plan.id}
           className={cn(
             "shrink-0 font-semibold",
             isPro
@@ -271,7 +284,7 @@ function MobilePlanCard({
                 : "",
           )}
         >
-          {plan.cta}
+          {activePlan === plan.id ? "Aktif" : plan.cta}
         </Button>
       </div>
 
@@ -344,6 +357,14 @@ function MobilePlanCard({
 
 export default function PlanPage() {
   const [yearly, setYearly] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<BillingPlanId>("pro");
+  const { data: subscription } = useSubscription();
+
+  function handleUpgrade(planId: BillingPlanId) {
+    setSelectedPlan(planId);
+    setModalOpen(true);
+  }
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8">
@@ -390,7 +411,13 @@ export default function PlanPage() {
       {/* Cards — semua ukuran kecuali layar sangat lebar */}
       <div className="flex flex-col gap-4 xl:hidden">
         {PLANS.map((plan) => (
-          <MobilePlanCard key={plan.id} plan={plan} yearly={yearly} />
+          <MobilePlanCard
+            key={plan.id}
+            plan={plan}
+            yearly={yearly}
+            onUpgrade={handleUpgrade}
+            activePlan={subscription?.plan}
+          />
         ))}
       </div>
 
@@ -534,6 +561,12 @@ export default function PlanPage() {
               >
                 <Button
                   variant={plan.ctaVariant}
+                  onClick={
+                    plan.id !== "free"
+                      ? () => handleUpgrade(plan.id as BillingPlanId)
+                      : undefined
+                  }
+                  disabled={subscription?.plan === plan.id}
                   className={cn(
                     "w-full text-sm font-semibold",
                     isPro
@@ -543,7 +576,7 @@ export default function PlanPage() {
                         : "",
                   )}
                 >
-                  {plan.cta}
+                  {subscription?.plan === plan.id ? "Aktif" : plan.cta}
                 </Button>
                 <p
                   className={cn(
@@ -570,6 +603,16 @@ export default function PlanPage() {
           ))}
         </div>
       </div>
+
+      <PaymentModal
+        planId={selectedPlan}
+        period={yearly ? "yearly" : "monthly"}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onSuccess={() => {
+          // TanStack Query auto-refetch subscription setelah modal tutup
+        }}
+      />
     </div>
   );
 }
