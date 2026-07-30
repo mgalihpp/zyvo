@@ -34,10 +34,7 @@ export default function DeleteAccountForm({
   };
 
   return (
-    <form
-      onSubmit={form.handleSubmit(submit)}
-      className="mt-3 space-y-4 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
-    >
+    <form onSubmit={form.handleSubmit(submit)} className="mt-3 space-y-4">
       <p className="text-sm text-muted-foreground">
         Tindakan ini permanen. Semua data Anda akan dihapus. Masukkan kata sandi
         untuk mengonfirmasi.

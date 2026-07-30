@@ -39,10 +39,7 @@ export default function ChangePasswordForm({
   };
 
   return (
-    <form
-      onSubmit={form.handleSubmit(submit)}
-      className="mt-3 space-y-4 rounded-xl border bg-muted/30 p-4"
-    >
+    <form onSubmit={form.handleSubmit(submit)} className="mt-3 space-y-4">
       <Controller
         name="currentPassword"
         control={form.control}
