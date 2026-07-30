@@ -229,8 +229,7 @@
         "Distinguishes TLS/WAF failures from signature/payload bugs by checking edge logs before debugging application status mapping",
         "Confirms the production Payment Notification URL is HTTPS, public, and not behind auth, VPN, unusual ports, or redirect chains"
       ]
-    }
-,
+    },
     {
       "id": "card-subscription-managed",
       "skills": ["integrate-midtrans-payments"],

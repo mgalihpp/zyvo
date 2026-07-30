@@ -4,11 +4,13 @@ import { ArrowRightIcon, SparklesIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { useSession } from "@/features/auth/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { ShaderHero } from "./shader-hero";
 
 export function Hero() {
+  const { data: session } = useSession();
   return (
     <section className="relative isolate overflow-hidden bg-black">
       <div className="absolute inset-0 -z-10">
@@ -47,24 +49,26 @@ export function Hero() {
 
         <Reveal delay={240} className="mt-9 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/signup"
+            href={session ? "/dashboard" : "/signup"}
             className={cn(
               buttonVariants({ size: "lg" }),
               "group h-11 gap-2 bg-white px-6 text-sm text-zinc-900 shadow-lg shadow-indigo-950/30 transition-transform hover:-translate-y-0.5 hover:bg-white/90",
             )}
           >
-            Mulai Sekarang — Gratis
+            {session ? "Ke Dashboard" : "Mulai Sekarang — Gratis"}
             <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
           </Link>
-          <Link
-            href="/signin"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
-            )}
-          >
-            Masuk
-          </Link>
+          {!session && (
+            <Link
+              href="/signin"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
+              )}
+            >
+              Masuk
+            </Link>
+          )}
         </Reveal>
 
         <Reveal

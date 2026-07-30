@@ -11,6 +11,7 @@ import {
   Roboto,
   Source_Serif_4,
 } from "next/font/google";
+import Script from "next/script";
 import { Toaster } from "@/components/ui/toast";
 import { PostHogProvider } from "@/lib/posthog/provider";
 import { TRPCProvider } from "@/lib/trpc/provider";
@@ -90,6 +91,15 @@ export default function RootLayout({
         </PostHogProvider>
         <Toaster />
         {process.env.NODE_ENV === "development" && <Agentation />}
+        <Script
+          src={
+            process.env.NODE_ENV === "production"
+              ? "https://app.midtrans.com/snap/snap.js"
+              : "https://app.sandbox.midtrans.com/snap/snap.js"
+          }
+          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

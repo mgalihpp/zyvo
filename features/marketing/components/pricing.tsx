@@ -1,6 +1,9 @@
+"use client";
+
 import { CheckIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { useSession } from "@/features/auth/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
@@ -12,7 +15,9 @@ type Plan = {
   description: string;
   features: string[];
   cta: string;
+  ctaAuth: string;
   href: string;
+  hrefAuth: string;
   featured?: boolean;
 };
 
@@ -28,7 +33,9 @@ const PLANS: Plan[] = [
       "Simpan otomatis",
     ],
     cta: "Mulai Gratis",
+    ctaAuth: "Ke Dashboard",
     href: "/signup",
+    hrefAuth: "/dashboard",
   },
   {
     name: "Basic",
@@ -41,8 +48,10 @@ const PLANS: Plan[] = [
       "Pelacak Lamaran",
       "Unduh PDF tak terbatas",
     ],
-    cta: "Upgrade ke Basic",
+    cta: "Tingkatkan ke Basic",
+    ctaAuth: "Tingkatkan ke Basic",
     href: "/signup",
+    hrefAuth: "/dashboard/billing",
   },
   {
     name: "Pro",
@@ -56,13 +65,17 @@ const PLANS: Plan[] = [
       "Pelacak Lamaran",
       "Garansi uang kembali 7 hari",
     ],
-    cta: "Upgrade ke Pro",
+    cta: "Tingkatkan ke Pro",
+    ctaAuth: "Tingkatkan ke Pro",
     href: "/signup",
+    hrefAuth: "/dashboard/billing",
     featured: true,
   },
 ];
 
 export function Pricing() {
+  const { data: session } = useSession();
+
   return (
     <section id="harga" className="relative border-y bg-muted/30 py-28">
       <div
@@ -156,16 +169,23 @@ export function Pricing() {
               </ul>
 
               <Link
-                href={plan.href}
+                href={session ? plan.hrefAuth : plan.href}
                 className={cn(
-                  buttonVariants({ size: "lg" }),
+                  buttonVariants({
+                    variant: plan.featured
+                      ? "default"
+                      : plan.name === "Gratis" && !session
+                        ? "outline"
+                        : "default",
+                    size: "lg",
+                  }),
                   "mt-8 h-11 text-sm",
                   plan.featured
                     ? "bg-white text-primary hover:bg-white/90"
                     : "",
                 )}
               >
-                {plan.cta}
+                {session ? plan.ctaAuth : plan.cta}
               </Link>
             </Reveal>
           ))}

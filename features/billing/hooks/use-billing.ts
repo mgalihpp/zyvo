@@ -1,0 +1,30 @@
+"use client";
+
+import { trpc } from "@/lib/trpc/client";
+
+export function useCreateSnapToken() {
+  return trpc.billing.createSnapToken.useMutation();
+}
+
+export function useSubscription() {
+  const { data, isLoading } = trpc.billing.getSubscription.useQuery();
+  return { data: data ?? null, isLoading };
+}
+
+export function usePollStatus(orderId: string | null, enabled: boolean) {
+  const { data } = trpc.billing.getStatus.useQuery(
+    { orderId: orderId ?? "" },
+    {
+      enabled: !!orderId && enabled,
+      refetchInterval: 3_000,
+      refetchIntervalInBackground: true,
+    },
+  );
+  const status = data?.transactionStatus ?? null;
+  const isPaid = status === "settlement" || status === "capture";
+  return { status, isPaid };
+}
+
+export function useCancelTransaction() {
+  return trpc.billing.cancelTransaction.useMutation();
+}

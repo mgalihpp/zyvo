@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
+import { useSession } from "@/features/auth/lib/auth-client";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -16,6 +17,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -56,26 +58,41 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/signin"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "lg" }),
-              "hidden h-9 px-4 text-sm sm:inline-flex",
-              !scrolled && "text-white hover:bg-white/10 hover:text-white",
-            )}
-          >
-            Masuk
-          </Link>
-          <Link
-            href="/signup"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "h-9 px-4 text-sm",
-              !scrolled && "bg-white text-zinc-900 hover:bg-white/90",
-            )}
-          >
-            Mulai Gratis
-          </Link>
+          {session ? (
+            <Link
+              href="/dashboard"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "h-9 px-4 text-sm",
+                !scrolled && "bg-white text-zinc-900 hover:bg-white/90",
+              )}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/signin"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "lg" }),
+                  "hidden h-9 px-4 text-sm sm:inline-flex",
+                  !scrolled && "text-white hover:bg-white/10 hover:text-white",
+                )}
+              >
+                Masuk
+              </Link>
+              <Link
+                href="/signup"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "h-9 px-4 text-sm",
+                  !scrolled && "bg-white text-zinc-900 hover:bg-white/90",
+                )}
+              >
+                Mulai Gratis
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>

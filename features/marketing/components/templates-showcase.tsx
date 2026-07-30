@@ -173,7 +173,7 @@ function TemplateCard({
       onClick={onClick}
       className="group/thumb flex w-full flex-col text-left focus-visible:outline-none"
     >
-      <div className="relative block cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-primary/30">
+      <div className="relative block cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm outline outline-2 outline-transparent transition-all duration-200 group-hover/thumb:shadow-md group-hover/thumb:outline-primary/30">
         <CvThumbnail cv={cv} className="w-full" aspectRatio="1 / 1.414" />
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 p-6 text-center opacity-0 transition-all duration-200 group-hover/thumb:bg-black/60 group-hover/thumb:opacity-100">
           <span className="text-lg font-bold text-white">
@@ -209,11 +209,11 @@ export function TemplatesShowcase() {
 
       <Reveal className="mt-16">
         <Carousel opts={{ align: "start" }} className="w-full">
-          <CarouselContent className="-ml-4">
+          <CarouselContent className="-ml-4 py-2">
             {TEMPLATES.map((template) => (
               <CarouselItem
                 key={template.id}
-                className="pl-4 basis-1/2 sm:basis-1/3 lg:basis-1/4"
+                className="pl-4 py-2 basis-1/2 sm:basis-1/3 lg:basis-1/4"
               >
                 <TemplateCard
                   template={template}
