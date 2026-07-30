@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { constructMetadata, siteConfig } from "@/lib/seo";
-import { FAQS } from "@/features/marketing/lib/faq-data";
 import { CtaSection } from "@/features/marketing/components/cta-section";
 import { Faq } from "@/features/marketing/components/faq";
 import { FeaturesGrid } from "@/features/marketing/components/features-grid";
@@ -10,9 +8,11 @@ import { HowItWorks } from "@/features/marketing/components/how-it-works";
 import { Navbar } from "@/features/marketing/components/navbar";
 import { Pricing } from "@/features/marketing/components/pricing";
 import { TemplatesShowcase } from "@/features/marketing/components/templates-showcase";
+import { FAQS } from "@/features/marketing/lib/faq-data";
+import { constructMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = constructMetadata({
-  title: "Zyvo — Pembuat CV AI",
+  title: "Zyvo — CV Impian, dalam Hitungan Menit",
   alternates: { canonical: `${siteConfig.url}/` },
 });
 
@@ -49,29 +49,32 @@ export default function Home() {
     <>
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD, no user input
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD, no user input
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdApp) }}
       />
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static JSON-LD, no user input
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaq) }}
       />
       <div className="flex flex-1 flex-col bg-background font-sans">
-      <Navbar />
-      <main className="flex flex-1 flex-col">
-        <Hero />
-        <FeaturesGrid />
-        <HowItWorks />
-        <TemplatesShowcase />
-        <Pricing />
-        <Faq />
-        <CtaSection />
-      </main>
-      <Footer />
-    </div>
+        <Navbar />
+        <main className="flex flex-1 flex-col">
+          <Hero />
+          <FeaturesGrid />
+          <HowItWorks />
+          <TemplatesShowcase />
+          <Pricing />
+          <Faq />
+          <CtaSection />
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

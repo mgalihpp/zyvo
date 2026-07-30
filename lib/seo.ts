@@ -15,14 +15,14 @@ export function constructMetadata(overrides: Partial<Metadata> = {}): Metadata {
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
-      default: `${siteConfig.name} — Pembuat CV AI`,
+      default: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
       template: `%s · ${siteConfig.name}`,
     },
     description: siteConfig.description,
     openGraph: {
       type: "website",
       siteName: siteConfig.name,
-      title: `${siteConfig.name} — Pembuat CV AI`,
+      title: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
       description: siteConfig.description,
       images: [
         {
@@ -37,7 +37,7 @@ export function constructMetadata(overrides: Partial<Metadata> = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${siteConfig.name} — Pembuat CV AI`,
+      title: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
       description: siteConfig.description,
       images: [siteConfig.ogImage],
       creator: siteConfig.twitterHandle,

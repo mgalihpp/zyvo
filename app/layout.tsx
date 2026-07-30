@@ -1,6 +1,5 @@
 import { Agentation } from "agentation";
 import type { Metadata } from "next";
-import { constructMetadata } from "@/lib/seo";
 import {
   Geist,
   Geist_Mono,
@@ -15,6 +14,7 @@ import {
 import Script from "next/script";
 import { Toaster } from "@/components/ui/toast";
 import { PostHogProvider } from "@/lib/posthog/provider";
+import { constructMetadata } from "@/lib/seo";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import "./globals.css";
 

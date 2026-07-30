@@ -1,11 +1,12 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Metadata } from "next";
 import type React from "react";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
+
 import { BrandLogo } from "@/components/brand-logo";
 import {
   SidebarInset,
