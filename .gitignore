@@ -43,3 +43,8 @@ next-env.d.ts
 # superpowers
 .superpowers
 docs/superpowers/
+
+# agent config
+.agents/
+.claude/
+skills-lock.json
