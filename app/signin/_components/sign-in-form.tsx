@@ -64,7 +64,9 @@ export function SignInForm() {
     });
   };
 
-  const handleGoogle = () => {
+  const handleGoogle = async () => {
+    const ok = await form.trigger("acceptTerms");
+    if (!ok) return;
     startGoogleTransition(async () => {
       await signIn.social({ provider: "google", callbackURL: redirectTo });
     });
