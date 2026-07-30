@@ -16,7 +16,7 @@ export const billingRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { planId, period } = input;
       const amount = getAmount(planId, period);
-      const orderId = `zyvo-${userId}-${Date.now()}`;
+      const orderId = `zyvo-${userId.slice(0, 20)}-${Date.now()}`;
 
       await ctx.prisma.transaction.create({
         data: { userId, orderId, amount, planId, period, status: "creating" },
@@ -40,6 +40,7 @@ export const billingRouter = createTRPCRouter({
           },
         });
       } catch (err) {
+        console.error("[billing] snapPost failed:", err);
         await ctx.prisma.transaction.update({
           where: { orderId },
           data: {

@@ -1,11 +1,20 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { BillingHeader } from "@/features/billing/components/billing-header";
 import { BillingSkeleton } from "@/features/billing/components/billing-skeleton";
-import { PaymentModal } from "@/features/billing/components/payment-modal";
-import { useSubscription } from "@/features/billing/hooks/use-billing";
+import {
+  useCancelTransaction,
+  useCreateSnapToken,
+  usePollStatus,
+  useSubscription,
+} from "@/features/billing/hooks/use-billing";
 import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
+
+const SNAP_VTWEB_BASE =
+  process.env.NODE_ENV === "production"
+    ? "https://app.midtrans.com/snap/v2/vtweb"
+    : "https://app.sandbox.midtrans.com/snap/v2/vtweb";
 
 const MobilePlanList = lazy(() =>
   import("@/features/billing/components/mobile-plan-card").then((m) => ({
@@ -27,13 +36,46 @@ const FaqSection = lazy(() =>
 
 export default function PlanPage() {
   const [yearly, setYearly] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<BillingPlanId>("pro");
-  const { data: subscription } = useSubscription();
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
+  const pollCount = useRef(0);
 
-  function handleUpgrade(planId: BillingPlanId) {
-    setSelectedPlan(planId);
-    setModalOpen(true);
+  const { data: subscription } = useSubscription();
+  const createToken = useCreateSnapToken();
+  const cancel = useCancelTransaction();
+  const { isPaid } = usePollStatus(orderId, polling);
+
+  if (isPaid && polling) {
+    setPolling(false);
+    setOrderId(null);
+    pollCount.current = 0;
+  }
+
+  async function handleUpgrade(planId: BillingPlanId) {
+    const period = yearly ? "yearly" : "monthly";
+    setLoadingPlanId(planId);
+    const result = await createToken.mutateAsync({ planId, period });
+    setLoadingPlanId(null);
+    setOrderId(result.orderId);
+    pollCount.current = 0;
+
+    if (!window.snap) {
+      window.location.href = `${SNAP_VTWEB_BASE}/${result.snapToken}`;
+      return;
+    }
+
+    window.snap.pay(result.snapToken, {
+      onSuccess: () => setPolling(true),
+      onPending: () => setPolling(true),
+      onError: () => {
+        if (orderId) cancel.mutate({ orderId: result.orderId });
+        setOrderId(null);
+      },
+      onClose: () => setPolling(true),
+    });
+
+    setPolling(true);
   }
 
   return (
@@ -44,23 +86,17 @@ export default function PlanPage() {
         <MobilePlanList
           yearly={yearly}
           onUpgrade={handleUpgrade}
-          activePlan={subscription?.plan}
+          activePlan={subscription?.plan ?? "free"}
+          loadingPlanId={loadingPlanId}
         />
         <DesktopPlanTable
           yearly={yearly}
           onUpgrade={handleUpgrade}
-          activePlan={subscription?.plan}
+          activePlan={subscription?.plan ?? "free"}
+          loadingPlanId={loadingPlanId}
         />
         <FaqSection />
       </Suspense>
-
-      <PaymentModal
-        planId={selectedPlan}
-        period={yearly ? "yearly" : "monthly"}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-        onSuccess={() => {}}
-      />
     </div>
   );
 }

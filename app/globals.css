@@ -294,8 +294,12 @@
 }
 
 @keyframes badge-orbit {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @utility animate-badge-orbit {
   animation: badge-orbit 3s linear infinite;

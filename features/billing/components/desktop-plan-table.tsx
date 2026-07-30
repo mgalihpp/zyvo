@@ -62,9 +62,7 @@ export function DesktopPlanTable({
                     <Badge
                       className={cn(
                         "relative gap-1",
-                        isPro
-                          ? "bg-white text-primary hover:bg-white/90"
-                          : "",
+                        isPro ? "bg-white text-primary hover:bg-white/90" : "",
                       )}
                     >
                       <SparklesIcon className="size-2.5" />
