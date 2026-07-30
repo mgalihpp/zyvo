@@ -58,11 +58,11 @@ export const TEMPLATE_DEFAULT_COLORS: Record<string, CvColors> = {
   },
   creative: {
     presetId: "custom",
-    background: "#ffffff",
-    heading: "#1f1d2b",
-    text: "#3d3d3d",
-    link: "#6c63ff",
-    accent: "#6c63ff",
+    background: "#fdf8f4",
+    heading: "#3b1f0e",
+    text: "#4a3728",
+    link: "#a0522d",
+    accent: "#a0522d",
   },
   elegant: {
     presetId: "custom",
