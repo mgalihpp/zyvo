@@ -1,34 +1,35 @@
 "use client";
 
-import { CheckIcon, CircleAlertIcon, LoaderIcon } from "lucide-react";
+import { AlertCircle, Check, Cloud, CloudOff, Loader2 } from "lucide-react";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
+const CONFIG = {
+  idle: { label: "Tersimpan", Icon: Cloud, tone: "ok" },
+  dirty: { label: "Ada perubahan…", Icon: null, tone: "muted" },
+  saving: { label: "Menyimpan…", Icon: Loader2, tone: "muted" },
+  saved: { label: "Tersimpan", Icon: Check, tone: "ok" },
+  error: { label: "Gagal menyimpan", Icon: AlertCircle, tone: "error" },
+} as const;
+
 export function SaveIndicator() {
   const status = useCvStore((s) => s.saveStatus);
+  const { label, Icon, tone } = CONFIG[status];
 
-  const map = {
-    idle: { label: "Semua perubahan tersimpan", icon: null, tone: "muted" },
-    dirty: { label: "Perubahan belum disimpan", icon: null, tone: "muted" },
-    saving: { label: "Menyimpan…", icon: "spin", tone: "muted" },
-    saved: { label: "Tersimpan", icon: "check", tone: "ok" },
-    error: { label: "Gagal menyimpan", icon: "alert", tone: "error" },
-  } as const;
-
-  const { label, icon, tone } = map[status];
+  if (status === "idle") return null;
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-xs",
-        tone === "muted" && "text-muted-foreground",
-        tone === "ok" && "text-green-600 dark:text-green-500",
-        tone === "error" && "text-destructive",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+        tone === "muted" && "bg-muted text-muted-foreground",
+        tone === "ok" && "bg-green-500/10 text-green-600 dark:text-green-400",
+        tone === "error" && "bg-destructive/10 text-destructive",
       )}
     >
-      {icon === "spin" && <LoaderIcon className="size-3.5 animate-spin" />}
-      {icon === "check" && <CheckIcon className="size-3.5" />}
-      {icon === "alert" && <CircleAlertIcon className="size-3.5" />}
+      {Icon && (
+        <Icon className={cn("size-3", status === "saving" && "animate-spin")} />
+      )}
       {label}
     </span>
   );
