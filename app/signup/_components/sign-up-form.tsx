@@ -36,7 +36,7 @@ const signUpSchema = z.object({
 export function SignUpForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isGooglePending, setIsGooglePending] = useState(false);
+  const [isGooglePending, startGoogleTransition] = useTransition();
   const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<z.input<typeof signUpSchema>>({
@@ -64,9 +64,9 @@ export function SignUpForm() {
   const handleGoogle = async () => {
     const ok = await form.trigger("acceptTerms");
     if (!ok) return;
-    setIsGooglePending(true);
-    await signIn.social({ provider: "google", callbackURL: DEFAULT_AUTH_REDIRECT });
-    setIsGooglePending(false);
+    startGoogleTransition(async () => {
+      await signIn.social({ provider: "google", callbackURL: DEFAULT_AUTH_REDIRECT });
+    });
   };
 
   return (
