@@ -7,7 +7,7 @@ export const siteConfig = {
   url: baseUrl,
   description:
     "Buat CV profesional dan ramah ATS dengan bantuan AI. Gratis, cepat, dan mudah digunakan.",
-  ogImage: `${baseUrl}/hero.png`,
+  ogImage: `${baseUrl}/og.png`,
   twitterHandle: "@zyvo_id",
 } as const;
 
