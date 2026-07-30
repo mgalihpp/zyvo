@@ -98,8 +98,8 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           </Section>
         ) : null}
 
-        <div className="grid grid-cols-2 gap-8">
-          {cv.skills.length > 0 ? (
+        {cv.skills.length > 0 && cv.languages.length > 0 ? (
+          <div className="mt-6 grid grid-cols-2 gap-8 [&>section]:mt-0">
             <Section title="Keahlian">
               <ul className="space-y-1 text-[0.88em]">
                 {cv.skills
@@ -112,9 +112,6 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                   ))}
               </ul>
             </Section>
-          ) : null}
-
-          {cv.languages.length > 0 ? (
             <Section title="Bahasa">
               <ul className="space-y-1 text-[0.88em]">
                 {cv.languages
@@ -129,8 +126,36 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                   ))}
               </ul>
             </Section>
-          ) : null}
-        </div>
+          </div>
+        ) : cv.skills.length > 0 ? (
+          <Section title="Keahlian">
+            <ul className="space-y-1 text-[0.88em]">
+              {cv.skills
+                .filter((s) => s.name.trim())
+                .map((s, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-[var(--cv-color-accent)]" />
+                    {s.name}
+                  </li>
+                ))}
+            </ul>
+          </Section>
+        ) : cv.languages.length > 0 ? (
+          <Section title="Bahasa">
+            <ul className="space-y-1 text-[0.88em]">
+              {cv.languages
+                .filter((l) => l.name.trim())
+                .map((l, i) => (
+                  <li key={i} className="flex justify-between">
+                    <span>{l.name}</span>
+                    {l.level ? (
+                      <span className="opacity-60">{l.level}</span>
+                    ) : null}
+                  </li>
+                ))}
+            </ul>
+          </Section>
+        ) : null}
 
         {cv.certifications.length > 0 ? (
           <Section title="Sertifikasi">
