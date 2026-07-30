@@ -154,6 +154,118 @@
   }
 }
 
+/* Scroll-reveal: elements start hidden/translated and animate in when the
+ * `data-reveal` attribute flips to "shown" (set by the Reveal component's
+ * IntersectionObserver). Honors reduced-motion by showing content instantly. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@utility reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+
+  &[data-reveal="shown"] {
+    animation: reveal-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    animation: none !important;
+  }
+}
+
+/* Slow indigo grid-glow drift used behind section headings. */
+@keyframes glow-drift {
+  0%,
+  100% {
+    transform: translate3d(-4%, 0, 0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate3d(4%, -3%, 0) scale(1.08);
+    opacity: 0.9;
+  }
+}
+.glow-drift {
+  animation: glow-drift 12s ease-in-out infinite;
+}
+
+/* Marquee-free "active" pulse for interactive mock chips. */
+@keyframes mock-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 40%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--primary) 0%, transparent);
+  }
+}
+
+@keyframes mock-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mock-dropdown {
+  from {
+    opacity: 0;
+    transform: scaleY(0.9) translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+@keyframes mock-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes mock-ripple {
+  from {
+    transform: scale(0.5);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes mock-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 /* Shine sweep for the featured pricing card. */
 @keyframes billing-shine {
   0% {
