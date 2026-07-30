@@ -1,0 +1,285 @@
+import { formatDateRange, join, type TemplateProps } from "./shared";
+
+/**
+ * Creative two-column template. A wide accent sidebar (40%) holds the photo,
+ * contact details, skills and languages; the right column holds the narrative
+ * sections. Bold accent color — aimed at designers and creative roles.
+ */
+export function CreativeTemplate({ cv }: TemplateProps) {
+  const p = cv.personal;
+
+  return (
+    <article className="mx-auto grid min-h-[1123px] w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[40%_1fr] sm:grid-rows-[1fr] print:min-h-[297mm] print:grid-cols-[40%_1fr] print:grid-rows-[1fr] print:[print-color-adjust:exact]">
+      <aside className="bg-[var(--cv-color-accent)] p-7 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
+        {p.photo ? (
+          // biome-ignore lint/performance/noImgElement: Puppeteer PDF export needs a plain img
+          <img
+            src={p.photo}
+            alt={p.fullName || "Foto profile"}
+            className="mb-5 size-28 rounded-lg object-cover ring-4 ring-[var(--cv-color-on-accent)]/20"
+          />
+        ) : null}
+
+        <h1 className="text-[1.25em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
+          {p.fullName || "Nama Anda"}
+        </h1>
+        {p.headline ? (
+          <p className="mt-1 text-[0.88em] opacity-75">{p.headline}</p>
+        ) : null}
+
+        <SideSection title="Kontak">
+          <ul className="space-y-1.5 break-words text-[0.83em] opacity-85">
+            {p.email ? <li>{p.email}</li> : null}
+            {p.phone ? <li>{p.phone}</li> : null}
+            {p.location ? <li>{p.location}</li> : null}
+            {p.website ? <li>{p.website}</li> : null}
+            {p.linkedin ? <li>{p.linkedin}</li> : null}
+            {p.github ? <li>{p.github}</li> : null}
+          </ul>
+        </SideSection>
+
+        {cv.skills.length > 0 ? (
+          <SideSection title="Keahlian">
+            <ul className="space-y-2">
+              {cv.skills
+                .filter((s) => s.name.trim())
+                .map((s, i) => (
+                  <li key={i}>
+                    <span className="text-[0.83em]">{s.name}</span>
+                    <span
+                      className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/20"
+                      aria-hidden
+                    >
+                      <span
+                        className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
+                        // level 1 (expert) = 100%, 5 (beginner) = 20%
+                        style={{ width: `${((6 - s.level) / 5) * 100}%` }}
+                      />
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </SideSection>
+        ) : null}
+
+        {cv.interpersonal.length > 0 ? (
+          <SideSection title="Interpersonal">
+            <p className="text-[0.83em] opacity-85">
+              {join(
+                cv.interpersonal.map((s) => s.name),
+                ", ",
+              )}
+            </p>
+          </SideSection>
+        ) : null}
+
+        {cv.languages.length > 0 ? (
+          <SideSection title="Bahasa">
+            <ul className="space-y-1 text-[0.83em] opacity-85">
+              {cv.languages
+                .filter((l) => l.name.trim())
+                .map((l, i) => (
+                  <li key={i} className="flex justify-between gap-2">
+                    <span>{l.name}</span>
+                    {l.level ? (
+                      <span className="opacity-70">{l.level}</span>
+                    ) : null}
+                  </li>
+                ))}
+            </ul>
+          </SideSection>
+        ) : null}
+
+        {cv.certifications.length > 0 ? (
+          <SideSection title="Sertifikasi">
+            <ul className="space-y-2 text-[0.83em] opacity-85">
+              {cv.certifications.map((c, i) => (
+                <li key={i}>
+                  <p className="font-medium opacity-100">{c.name}</p>
+                  {join([c.issuer, c.date]) ? (
+                    <p className="opacity-70">{join([c.issuer, c.date])}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </SideSection>
+        ) : null}
+      </aside>
+
+      <div className="p-8">
+        {cv.summary?.trim() ? (
+          <MainSection title="Profil">
+            <p className="whitespace-pre-line">{cv.summary}</p>
+          </MainSection>
+        ) : null}
+
+        {cv.experience.length > 0 ? (
+          <MainSection title="Pengalaman">
+            <div className="space-y-4">
+              {cv.experience.map((exp, i) => (
+                <div key={i}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                      {exp.role || "Posisi"}
+                    </h3>
+                    <span className="shrink-0 text-[0.82em] opacity-60">
+                      {formatDateRange(exp.startDate, exp.endDate, exp.current)}
+                    </span>
+                  </div>
+                  <p className="text-[0.85em] font-medium opacity-75">
+                    {join([exp.company, exp.location])}
+                  </p>
+                  {exp.description ? (
+                    <p className="mt-1 whitespace-pre-line text-[0.9em]">
+                      {exp.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </MainSection>
+        ) : null}
+
+        {cv.projects.length > 0 ? (
+          <MainSection title="Proyek">
+            <div className="space-y-3">
+              {cv.projects.map((proj, i) => (
+                <div key={i}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
+                      {proj.name}
+                      {proj.type ? (
+                        <span className="font-normal opacity-70">
+                          {" "}
+                          — {proj.type}
+                        </span>
+                      ) : null}
+                    </h3>
+                    {proj.date ? (
+                      <span className="shrink-0 text-[0.82em] opacity-60">
+                        {proj.date}
+                      </span>
+                    ) : null}
+                  </div>
+                  {proj.description ? (
+                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
+                      {proj.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </MainSection>
+        ) : null}
+
+        {cv.education.length > 0 ? (
+          <MainSection title="Pendidikan">
+            <div className="space-y-3">
+              {cv.education.map((edu, i) => (
+                <div key={i}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                      {edu.school || "Institusi"}
+                    </h3>
+                    <span className="shrink-0 text-[0.82em] opacity-60">
+                      {formatDateRange(edu.startDate, edu.endDate)}
+                    </span>
+                  </div>
+                  <p className="text-[0.88em]">
+                    {join([edu.degree, edu.field], ", ")}
+                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </MainSection>
+        ) : null}
+
+        {cv.organizations.length > 0 ? (
+          <MainSection title="Organisasi">
+            <div className="space-y-3">
+              {cv.organizations.map((org, i) => (
+                <div key={i}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
+                      {org.role || "Posisi"}
+                      {org.name ? (
+                        <span className="font-normal opacity-70">
+                          {" "}
+                          — {org.name}
+                        </span>
+                      ) : null}
+                    </h3>
+                    {org.date ? (
+                      <span className="shrink-0 text-[0.82em] opacity-60">
+                        {org.date}
+                      </span>
+                    ) : null}
+                  </div>
+                  {org.description ? (
+                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
+                      {org.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </MainSection>
+        ) : null}
+
+        {cv.custom.length > 0 ? (
+          <MainSection title="Tambahan">
+            <div className="space-y-2">
+              {cv.custom.map((item, i) => (
+                <div key={i}>
+                  <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
+                    {item.title}
+                  </h3>
+                  {item.description ? (
+                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
+                      {item.description}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </MainSection>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function SideSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-5">
+      <h2 className="mb-2 text-[0.62em] font-bold uppercase tracking-widest opacity-55 font-[family-name:var(--cv-font-heading)]">
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function MainSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="mt-5 first:mt-0">
+      <h2 className="mb-2 border-b-2 border-[var(--cv-color-accent)] pb-1 text-[0.82em] font-bold uppercase tracking-widest text-[var(--cv-color-accent)] font-[family-name:var(--cv-font-heading)]">
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}

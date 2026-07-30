@@ -1,5 +1,9 @@
 import type { ComponentType } from "react";
 import { ClassicTemplate } from "./classic";
+import { CompactTemplate } from "./compact";
+import { CreativeTemplate } from "./creative";
+import { ElegantTemplate } from "./elegant";
+import { ExecutiveTemplate } from "./executive";
 import { FreshGraduateTemplate } from "./fresh-graduate";
 import { DEFAULT_TEMPLATE_ID } from "./index";
 import { MinimalTemplate } from "./minimal";
@@ -20,6 +24,10 @@ const EAGER_TEMPLATES: Record<string, ComponentType<TemplateProps>> = {
   professional: ProfessionalTemplate,
   minimal: MinimalTemplate,
   "fresh-graduate": FreshGraduateTemplate,
+  executive: ExecutiveTemplate,
+  creative: CreativeTemplate,
+  elegant: ElegantTemplate,
+  compact: CompactTemplate,
 };
 
 /** Returns the eager renderer for `id`, falling back to the default template. */

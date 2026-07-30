@@ -19,6 +19,7 @@ export const SAMPLE_CV: CvContent = {
     website: "cecily.design",
     linkedin: "in/cecily",
     github: "",
+    photo: "",
   },
   summary:
     "Marketing specialist with 5+ years driving growth through data-led campaigns and brand storytelling across B2B and B2C.",

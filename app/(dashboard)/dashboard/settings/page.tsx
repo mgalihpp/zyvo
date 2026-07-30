@@ -19,11 +19,14 @@ const ChangePasswordForm = lazy(
 const DeleteAccountForm = lazy(
   () => import("@/features/auth/components/settings/delete-account-form"),
 );
+const ActiveDevices = lazy(
+  () => import("@/features/auth/components/settings/active-devices"),
+);
 
 /** Placeholder shown while a lazily-loaded form chunk downloads. */
 function FormFallback() {
   return (
-    <div className="mt-3 space-y-4 rounded-xl border bg-muted/30 p-4">
+    <div className="mt-3 space-y-4">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-9 w-full" />
       <Skeleton className="h-9 w-28 rounded-full" />
@@ -135,6 +138,22 @@ export default function SettingsPage() {
               </>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Security */}
+      <Card className="rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Keamanan</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Kelola preferensi keamanan Anda.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm font-semibold">Perangkat Aktif</p>
+          <Suspense fallback={<FormFallback />}>
+            <ActiveDevices />
+          </Suspense>
         </CardContent>
       </Card>
 

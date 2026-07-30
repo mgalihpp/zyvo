@@ -30,6 +30,7 @@ export function toCvContent(cv: CvDoc): CvContent {
       website: cv.personal?.website ?? "",
       linkedin: cv.personal?.linkedin ?? "",
       github: cv.personal?.github ?? "",
+      photo: cv.personal?.photo ?? "",
     },
     summary: cv.summary ?? "",
     experience: cv.experience.map((e) => ({

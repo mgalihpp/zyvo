@@ -47,6 +47,15 @@ describe("toCvContent", () => {
     const c = toCvContent(baseCv);
     assert.equal(c.personal.fullName, "");
     assert.equal(c.personal.email, "");
+    assert.equal(c.personal.photo, "");
+  });
+
+  it("maps a stored photo url through", () => {
+    const c = toCvContent({
+      ...baseCv,
+      personal: { photo: "https://x.ufs.sh/f/abc" },
+    });
+    assert.equal(c.personal.photo, "https://x.ufs.sh/f/abc");
   });
 
   it("falls back to schema defaults for null typography/colors", () => {

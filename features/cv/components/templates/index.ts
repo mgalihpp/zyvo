@@ -19,6 +19,18 @@ const FreshGraduateLazy = lazy(() =>
     default: m.FreshGraduateTemplate,
   })),
 );
+const ExecutiveLazy = lazy(() =>
+  import("./executive").then((m) => ({ default: m.ExecutiveTemplate })),
+);
+const CreativeLazy = lazy(() =>
+  import("./creative").then((m) => ({ default: m.CreativeTemplate })),
+);
+const ElegantLazy = lazy(() =>
+  import("./elegant").then((m) => ({ default: m.ElegantTemplate })),
+);
+const CompactLazy = lazy(() =>
+  import("./compact").then((m) => ({ default: m.CompactTemplate })),
+);
 
 export const TEMPLATES: TemplateMeta[] = [
   {
@@ -55,6 +67,34 @@ export const TEMPLATES: TemplateMeta[] = [
     description: "Menonjolkan pendidikan & keahlian untuk pemula.",
     categories: ["fresh-graduate", "two-column", "new"],
     lazyComponent: FreshGraduateLazy,
+  },
+  {
+    id: "executive",
+    name: "Executive",
+    description: "Header band elegan dengan foto, formal untuk level senior.",
+    categories: ["professional", "one-column", "new"],
+    lazyComponent: ExecutiveLazy,
+  },
+  {
+    id: "creative",
+    name: "Creative",
+    description: "Sidebar bold dengan foto, cocok untuk desainer & kreator.",
+    categories: ["creative", "two-column", "new"],
+    lazyComponent: CreativeLazy,
+  },
+  {
+    id: "elegant",
+    name: "Elegant",
+    description: "Header terpusat dengan foto bulat, serif premium.",
+    categories: ["professional", "one-column", "new"],
+    lazyComponent: ElegantLazy,
+  },
+  {
+    id: "compact",
+    name: "Compact",
+    description: "Tata letak padat dua kolom, cocok untuk CV panjang.",
+    categories: ["professional", "two-column", "ats"],
+    lazyComponent: CompactLazy,
   },
 ];
 

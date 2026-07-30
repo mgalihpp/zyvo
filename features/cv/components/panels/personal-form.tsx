@@ -2,6 +2,7 @@
 
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PhotoField } from "@/features/cv/components/panels/photo-field";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 
 /** Personal/contact info form (rendered inside the "Informasi Pribadi" panel). */
@@ -11,6 +12,10 @@ export function PersonalForm() {
 
   return (
     <FieldGroup>
+      <Field>
+        <FieldLabel>Foto Profile</FieldLabel>
+        <PhotoField />
+      </Field>
       <div className="grid gap-4 @md/field-group:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="fullName">Nama</FieldLabel>

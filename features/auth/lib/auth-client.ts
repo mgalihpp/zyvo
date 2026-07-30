@@ -13,4 +13,6 @@ export const {
   listAccounts,
   changePassword,
   deleteUser,
+  listSessions,
+  revokeSession,
 } = authClient;
