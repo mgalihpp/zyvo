@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zyvo
+
+AI-assisted CV/resume builder. Craft, edit, and export professional CVs with a live preview editor and PDF export.
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) + **React 19.2** (React Compiler enabled)
+- **Tailwind CSS v4** + **shadcn/ui**
+- **tRPC v11** — end-to-end typesafe API
+- **Better Auth** — authentication
+- **MongoDB** via **Prisma** (CV sections as embedded composite types)
+- **Zustand** — CV builder state with 800ms debounced autosave
+- **Zod** — shared validation (tRPC input + react-hook-form)
+- **Puppeteer-core + @sparticuz/chromium** — PDF export
+- **PostHog** (analytics), **Upstash Redis** (caching), **Biome v2** (lint/format)
 
 ## Getting Started
 
-First, run the development server:
+Requires [Bun](https://bun.sh) and a MongoDB connection string.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+```
+
+Create a `.env` with at least:
+
+```bash
+DATABASE_URL="mongodb://..."
+BETTER_AUTH_SECRET="..."
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+Push the Prisma schema and start the dev server:
+
+```bash
+bun db:push
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Action |
+|---------|--------|
+| `bun dev` | Dev server (port 3000) |
+| `bun build` | Production build |
+| `bun lint` | Biome check |
+| `bun format` | Biome format --write |
+| `bun db:push` | Push Prisma schema to MongoDB |
+| `bun db:generate` | Regenerate Prisma Client |
+| `bun db:studio` | Open Prisma Studio |
 
-## Learn More
+`postinstall` auto-runs `prisma generate`.
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **`app/(auth)/`** — protected route group (server-side session check)
+- **`app/(auth)/builder/`** — CV dashboard; **`builder/[cvId]/`** — editor
+- **`app/api/auth/[...all]/route.ts`** — Better Auth handler
+- **`app/api/trpc/[trpc]/route.ts`** — tRPC fetch handler
+- **`features/`** — feature-based modules, each owning its `components/`, `hooks/`, `schemas/`, `stores/`, `server/`, `lib/`
+  - **`features/cv/`** — CV builder (Zustand store, Zod schemas, autosave hook, tRPC router, templates)
+  - **`features/auth/`** — Better Auth config + route guards
+- **`server/trpc/`** — tRPC core + root router (`routers/_app.ts`)
+- **`proxy.ts`** — Next.js 16 proxy (replaces `middleware.ts`); optimistic auth check via session cookie
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Conventions
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- All DB access goes through the tRPC backend — no direct client-to-MongoDB
+- CV ownership enforced via `userId` matching the Better Auth user ID
+- `@/*` path alias maps to the project root
+- Validate with Zod on both tRPC input (server) and react-hook-form (client)
