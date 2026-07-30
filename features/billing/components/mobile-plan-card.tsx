@@ -22,6 +22,7 @@ interface MobilePlanCardProps {
   yearly: boolean;
   onUpgrade: (planId: BillingPlanId) => void;
   activePlan?: string | null;
+  loadingPlanId?: string | null;
 }
 
 function MobilePlanCard({
@@ -29,6 +30,7 @@ function MobilePlanCard({
   yearly,
   onUpgrade,
   activePlan,
+  loadingPlanId,
 }: MobilePlanCardProps) {
   const [open, setOpen] = useState(false);
   const isPro = plan.id === "pro";
@@ -112,7 +114,9 @@ function MobilePlanCard({
               ? () => onUpgrade(plan.id as BillingPlanId)
               : undefined
           }
-          disabled={activePlan === plan.id}
+          loading={loadingPlanId === plan.id}
+          loadingText="Memuat..."
+          disabled={activePlan === plan.id || !!loadingPlanId}
           className={cn(
             "shrink-0 font-semibold",
             isPro
@@ -196,12 +200,14 @@ interface MobilePlanListProps {
   yearly: boolean;
   onUpgrade: (planId: BillingPlanId) => void;
   activePlan?: string | null;
+  loadingPlanId?: string | null;
 }
 
 export function MobilePlanList({
   yearly,
   onUpgrade,
   activePlan,
+  loadingPlanId,
 }: MobilePlanListProps) {
   return (
     <div className="flex flex-col gap-4 xl:hidden">
@@ -212,6 +218,7 @@ export function MobilePlanList({
           yearly={yearly}
           onUpgrade={onUpgrade}
           activePlan={activePlan}
+          loadingPlanId={loadingPlanId}
         />
       ))}
     </div>

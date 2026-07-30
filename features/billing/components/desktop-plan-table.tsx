@@ -16,12 +16,14 @@ interface DesktopPlanTableProps {
   yearly: boolean;
   onUpgrade: (planId: BillingPlanId) => void;
   activePlan?: string | null;
+  loadingPlanId?: string | null;
 }
 
 export function DesktopPlanTable({
   yearly,
   onUpgrade,
   activePlan,
+  loadingPlanId,
 }: DesktopPlanTableProps) {
   return (
     <div className="relative hidden overflow-hidden rounded-2xl border bg-card shadow-sm xl:block">
@@ -45,20 +47,32 @@ export function DesktopPlanTable({
                 isPro ? "bg-primary text-primary-foreground" : "",
               )}
             >
-              {plan.popular && (
-                <Badge
-                  className={cn(
-                    "mb-2 gap-1",
-                    isPro
-                      ? "bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"
-                      : "",
-                  )}
-                >
-                  <SparklesIcon className="size-2.5" />
-                  POPULER
-                </Badge>
-              )}
-              <p className="text-lg font-bold">{plan.name}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-lg font-bold">{plan.name}</p>
+                {plan.popular && (
+                  <div className="relative inline-flex rounded-full p-[2px] overflow-hidden">
+                    <span
+                      aria-hidden
+                      className="animate-badge-orbit pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square w-[200%] rounded-full"
+                      style={{
+                        background:
+                          "conic-gradient(from 0deg, #f59e0b, #ef4444, #ec4899, #8b5cf6, #3b82f6, #22d3ee, #22c55e, #f59e0b 360deg)",
+                      }}
+                    />
+                    <Badge
+                      className={cn(
+                        "relative gap-1",
+                        isPro
+                          ? "bg-white text-primary hover:bg-white/90"
+                          : "",
+                      )}
+                    >
+                      <SparklesIcon className="size-2.5" />
+                      POPULER
+                    </Badge>
+                  </div>
+                )}
+              </div>
               <p
                 className={cn(
                   "text-xs",
@@ -168,7 +182,9 @@ export function DesktopPlanTable({
                     ? () => onUpgrade(plan.id as BillingPlanId)
                     : undefined
                 }
-                disabled={activePlan === plan.id}
+                loading={loadingPlanId === plan.id}
+                loadingText="Memuat..."
+                disabled={activePlan === plan.id || !!loadingPlanId}
                 className={cn(
                   "w-full text-sm font-semibold",
                   isPro

@@ -293,6 +293,14 @@
   animation: billing-shine 4.5s ease-in-out infinite;
 }
 
+@keyframes badge-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@utility animate-badge-orbit {
+  animation: badge-orbit 3s linear infinite;
+}
+
 /* Keep CV entries and headings intact across PDF/print page breaks. Scoped to
  * the print route wrapper so the editor UI is unaffected. Templates own their
  * own inner padding, so @page has no margin (full-bleed sidebars reach the
