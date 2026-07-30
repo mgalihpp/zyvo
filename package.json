@@ -19,6 +19,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.4.3",
+    "@posthog/react": "^1.10.3",
     "@prisma/client": "^6.0.0",
     "@shadcn/react": "^0.2.1",
     "@sparticuz/chromium-min": "149",

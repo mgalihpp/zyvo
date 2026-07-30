@@ -12,6 +12,7 @@ import {
   Source_Serif_4,
 } from "next/font/google";
 import { Toaster } from "@/components/ui/toast";
+import { PostHogProvider } from "@/lib/posthog/provider";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import "./globals.css";
 
@@ -84,7 +85,9 @@ export default function RootLayout({
       style={{ ["--font-geist" as string]: "var(--font-geist-sans)" }}
     >
       <body className="min-h-full flex flex-col">
-        <TRPCProvider>{children}</TRPCProvider>
+        <PostHogProvider>
+          <TRPCProvider>{children}</TRPCProvider>
+        </PostHogProvider>
         <Toaster />
         {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
