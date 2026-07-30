@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Check, Cloud, CloudOff, Loader2 } from "lucide-react";
+import { AlertCircle, Check, Cloud, Loader2 } from "lucide-react";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
