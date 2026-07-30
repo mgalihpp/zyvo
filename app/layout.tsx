@@ -1,5 +1,6 @@
 import { Agentation } from "agentation";
 import type { Metadata } from "next";
+import { constructMetadata } from "@/lib/seo";
 import {
   Geist,
   Geist_Mono,
@@ -66,13 +67,14 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Zyvo — Pembuat CV AI",
-    template: "%s · Zyvo",
+export const metadata: Metadata = constructMetadata({
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "",
+    other: {
+      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ?? "",
+    },
   },
-  description: "Buat CV profesional dan ramah ATS dengan bantuan AI.",
-};
+});
 
 export default function RootLayout({
   children,

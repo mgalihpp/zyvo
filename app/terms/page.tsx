@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BackButton } from "@/components/back-button";
 import { BrandLogo } from "@/components/brand-logo";
+import { constructMetadata, siteConfig } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "Syarat & Ketentuan",
   description: "Syarat dan ketentuan penggunaan layanan Zyvo.",
-};
+  alternates: { canonical: `${siteConfig.url}/terms` },
+});
 
 export default function TermsPage() {
   return (

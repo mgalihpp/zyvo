@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BackButton } from "@/components/back-button";
 import { BrandLogo } from "@/components/brand-logo";
+import { constructMetadata, siteConfig } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "Kebijakan Privasi",
   description: "Kebijakan privasi dan pengelolaan data pengguna Zyvo.",
-};
+  alternates: { canonical: `${siteConfig.url}/privacy` },
+});
 
 export default function PrivacyPage() {
   return (

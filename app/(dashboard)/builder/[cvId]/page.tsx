@@ -1,5 +1,10 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
 import { BuilderClient } from "@/features/cv/components/builder-client";
