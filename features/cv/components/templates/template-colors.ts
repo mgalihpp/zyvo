@@ -48,6 +48,38 @@ export const TEMPLATE_DEFAULT_COLORS: Record<string, CvColors> = {
     link: "#c2410c",
     accent: "#ea580c",
   },
+  executive: {
+    presetId: "custom",
+    background: "#ffffff",
+    heading: "#1a1a2e",
+    text: "#2d2d2d",
+    link: "#3a3a6e",
+    accent: "#16213e",
+  },
+  creative: {
+    presetId: "custom",
+    background: "#ffffff",
+    heading: "#1f1d2b",
+    text: "#3d3d3d",
+    link: "#6c63ff",
+    accent: "#6c63ff",
+  },
+  elegant: {
+    presetId: "custom",
+    background: "#fffaf7",
+    heading: "#4a3728",
+    text: "#5a5a5a",
+    link: "#c9956c",
+    accent: "#c9956c",
+  },
+  compact: {
+    presetId: "custom",
+    background: "#ffffff",
+    heading: "#0d3b66",
+    text: "#333333",
+    link: "#0d3b66",
+    accent: "#0d3b66",
+  },
 };
 
 /** Default palette for a template id, falling back to the classic (neutral). */
@@ -71,6 +103,10 @@ const TEMPLATE_DEFAULT_FONTS: Record<
   professional: { fontHeading: "source-serif", fontBody: "source-serif" },
   minimal: { fontHeading: "geist", fontBody: "geist" },
   "fresh-graduate": { fontHeading: "lato", fontBody: "lato" },
+  executive: { fontHeading: "source-serif", fontBody: "source-serif" },
+  creative: { fontHeading: "inter", fontBody: "inter" },
+  elegant: { fontHeading: "lora", fontBody: "lora" },
+  compact: { fontHeading: "roboto", fontBody: "roboto" },
 };
 
 /** Default typography for a template id, falling back to base defaults. */

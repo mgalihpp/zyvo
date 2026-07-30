@@ -13,6 +13,7 @@ export type TemplateCategory =
   | "fresh-graduate"
   | "one-column"
   | "two-column"
+  | "creative"
   | "new";
 
 export interface TemplateCategoryMeta {
@@ -25,6 +26,7 @@ export const TEMPLATE_CATEGORIES: TemplateCategoryMeta[] = [
   { id: "professional", label: "Profesional" },
   { id: "ats", label: "ATS" },
   { id: "fresh-graduate", label: "Fresh Graduate" },
+  { id: "creative", label: "Kreatif" },
   { id: "one-column", label: "1 Kolom" },
   { id: "two-column", label: "2 Kolom" },
   { id: "new", label: "Baru" },
