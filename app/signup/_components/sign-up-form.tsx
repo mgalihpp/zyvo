@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -36,6 +36,7 @@ const signUpSchema = z.object({
 export function SignUpForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isGooglePending, setIsGooglePending] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const form = useForm<z.input<typeof signUpSchema>>({
@@ -63,7 +64,9 @@ export function SignUpForm() {
   const handleGoogle = async () => {
     const ok = await form.trigger("acceptTerms");
     if (!ok) return;
-    signIn.social({ provider: "google", callbackURL: DEFAULT_AUTH_REDIRECT });
+    setIsGooglePending(true);
+    await signIn.social({ provider: "google", callbackURL: DEFAULT_AUTH_REDIRECT });
+    setIsGooglePending(false);
   };
 
   return (
@@ -206,7 +209,9 @@ export function SignUpForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogle}
-            disabled={isPending}
+            disabled={isPending || isGooglePending}
+            loading={isGooglePending}
+            loadingText="Menghubungkan..."
           >
             <GoogleIcon />
             Lanjutkan dengan Google
@@ -225,3 +230,4 @@ export function SignUpForm() {
     </main>
   );
 }
+

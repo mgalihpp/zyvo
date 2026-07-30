@@ -36,6 +36,7 @@ export function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const [isGooglePending, setIsGooglePending] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const redirectTo = searchParams.get("redirectTo") ?? DEFAULT_AUTH_REDIRECT;
@@ -66,7 +67,9 @@ export function SignInForm() {
   const handleGoogle = async () => {
     const ok = await form.trigger("acceptTerms");
     if (!ok) return;
-    signIn.social({ provider: "google", callbackURL: redirectTo });
+    setIsGooglePending(true);
+    await signIn.social({ provider: "google", callbackURL: redirectTo });
+    setIsGooglePending(false);
   };
 
   return (
@@ -194,7 +197,9 @@ export function SignInForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogle}
-            disabled={isPending}
+            disabled={isPending || isGooglePending}
+            loading={isGooglePending}
+            loadingText="Menghubungkan..."
           >
             <GoogleIcon />
             Lanjutkan dengan Google
