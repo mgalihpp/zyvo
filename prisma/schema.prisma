@@ -129,6 +129,7 @@ type Personal {
   website  String?
   linkedin String?
   github   String?
+  photo    String?
 }
 
 type Experience {

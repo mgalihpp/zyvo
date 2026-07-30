@@ -17,6 +17,7 @@ export const personalSchema = z.object({
   website: z.string().max(200).optional().default(""),
   linkedin: z.string().max(200).optional().default(""),
   github: z.string().max(200).optional().default(""),
+  photo: z.string().max(500).optional().default(""),
 });
 
 export const experienceSchema = z.object({
@@ -185,6 +186,7 @@ export const emptyPersonal: PersonalInput = {
   website: "",
   linkedin: "",
   github: "",
+  photo: "",
 };
 
 export const emptyExperience: ExperienceInput = {
