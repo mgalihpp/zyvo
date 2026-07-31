@@ -72,7 +72,17 @@ export const billingRouter = createTRPCRouter({
 
   getStatus: protectedProcedure
     .input(z.object({ orderId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+        select: { userId: true },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
       const res = await coreGet(`/${input.orderId}/status`);
       return {
         transactionStatus: (res.transaction_status as string) ?? "not_found",
@@ -128,6 +138,15 @@ export const billingRouter = createTRPCRouter({
   cancelTransaction: protectedProcedure
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
       await corePost(`/${input.orderId}/cancel`);
       await ctx.prisma.transaction.update({
         where: { orderId: input.orderId },
