@@ -305,31 +305,11 @@
   animation: badge-orbit 3s linear infinite;
 }
 
-/* Keep CV entries and headings intact across PDF/print page breaks. Scoped to
- * the print route wrapper so the editor UI is unaffected. Templates own their
- * own inner padding, so @page has no margin (full-bleed sidebars reach the
- * paper edge). */
-@page {
-  margin: 0;
-}
-[data-print-root] section {
-  break-inside: auto;
-}
-[data-print-root] h1,
-[data-print-root] h2,
-[data-print-root] h3 {
-  break-after: avoid;
-}
-[data-print-root] [data-entry] {
-  break-inside: avoid;
-}
-/* A section heading orphaned at the bottom of a page (entries flow to the next)
- * reads as a torn section. Chromium's print engine honors break-after:avoid on
- * the heading weakly when siblings intervene, so also forbid a break right
- * before any section — keeps the heading glued to its first entry. */
-[data-print-root] section {
-  break-before: avoid;
-}
-[data-print-root] section:first-child {
-  break-before: auto;
+/* Halaman sudah dipra-paginasi jadi kotak 794x1123 oleh CvPaginator; template
+ * mengatur padding-nya sendiri, jadi @page tanpa margin (sidebar full-bleed
+ * menyentuh tepi kertas). */
+@media print {
+  @page {
+    margin: 0;
+  }
 }

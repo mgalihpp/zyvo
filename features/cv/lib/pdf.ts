@@ -70,6 +70,9 @@ export async function renderCvDocument({
     await page.setExtraHTTPHeaders({ cookie });
     await page.goto(url, { waitUntil: "networkidle0" });
 
+    // Tunggu CvPaginator selesai mengukur & membelah halaman (client-side).
+    await page.waitForSelector('[data-paginated="true"]', { timeout: 15_000 });
+
     if (format === "png") {
       // A4 width at 96dpi ≈ 794px; full page height captures the whole CV.
       await page.setViewport({ width: 794, height: 1123 });
@@ -77,14 +80,12 @@ export async function renderCvDocument({
       return new Uint8Array(buf);
     }
 
-    // Real A4, paginated by Chromium's print engine: konten yang melebihi satu
-    // lembar otomatis mengalir ke halaman 2, 3, ... Aturan break (entri utuh,
-    // heading menempel ke section) ada di globals.css scoped ke
-    // [data-print-root]. Template mengatur padding-nya sendiri, jadi margin
-    // halaman 0 (sidebar full-bleed menyentuh tepi kertas).
+    // Setiap halaman sudah berupa kotak 794x1123px dari CvPaginator dengan
+    // break-after page. Ukuran pdf pakai px yang sama persis (bukan mm) agar
+    // tidak ada selisih pembulatan 210mm≈794.6px yang menggeser break.
     const buf = await page.pdf({
-      width: "210mm",
-      height: "297mm",
+      width: "794px",
+      height: "1123px",
       printBackground: true,
       preferCSSPageSize: false,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
