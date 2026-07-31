@@ -157,80 +157,96 @@ export function AiAssistantModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl" scrollable>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <SparklesIcon className="size-4 text-violet-500" />
-            Asisten AI Lamaran
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Context header */}
-          <div className="space-y-3 rounded-xl border bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <ContextPicker
-                label="Lamaran"
-                value={appId}
-                onChange={setAppId}
-                placeholder="Pilih lamaran"
-                options={applications.map((a) => ({
-                  value: a.id,
-                  label: `${a.company} — ${a.position}`,
-                }))}
-              />
-              <ContextPicker
-                label="CV"
-                value={cvId}
-                onChange={setCvId}
-                placeholder="Pilih CV"
-                options={
-                  cvs?.map((cv) => ({ value: cv.id, label: cv.title })) ?? []
-                }
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-xs font-medium",
-                  jdText
-                    ? "bg-green-100 text-green-800"
-                    : "bg-amber-100 text-amber-800",
-                )}
+      <DialogContent className="overflow-hidden p-0 sm:max-w-6xl" scrollable>
+        <Tabs
+          defaultValue="cover-letter"
+          orientation="vertical"
+          className="min-h-[560px] gap-0"
+        >
+          {/* Sidebar */}
+          <div className="flex w-52 shrink-0 flex-col gap-4 border-r bg-muted/40 p-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <SparklesIcon className="size-4 text-violet-500" />
+                Asisten AI Lamaran
+              </DialogTitle>
+            </DialogHeader>
+            <TabsList variant="line" className="w-full gap-1 p-0">
+              <TabsTrigger
+                value="cover-letter"
+                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
               >
-                {jdText ? "JD: tersedia" : "JD: tidak ada"}
-              </span>
-              {!cvId && (
-                <span className="text-xs text-muted-foreground">
-                  Pilih CV untuk mulai.
-                </span>
-              )}
-            </div>
-            {!selectedApp?.jobDescription && (
-              <Textarea
-                value={manualJd}
-                onChange={(e) => setManualJd(e.target.value.slice(0, 3000))}
-                placeholder="Lamaran ini belum punya deskripsi lowongan — paste di sini (tidak disimpan)..."
-                className="min-h-[70px] resize-none text-xs"
-              />
-            )}
-          </div>
-
-          <Tabs defaultValue="cover-letter" orientation="vertical">
-            <TabsList className="w-44 shrink-0 self-start">
-              <TabsTrigger value="cover-letter">
                 <FileTextIcon aria-hidden="true" />
                 Surat Lamaran
               </TabsTrigger>
-              <TabsTrigger value="interview">
+              <TabsTrigger
+                value="interview"
+                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
+              >
                 <MessageSquareIcon aria-hidden="true" />
                 Interview Prep
               </TabsTrigger>
-              <TabsTrigger value="analysis">
+              <TabsTrigger
+                value="analysis"
+                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
+              >
                 <SearchCheckIcon aria-hidden="true" />
                 Analisis Lowongan
               </TabsTrigger>
             </TabsList>
+          </div>
+
+          {/* Main content */}
+          <div className="flex min-w-0 flex-1 flex-col gap-4 p-6">
+            {/* Context header */}
+            <div className="space-y-3 rounded-xl border bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <ContextPicker
+                  label="Lamaran"
+                  value={appId}
+                  onChange={setAppId}
+                  placeholder="Pilih lamaran"
+                  options={applications.map((a) => ({
+                    value: a.id,
+                    label: `${a.company} — ${a.position}`,
+                  }))}
+                />
+                <ContextPicker
+                  label="CV"
+                  value={cvId}
+                  onChange={setCvId}
+                  placeholder="Pilih CV"
+                  options={
+                    cvs?.map((cv) => ({ value: cv.id, label: cv.title })) ?? []
+                  }
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium",
+                    jdText
+                      ? "bg-green-100 text-green-800"
+                      : "bg-amber-100 text-amber-800",
+                  )}
+                >
+                  {jdText ? "JD: tersedia" : "JD: tidak ada"}
+                </span>
+                {!cvId && (
+                  <span className="text-xs text-muted-foreground">
+                    Pilih CV untuk mulai.
+                  </span>
+                )}
+              </div>
+              {!selectedApp?.jobDescription && (
+                <Textarea
+                  value={manualJd}
+                  onChange={(e) => setManualJd(e.target.value.slice(0, 3000))}
+                  placeholder="Lamaran ini belum punya deskripsi lowongan — paste di sini (tidak disimpan)..."
+                  className="min-h-[70px] resize-none text-xs"
+                />
+              )}
+            </div>
 
             {/* Surat Lamaran */}
             <TabsContent value="cover-letter" className="space-y-4">
@@ -429,8 +445,8 @@ export function AiAssistantModal({
                 </p>
               )}
             </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
