@@ -2,9 +2,12 @@
 
 import type { JobApplication } from "@prisma/client";
 import {
+  BriefcaseIcon,
   ChevronDownIcon,
   FileTextIcon,
+  LightbulbIcon,
   MessageSquareIcon,
+  PenLineIcon,
   SearchCheckIcon,
   SparklesIcon,
 } from "lucide-react";
@@ -36,6 +39,27 @@ interface JdResult {
   recommendations: string[];
 }
 
+const TONES = [
+  {
+    value: "formal",
+    label: "Formal",
+    description: "Bahasa formal dan profesional",
+    icon: PenLineIcon,
+  },
+  {
+    value: "casual",
+    label: "Santai profesional",
+    description: "Tetap profesional, lebih ringan",
+    icon: SparklesIcon,
+  },
+  {
+    value: "creative",
+    label: "Kreatif",
+    description: "Menarik dan beda dari yang lain",
+    icon: LightbulbIcon,
+  },
+] as const;
+
 /** Picker built on DropdownMenu (same pattern as ApplicationDialog). */
 function ContextPicker({
   label,
@@ -43,17 +67,19 @@ function ContextPicker({
   onChange,
   placeholder,
   options,
+  icon: Icon,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   options: { value: string; label: string }[];
+  icon: typeof BriefcaseIcon;
 }) {
   const selected = options.find((o) => o.value === value);
   return (
     <div className="min-w-0 flex-1">
-      <span className="mb-1 block text-xs font-medium">{label}</span>
+      <span className="mb-1.5 block text-xs font-medium">{label}</span>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -61,13 +87,19 @@ function ContextPicker({
               type="button"
               variant="outline"
               className={cn(
-                "w-full justify-between font-normal",
+                "h-10 w-full justify-between font-normal",
                 !selected && "text-muted-foreground",
               )}
             />
           }
         >
-          <span className="truncate">{selected?.label ?? placeholder}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            <Icon
+              className="size-4 shrink-0 text-violet-500"
+              aria-hidden="true"
+            />
+            <span className="truncate">{selected?.label ?? placeholder}</span>
+          </span>
           <ChevronDownIcon
             className="size-3.5 shrink-0 text-muted-foreground"
             aria-hidden="true"
@@ -86,6 +118,110 @@ function ContextPicker({
     </div>
   );
 }
+
+/** Shared context: application + CV pickers, JD chip, manual JD textarea. */
+function ContextFields({
+  applications,
+  cvs,
+  appId,
+  setAppId,
+  cvId,
+  setCvId,
+  jdText,
+  manualJd,
+  setManualJd,
+  hasStoredJd,
+}: {
+  applications: JobApplication[];
+  cvs: { id: string; title: string }[] | undefined;
+  appId: string;
+  setAppId: (v: string) => void;
+  cvId: string;
+  setCvId: (v: string) => void;
+  jdText: string;
+  manualJd: string;
+  setManualJd: (v: string) => void;
+  hasStoredJd: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <ContextPicker
+          label="Lamaran untuk posisi"
+          value={appId}
+          onChange={setAppId}
+          placeholder="Pilih lamaran"
+          icon={BriefcaseIcon}
+          options={applications.map((a) => ({
+            value: a.id,
+            label: `${a.company} — ${a.position}`,
+          }))}
+        />
+        <ContextPicker
+          label="Pilih CV"
+          value={cvId}
+          onChange={setCvId}
+          placeholder="Pilih CV"
+          icon={FileTextIcon}
+          options={cvs?.map((cv) => ({ value: cv.id, label: cv.title })) ?? []}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <span
+          className={cn(
+            "rounded-md px-2 py-0.5 text-xs font-medium",
+            jdText
+              ? "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-400"
+              : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
+          )}
+        >
+          {jdText ? "JD: tersedia" : "JD: tidak ada"}
+        </span>
+        {!cvId && (
+          <span className="text-xs text-muted-foreground">
+            Pilih CV untuk mulai.
+          </span>
+        )}
+      </div>
+      {!hasStoredJd && (
+        <div className="rounded-xl border border-dashed border-violet-300/60 bg-violet-500/[0.03] p-4 dark:border-violet-500/30">
+          <span className="mb-1 block text-xs font-medium">
+            Deskripsi lowongan (opsional)
+          </span>
+          <Textarea
+            value={manualJd}
+            onChange={(e) => setManualJd(e.target.value.slice(0, 3000))}
+            placeholder={
+              "Paste deskripsi lowongan atau persyaratan pekerjaan di sini...\nSemakin lengkap, semakin akurat hasilnya."
+            }
+            className="min-h-[90px] resize-none border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+          />
+          <p className="text-right text-[11px] text-muted-foreground">
+            {manualJd.length} / 3000
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TabHeading({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <h2 className="font-heading text-lg font-semibold">{title}</h2>
+      <p className="text-xs/relaxed text-muted-foreground">{description}</p>
+    </div>
+  );
+}
+
+const sidebarTabClass =
+  "rounded-lg px-3 py-2.5 text-[13px] after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300";
 
 export function AiAssistantModal({
   open,
@@ -155,301 +291,302 @@ export function AiAssistantModal({
         ? "text-yellow-600"
         : "text-red-600";
 
+  const contextFields = (
+    <ContextFields
+      applications={applications}
+      cvs={cvs}
+      appId={appId}
+      setAppId={setAppId}
+      cvId={cvId}
+      setCvId={setCvId}
+      jdText={jdText}
+      manualJd={manualJd}
+      setManualJd={setManualJd}
+      hasStoredJd={Boolean(selectedApp?.jobDescription)}
+    />
+  );
+
+  const ctaClass =
+    "h-11 w-full bg-gradient-to-r from-violet-600 to-violet-500 text-sm text-white hover:from-violet-700 hover:to-violet-600";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-hidden p-0 sm:max-w-6xl" scrollable>
         <Tabs
           defaultValue="cover-letter"
           orientation="vertical"
-          className="min-h-[560px] gap-0"
+          className="min-h-[620px] gap-0"
         >
           {/* Sidebar */}
-          <div className="flex w-52 shrink-0 flex-col gap-4 border-r bg-muted/40 p-4">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <SparklesIcon className="size-4 text-violet-500" />
+          <div className="flex w-60 shrink-0 flex-col border-r bg-muted/30 p-4">
+            <DialogHeader className="mb-6 px-1 pt-1">
+              <DialogTitle className="flex items-center gap-2 text-sm">
+                <SparklesIcon className="size-4.5 text-violet-500" />
                 Asisten AI Lamaran
               </DialogTitle>
             </DialogHeader>
             <TabsList variant="line" className="w-full gap-1 p-0">
-              <TabsTrigger
-                value="cover-letter"
-                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
-              >
+              <TabsTrigger value="cover-letter" className={sidebarTabClass}>
                 <FileTextIcon aria-hidden="true" />
                 Surat Lamaran
               </TabsTrigger>
-              <TabsTrigger
-                value="interview"
-                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
-              >
+              <TabsTrigger value="interview" className={sidebarTabClass}>
                 <MessageSquareIcon aria-hidden="true" />
                 Interview Prep
               </TabsTrigger>
-              <TabsTrigger
-                value="analysis"
-                className="rounded-md px-2.5 py-2 after:hidden data-active:bg-violet-500/10 data-active:text-violet-700 dark:data-active:bg-violet-500/15 dark:data-active:text-violet-300"
-              >
+              <TabsTrigger value="analysis" className={sidebarTabClass}>
                 <SearchCheckIcon aria-hidden="true" />
                 Analisis Lowongan
               </TabsTrigger>
             </TabsList>
+            <div className="mt-auto rounded-xl bg-violet-500/5 p-3.5 dark:bg-violet-500/10">
+              <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium">
+                <SparklesIcon className="size-3.5 text-violet-500" />
+                Tips
+              </p>
+              <p className="text-xs/relaxed text-muted-foreground">
+                AI akan menyesuaikan hasil berdasarkan lamaran, CV, dan
+                deskripsi lowongan yang kamu pilih.
+              </p>
+            </div>
           </div>
 
           {/* Main content */}
-          <div className="flex min-w-0 flex-1 justify-center p-6">
-            <div className="flex w-full max-w-2xl flex-col gap-4">
-              {/* Context header */}
-              <div className="space-y-3 rounded-xl border bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 p-4">
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <ContextPicker
-                    label="Lamaran"
-                    value={appId}
-                    onChange={setAppId}
-                    placeholder="Pilih lamaran"
-                    options={applications.map((a) => ({
-                      value: a.id,
-                      label: `${a.company} — ${a.position}`,
-                    }))}
-                  />
-                  <ContextPicker
-                    label="CV"
-                    value={cvId}
-                    onChange={setCvId}
-                    placeholder="Pilih CV"
-                    options={
-                      cvs?.map((cv) => ({ value: cv.id, label: cv.title })) ??
-                      []
-                    }
+          <div className="min-w-0 flex-1 overflow-y-auto bg-violet-500/[0.02] p-6 sm:p-8">
+            {/* Surat Lamaran */}
+            <TabsContent value="cover-letter" className="space-y-5">
+              <TabHeading
+                title="Buat Surat Lamaran"
+                description="Isi informasi di bawah ini untuk membuat surat lamaran yang profesional dan sesuai kebutuhanmu."
+              />
+              {contextFields}
+              <div>
+                <span className="mb-1.5 block text-xs font-medium">
+                  Gaya penulisan
+                </span>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {TONES.map(({ value, label, description, icon: Icon }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setTone(value)}
+                      className={cn(
+                        "flex items-start gap-2.5 rounded-xl border p-3 text-left transition-colors",
+                        tone === value
+                          ? "border-violet-400 bg-violet-500/10 dark:border-violet-500/60"
+                          : "bg-background hover:border-violet-300 hover:bg-violet-500/5",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "mt-0.5 size-4 shrink-0",
+                          tone === value
+                            ? "text-violet-600 dark:text-violet-400"
+                            : "text-muted-foreground",
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0">
+                        <span
+                          className={cn(
+                            "block text-xs font-semibold",
+                            tone === value &&
+                              "text-violet-700 dark:text-violet-300",
+                          )}
+                        >
+                          {label}
+                        </span>
+                        <span className="block text-[11px]/relaxed text-muted-foreground">
+                          {description}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button
+                className={ctaClass}
+                disabled={!ready}
+                onClick={() =>
+                  snapshot &&
+                  coverLetterMutation.mutate({
+                    cvSnapshot: snapshot,
+                    jdText,
+                    tone,
+                  })
+                }
+                loading={coverLetterMutation.isPending}
+                loadingText="Membuat surat lamaran..."
+              >
+                <SparklesIcon aria-hidden="true" />
+                Buat Surat Lamaran
+              </Button>
+              {coverLetter && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium">Hasil:</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigator.clipboard.writeText(coverLetter)}
+                    >
+                      Salin
+                    </Button>
+                  </div>
+                  <Textarea
+                    value={coverLetter}
+                    onChange={(e) => setCoverLetter(e.target.value)}
+                    className="min-h-[240px] resize-none bg-background text-xs"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-xs font-medium",
-                      jdText
-                        ? "bg-green-100 text-green-800"
-                        : "bg-amber-100 text-amber-800",
-                    )}
-                  >
-                    {jdText ? "JD: tersedia" : "JD: tidak ada"}
-                  </span>
-                  {!cvId && (
+              )}
+              {coverLetterMutation.error && (
+                <p className="text-xs text-destructive">
+                  {coverLetterMutation.error.message}
+                </p>
+              )}
+            </TabsContent>
+
+            {/* Interview Prep */}
+            <TabsContent value="interview" className="space-y-5">
+              <TabHeading
+                title="Persiapan Interview"
+                description="Generate pertanyaan interview yang mungkin muncul berdasarkan CV dan lowongan yang kamu pilih."
+              />
+              {contextFields}
+              <Button
+                className={ctaClass}
+                disabled={!ready}
+                onClick={() =>
+                  snapshot &&
+                  interviewMutation.mutate({ cvSnapshot: snapshot, jdText })
+                }
+                loading={interviewMutation.isPending}
+                loadingText="Membuat pertanyaan..."
+              >
+                <SparklesIcon aria-hidden="true" />
+                Generate 10 Pertanyaan Interview
+              </Button>
+              {questions.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {questions.map((q, i) => (
+                    <div
+                      key={q.question}
+                      className="space-y-1.5 rounded-xl border bg-background p-3.5"
+                    >
+                      <p className="text-sm font-medium">
+                        {i + 1}. {q.question}
+                      </p>
+                      <p className="text-xs/relaxed text-muted-foreground">
+                        💡 {q.tip}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {interviewMutation.error && (
+                <p className="text-xs text-destructive">
+                  {interviewMutation.error.message}
+                </p>
+              )}
+            </TabsContent>
+
+            {/* Analisis Lowongan */}
+            <TabsContent value="analysis" className="space-y-5">
+              <TabHeading
+                title="Analisis Lowongan"
+                description="Bandingkan CV-mu dengan deskripsi lowongan untuk melihat skor kecocokan dan gap yang perlu diisi."
+              />
+              {contextFields}
+              <Button
+                className={ctaClass}
+                disabled={!ready || !jdText.trim()}
+                onClick={() =>
+                  snapshot &&
+                  analyzeMutation.mutate({
+                    jdText: jdText.slice(0, 3000),
+                    cvSnapshot: snapshot,
+                  })
+                }
+                loading={analyzeMutation.isPending}
+                loadingText="Menganalisis..."
+              >
+                <SparklesIcon aria-hidden="true" />
+                Analisis Kesesuaian
+              </Button>
+              {!jdText.trim() && (
+                <p className="text-xs text-muted-foreground">
+                  Butuh deskripsi lowongan — isi di form lamaran atau paste di
+                  atas.
+                </p>
+              )}
+              {analysis && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
-                      Pilih CV untuk mulai.
+                      Skor kesesuaian:
                     </span>
+                    <span className={`text-3xl font-bold ${scoreColor}`}>
+                      {analysis.score}%
+                    </span>
+                  </div>
+                  {analysis.matchedKeywords.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-green-700">
+                        Keyword yang cocok:
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {analysis.matchedKeywords.map((kw) => (
+                          <span
+                            key={kw}
+                            className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800"
+                          >
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {analysis.gaps.length > 0 && (
+                    <div>
+                      <p className="mb-1 text-xs font-medium text-amber-700">
+                        Gap yang perlu diisi:
+                      </p>
+                      <ul className="space-y-0.5">
+                        {analysis.gaps.map((gap) => (
+                          <li
+                            key={gap}
+                            className="text-xs text-muted-foreground"
+                          >
+                            • {gap}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {analysis.recommendations.length > 0 && (
+                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-3.5">
+                      <p className="mb-1 text-xs font-medium">Rekomendasi:</p>
+                      <ul className="space-y-1">
+                        {analysis.recommendations.map((rec) => (
+                          <li
+                            key={rec}
+                            className="text-xs text-muted-foreground"
+                          >
+                            • {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                 </div>
-                {!selectedApp?.jobDescription && (
-                  <Textarea
-                    value={manualJd}
-                    onChange={(e) => setManualJd(e.target.value.slice(0, 3000))}
-                    placeholder="Lamaran ini belum punya deskripsi lowongan — paste di sini (tidak disimpan)..."
-                    className="min-h-[70px] resize-none text-xs"
-                  />
-                )}
-              </div>
-
-              {/* Surat Lamaran */}
-              <TabsContent value="cover-letter" className="space-y-4">
-                <div>
-                  <span className="mb-1 block text-xs font-medium">
-                    Gaya penulisan
-                  </span>
-                  <div className="flex gap-1 rounded-lg bg-muted p-1">
-                    {(
-                      [
-                        ["formal", "Formal"],
-                        ["casual", "Santai profesional"],
-                        ["creative", "Kreatif"],
-                      ] as const
-                    ).map(([value, label]) => (
-                      <Button
-                        key={value}
-                        type="button"
-                        size="sm"
-                        variant={tone === value ? "default" : "ghost"}
-                        className="flex-1"
-                        onClick={() => setTone(value)}
-                      >
-                        {label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <Button
-                  className="w-full"
-                  disabled={!ready}
-                  onClick={() =>
-                    snapshot &&
-                    coverLetterMutation.mutate({
-                      cvSnapshot: snapshot,
-                      jdText,
-                      tone,
-                    })
-                  }
-                  loading={coverLetterMutation.isPending}
-                  loadingText="Membuat surat lamaran..."
-                >
-                  Buat Surat Lamaran
-                </Button>
-                {coverLetter && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium">Hasil:</span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          navigator.clipboard.writeText(coverLetter)
-                        }
-                      >
-                        Salin
-                      </Button>
-                    </div>
-                    <Textarea
-                      value={coverLetter}
-                      onChange={(e) => setCoverLetter(e.target.value)}
-                      className="min-h-[240px] resize-none text-xs"
-                    />
-                  </div>
-                )}
-                {coverLetterMutation.error && (
-                  <p className="text-xs text-destructive">
-                    {coverLetterMutation.error.message}
-                  </p>
-                )}
-              </TabsContent>
-
-              {/* Interview Prep */}
-              <TabsContent value="interview" className="space-y-4">
-                <Button
-                  className="w-full"
-                  disabled={!ready}
-                  onClick={() =>
-                    snapshot &&
-                    interviewMutation.mutate({ cvSnapshot: snapshot, jdText })
-                  }
-                  loading={interviewMutation.isPending}
-                  loadingText="Membuat pertanyaan..."
-                >
-                  Generate 10 Pertanyaan Interview
-                </Button>
-                {questions.length > 0 && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {questions.map((q, i) => (
-                      <div
-                        key={q.question}
-                        className="space-y-1.5 rounded-lg border p-3"
-                      >
-                        <p className="text-sm font-medium">
-                          {i + 1}. {q.question}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          💡 {q.tip}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {interviewMutation.error && (
-                  <p className="text-xs text-destructive">
-                    {interviewMutation.error.message}
-                  </p>
-                )}
-              </TabsContent>
-
-              {/* Analisis Lowongan */}
-              <TabsContent value="analysis" className="space-y-4">
-                <Button
-                  className="w-full"
-                  disabled={!ready || !jdText.trim()}
-                  onClick={() =>
-                    snapshot &&
-                    analyzeMutation.mutate({
-                      jdText: jdText.slice(0, 3000),
-                      cvSnapshot: snapshot,
-                    })
-                  }
-                  loading={analyzeMutation.isPending}
-                  loadingText="Menganalisis..."
-                >
-                  Analisis Kesesuaian
-                </Button>
-                {!jdText.trim() && (
-                  <p className="text-xs text-muted-foreground">
-                    Butuh deskripsi lowongan — isi di form lamaran atau paste di
-                    atas.
-                  </p>
-                )}
-                {analysis && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        Skor kesesuaian:
-                      </span>
-                      <span className={`text-3xl font-bold ${scoreColor}`}>
-                        {analysis.score}%
-                      </span>
-                    </div>
-                    {analysis.matchedKeywords.length > 0 && (
-                      <div>
-                        <p className="mb-1 text-xs font-medium text-green-700">
-                          Keyword yang cocok:
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {analysis.matchedKeywords.map((kw) => (
-                            <span
-                              key={kw}
-                              className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800"
-                            >
-                              {kw}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {analysis.gaps.length > 0 && (
-                      <div>
-                        <p className="mb-1 text-xs font-medium text-amber-700">
-                          Gap yang perlu diisi:
-                        </p>
-                        <ul className="space-y-0.5">
-                          {analysis.gaps.map((gap) => (
-                            <li
-                              key={gap}
-                              className="text-xs text-muted-foreground"
-                            >
-                              • {gap}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {analysis.recommendations.length > 0 && (
-                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                        <p className="mb-1 text-xs font-medium">Rekomendasi:</p>
-                        <ul className="space-y-1">
-                          {analysis.recommendations.map((rec) => (
-                            <li
-                              key={rec}
-                              className="text-xs text-muted-foreground"
-                            >
-                              • {rec}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {analyzeMutation.error && (
-                  <p className="text-xs text-destructive">
-                    {analyzeMutation.error.message}
-                  </p>
-                )}
-              </TabsContent>
-            </div>
+              )}
+              {analyzeMutation.error && (
+                <p className="text-xs text-destructive">
+                  {analyzeMutation.error.message}
+                </p>
+              )}
+            </TabsContent>
           </div>
         </Tabs>
       </DialogContent>
