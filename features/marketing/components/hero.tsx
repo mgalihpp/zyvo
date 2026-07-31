@@ -3,14 +3,31 @@
 import { ArrowRightIcon, SparklesIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/lib/auth-client";
+import { useMounted } from "@/features/auth/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { ShaderHero } from "./shader-hero";
 
 export function Hero() {
-  const { data: session } = useSession();
+  const mounted = useMounted();
+  const { data: session, isPending } = useSession();
+  const authed = mounted && !isPending && !!session;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const handleMove = (e: React.MouseEvent) => {
+    const el = panelRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    el.style.transform = `rotateY(${x * 14}deg) rotateX(${y * -14}deg)`;
+  };
+  const handleLeave = () => {
+    if (panelRef.current) panelRef.current.style.transform = "";
+  };
   return (
     <section className="relative isolate overflow-hidden bg-black">
       <div className="absolute inset-0 -z-10">
@@ -48,26 +65,35 @@ export function Hero() {
         </Reveal>
 
         <Reveal delay={240} className="mt-9 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href={session ? "/dashboard" : "/signup"}
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "group h-11 gap-2 bg-white px-6 text-sm text-zinc-900 shadow-lg shadow-indigo-950/30 transition-transform hover:-translate-y-0.5 hover:bg-white/90",
-            )}
-          >
-            {session ? "Ke Dashboard" : "Mulai Sekarang — Gratis"}
-            <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
-          {!session && (
-            <Link
-              href="/signin"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
+          {!mounted || isPending ? (
+            <>
+              <Skeleton className="h-11 w-52 rounded-md" />
+              <Skeleton className="h-11 w-24 rounded-md" />
+            </>
+          ) : (
+            <>
+              <Link
+                href={authed ? "/dashboard" : "/signup"}
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "group h-11 gap-2 bg-white px-6 text-sm text-zinc-900 shadow-lg shadow-indigo-950/30 transition-transform hover:-translate-y-0.5 hover:bg-white/90",
+                )}
+              >
+                {authed ? "Ke Dashboard" : "Mulai Sekarang — Gratis"}
+                <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              {!authed && (
+                <Link
+                  href="/signin"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" }),
+                    "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  Masuk
+                </Link>
               )}
-            >
-              Masuk
-            </Link>
+            </>
           )}
         </Reveal>
 
@@ -84,19 +110,31 @@ export function Hero() {
           Tanpa kartu kredit • Ekspor PDF instan
         </Reveal>
 
-        <Reveal delay={420} className="relative mt-16 w-full max-w-5xl">
+        <Reveal
+          delay={420}
+          className="relative mt-16 w-full max-w-5xl [perspective:1200px]"
+        >
           <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-x-10 -top-10 bottom-0 -z-10 bg-[radial-gradient(50%_50%_at_50%_0%,rgba(99,102,241,0.35),transparent)]"
-          />
-          <Image
-            src="/hero.png"
-            alt="Pratinjau editor Zyvo"
-            width={1600}
-            height={1000}
-            priority
-            className="w-full rounded-xl border border-white/10 shadow-2xl shadow-indigo-950/50 ring-1 ring-white/5"
-          />
+            ref={panelRef}
+            onPointerMove={handleMove}
+            onPointerLeave={handleLeave}
+            className="relative overflow-hidden rounded-4xl border border-white/15 bg-white/5 p-4 shadow-2xl shadow-indigo-950/50 backdrop-blur-xl transition-transform duration-300 ease-out will-change-transform [transform-style:preserve-3d]"
+          >
+            <div className="overflow-hidden rounded-xl">
+              <Image
+                src="/hero.png"
+                alt="Pratinjau editor Zyvo"
+                width={1600}
+                height={1000}
+                priority
+                className="w-full"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-white/15"
+              />
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>

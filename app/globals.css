@@ -131,6 +131,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Animated decorative glows (`.glow-drift`) overshoot the viewport with their
+   * transform, which widens the document and creates a horizontal scrollbar on
+   * mobile. Clip instead of hidden: never becomes a scroll container. */
+  html,
+  body {
+    overflow-x: clip;
+  }
   html {
     @apply font-sans;
   }

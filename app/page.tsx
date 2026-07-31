@@ -1,15 +1,37 @@
 import type { Metadata } from "next";
-import { CtaSection } from "@/features/marketing/components/cta-section";
-import { Faq } from "@/features/marketing/components/faq";
-import { FeaturesGrid } from "@/features/marketing/components/features-grid";
+import dynamic from "next/dynamic";
 import { Footer } from "@/features/marketing/components/footer";
 import { Hero } from "@/features/marketing/components/hero";
-import { HowItWorks } from "@/features/marketing/components/how-it-works";
 import { Navbar } from "@/features/marketing/components/navbar";
-import { Pricing } from "@/features/marketing/components/pricing";
-import { TemplatesShowcase } from "@/features/marketing/components/templates-showcase";
 import { FAQS } from "@/features/marketing/lib/faq-data";
 import { constructMetadata, siteConfig } from "@/lib/seo";
+
+const CtaSection = dynamic(() =>
+  import("@/features/marketing/components/cta-section").then(
+    (m) => m.CtaSection,
+  ),
+);
+const Faq = dynamic(() =>
+  import("@/features/marketing/components/faq").then((m) => m.Faq),
+);
+const FeaturesGrid = dynamic(() =>
+  import("@/features/marketing/components/features-grid").then(
+    (m) => m.FeaturesGrid,
+  ),
+);
+const HowItWorks = dynamic(() =>
+  import("@/features/marketing/components/how-it-works").then(
+    (m) => m.HowItWorks,
+  ),
+);
+const Pricing = dynamic(() =>
+  import("@/features/marketing/components/pricing").then((m) => m.Pricing),
+);
+const TemplatesShowcase = dynamic(() =>
+  import("@/features/marketing/components/templates-showcase").then(
+    (m) => m.TemplatesShowcase,
+  ),
+);
 
 export const metadata: Metadata = constructMetadata({
   title: "Zyvo | Buat CV profesional dalam hitungan menit",
