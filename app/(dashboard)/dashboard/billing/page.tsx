@@ -6,6 +6,7 @@ import { BillingSkeleton } from "@/features/billing/components/billing-skeleton"
 import { ResumeAlert } from "@/features/billing/components/resume-alert";
 import {
   useCancelTransaction,
+  useConfirmPayment,
   useCreateSnapToken,
   usePollStatus,
   useSubscription,
@@ -61,10 +62,27 @@ export default function PlanPage() {
   const [polling, setPolling] = useState(false);
   const pollCount = useRef(0);
 
-  const { data: subscription } = useSubscription();
+  const { data: subscription, refetch: refetchSubscription } = useSubscription();
   const createToken = useCreateSnapToken();
   const cancel = useCancelTransaction();
+  const confirmPayment = useConfirmPayment();
   const { isPaid } = usePollStatus(orderId, polling);
+
+  useEffect(() => {
+    if (!isPaid || !polling) return;
+    setPolling(false);
+    setOrderId(null);
+    setSnapToken(null);
+    setPendingPlanId(null);
+    setShowResume(false);
+    pollCount.current = 0;
+    if (orderId) {
+      confirmPayment
+        .mutateAsync({ orderId })
+        .catch(() => undefined)
+        .finally(() => refetchSubscription());
+    }
+  }, [isPaid, polling, orderId, confirmPayment, refetchSubscription]);
 
   useEffect(() => {
     try {
@@ -95,15 +113,6 @@ export default function PlanPage() {
     };
     localStorage.setItem(RESUME_KEY, JSON.stringify(state));
   }, [orderId, snapToken, pendingPlanId, showResume]);
-
-  if (isPaid && polling) {
-    setPolling(false);
-    setOrderId(null);
-    setSnapToken(null);
-    setPendingPlanId(null);
-    setShowResume(false);
-    pollCount.current = 0;
-  }
 
   function openSnap(token: string, orderId: string) {
     if (!window.snap) {

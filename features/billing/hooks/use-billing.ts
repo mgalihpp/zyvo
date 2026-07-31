@@ -7,8 +7,12 @@ export function useCreateSnapToken() {
 }
 
 export function useSubscription() {
-  const { data, isLoading } = trpc.billing.getSubscription.useQuery();
-  return { data: data ?? null, isLoading };
+  const { data, isLoading, refetch } = trpc.billing.getSubscription.useQuery();
+  return { data: data ?? null, isLoading, refetch };
+}
+
+export function useConfirmPayment() {
+  return trpc.billing.confirmPayment.useMutation();
 }
 
 export function usePollStatus(orderId: string | null, enabled: boolean) {

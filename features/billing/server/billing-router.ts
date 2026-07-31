@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { coreGet, corePost, snapPost } from "@/features/billing/lib/midtrans";
 import { getAmount } from "@/features/billing/lib/plans";
+import { applyPayment, TERMINAL_FAILED } from "@/features/billing/server/apply-payment";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 export const billingRouter = createTRPCRouter({
@@ -83,6 +84,44 @@ export const billingRouter = createTRPCRouter({
     const isActive = sub?.status === "active" && sub.expiresAt > new Date();
     return isActive ? sub : null;
   }),
+
+  confirmPayment: protectedProcedure
+    .input(z.object({ orderId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
+
+      if (tx.status === "settlement") return { paid: true };
+      if (TERMINAL_FAILED.has(tx.status)) return { paid: false };
+
+      let res: Record<string, unknown>;
+      try {
+        res = await coreGet(`/${input.orderId}/status`);
+      } catch {
+        return { paid: false };
+      }
+
+      const isPaid =
+        res.transaction_status === "settlement" ||
+        (res.transaction_status === "capture" &&
+          res.fraud_status === "accept");
+
+      if (!isPaid) return { paid: false };
+
+      await applyPayment(ctx.prisma, input.orderId, {
+        transaction_status: res.transaction_status as string,
+        fraud_status: res.fraud_status as string | undefined,
+      });
+
+      return { paid: true };
+    }),
 
   cancelTransaction: protectedProcedure
     .input(z.object({ orderId: z.string() }))
