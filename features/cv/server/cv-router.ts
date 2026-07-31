@@ -146,13 +146,34 @@ function describeChange(
   if (key === "personal") {
     const a = (current ?? {}) as Record<string, unknown>;
     const b = (version ?? {}) as Record<string, unknown>;
-    const changed = Object.keys(PERSONAL_LABELS).filter((k) => !eq(a[k], b[k]));
-    if (changed.length === 0)
+    const entries: VersionChangeEntry[] = [];
+    for (const k of Object.keys(PERSONAL_LABELS)) {
+      if (eq(a[k], b[k])) continue;
+      const label = PERSONAL_LABELS[k];
+      const curVal = str(a[k]);
+      const verVal = str(b[k]);
+      // Photos are data URLs / long blobs — describe the change instead of
+      // dumping the value.
+      if (k === "photo") {
+        if (!curVal && verVal)
+          entries.push({ kind: "restore", text: "Foto: akan dikembalikan" });
+        else if (curVal && !verVal)
+          entries.push({ kind: "remove", text: "Foto: akan dihapus" });
+        else entries.push({ kind: "edit", text: "Foto: diganti" });
+        continue;
+      }
+      if (!curVal && verVal) {
+        entries.push({ kind: "restore", text: `${label}: ${verVal}` });
+      } else if (curVal && !verVal) {
+        entries.push({ kind: "remove", text: `${label}: ${curVal}` });
+      } else {
+        entries.push({ kind: "remove", text: `${label}: ${curVal}` });
+        entries.push({ kind: "restore", text: `${label}: ${verVal}` });
+      }
+    }
+    if (entries.length === 0)
       return [{ kind: "edit", text: "Data pribadi berbeda" }];
-    return changed.map((k) => ({
-      kind: "edit" as const,
-      text: PERSONAL_LABELS[k],
-    }));
+    return entries;
   }
 
   if (key === "typography" || key === "colors") {
