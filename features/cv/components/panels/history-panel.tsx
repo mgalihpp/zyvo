@@ -42,43 +42,39 @@ function formatRelative(date: Date) {
   return formatVersionDate(date);
 }
 
-interface VersionChange {
-  label: string;
-  detail: string;
+interface ChangeEntry {
+  kind: "restore" | "remove" | "edit" | "info";
+  text: string;
 }
 
-/** "Pengalaman: PT A akan dihapus" rows, capped at `max` with a +N indicator. */
-function ChangeList({
-  changes,
-  max = Number.POSITIVE_INFINITY,
-}: {
-  changes: VersionChange[];
-  max?: number;
-}) {
-  const shown = changes.slice(0, max);
-  const hidden = changes.length - shown.length;
-  return (
-    <ul className="space-y-1">
-      {shown.map((c) => (
-        <li key={c.label} className="flex gap-1.5 text-xs">
-          <span className="shrink-0 font-medium text-foreground">
-            {c.label}:
-          </span>
-          <span className="text-muted-foreground">{c.detail}</span>
-        </li>
-      ))}
-      {hidden > 0 ? (
-        <li className="text-xs text-muted-foreground">
-          +{hidden} perubahan lainnya
-        </li>
-      ) : null}
-    </ul>
-  );
+interface VersionChange {
+  label: string;
+  entries: ChangeEntry[];
+}
+
+/** Diff gutter marker + color per entry kind, mirroring a code diff. */
+const KIND_STYLE: Record<ChangeEntry["kind"], { sign: string; cls: string }> = {
+  restore: {
+    sign: "+",
+    cls: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  },
+  remove: { sign: "-", cls: "bg-red-500/10 text-red-700 dark:text-red-400" },
+  edit: {
+    sign: "~",
+    cls: "bg-amber-500/10 text-amber-700 dark:text-amber-500",
+  },
+  info: { sign: " ", cls: "text-muted-foreground" },
+};
+
+/** Total diff lines across all changed sections. */
+function countEntries(changes: VersionChange[]) {
+  return changes.reduce((n, c) => n + c.entries.length, 0);
 }
 
 export function HistoryPanel() {
   const cvId = useCvStore((s) => s.cvId);
   const replaceContent = useCvStore((s) => s.replaceContent);
+  const lastSavedAt = useCvStore((s) => s.lastSavedAt);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
@@ -123,11 +119,26 @@ export function HistoryPanel() {
         </p>
       </div>
 
-      <div className="p-4">
+      <div className="space-y-3 p-4">
+        {/* The live CV, pinned above the saved snapshots so "sekarang" is
+            never confused with the newest snapshot below it. */}
+        <div className="rounded-lg border border-primary/50 bg-primary/[0.04] p-3">
+          <div className="flex items-center gap-1.5">
+            <span aria-hidden className="size-2 rounded-full bg-primary" />
+            <p className="text-sm font-medium">Versi sekarang</p>
+            <Badge className="h-4 px-1.5 text-[10px]">Aktif</Badge>
+          </div>
+          <p className="mt-0.5 pl-3.5 text-xs text-muted-foreground">
+            {lastSavedAt
+              ? `Tersimpan ${formatRelative(new Date(lastSavedAt))}`
+              : "CV yang sedang Anda edit"}
+          </p>
+        </div>
+
         {versions.isLoading ? (
           <div className="space-y-3">
             {["a", "b", "c"].map((id) => (
-              <Skeleton key={id} className="h-20 w-full rounded-lg" />
+              <Skeleton key={id} className="h-16 w-full rounded-lg" />
             ))}
           </div>
         ) : versions.isError ? (
@@ -135,53 +146,32 @@ export function HistoryPanel() {
             Gagal memuat riwayat. Coba lagi nanti.
           </p>
         ) : versions.data && versions.data.length > 0 ? (
-          <ol className="space-y-3">
-            {versions.data.map((v, i) => {
-              const isLatest = i === 0;
+          <ol className="space-y-2">
+            {versions.data.map((v) => {
+              const total = countEntries(v.changes);
               return (
                 <li
                   key={v.id}
-                  className={
-                    "rounded-lg border p-3 transition-colors " +
-                    (isLatest
-                      ? "border-primary/50 bg-primary/[0.03]"
-                      : "hover:border-primary/40")
-                  }
+                  className="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:border-primary/40"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="text-sm font-medium">
-                          {formatRelative(new Date(v.createdAt))}
-                        </p>
-                        {isLatest ? (
-                          <Badge className="h-4 px-1.5 text-[10px]">
-                            Terbaru
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {formatVersionDate(new Date(v.createdAt))}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="shrink-0"
-                      onClick={() => setConfirmId(v.id)}
-                    >
-                      Pulihkan
-                    </Button>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {formatRelative(new Date(v.createdAt))}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {total > 0
+                        ? `${total} perubahan · ${v.changes.length} bagian`
+                        : "Sama dengan versi sekarang"}
+                    </p>
                   </div>
-                  <div className="mt-2 border-t pt-2">
-                    {v.changes.length > 0 ? (
-                      <ChangeList changes={v.changes} max={3} />
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        Sama dengan CV saat ini
-                      </p>
-                    )}
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={() => setConfirmId(v.id)}
+                  >
+                    Lihat
+                  </Button>
                 </li>
               );
             })}
@@ -205,37 +195,81 @@ export function HistoryPanel() {
           if (!open) setConfirmId(null);
         }}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Pulihkan versi ini?</AlertDialogTitle>
             <AlertDialogDescription>
-              Periksa perubahan di bawah sebelum memulihkan.
+              Perbandingan versi sekarang dengan versi yang dipilih.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-3 text-sm">
-            {confirmVersion ? (
-              <p className="flex items-center gap-1.5 text-muted-foreground">
-                <ClockIcon className="size-3.5 shrink-0" />
-                Versi {formatVersionDate(new Date(confirmVersion.createdAt))}
-              </p>
-            ) : null}
-            {confirmVersion && confirmVersion.changes.length > 0 ? (
-              <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3">
-                <p className="text-xs font-medium">
-                  Yang akan berubah pada CV Anda:
-                </p>
-                <ChangeList changes={confirmVersion.changes} />
+
+          {confirmVersion ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <ClockIcon className="size-3.5 shrink-0" />
+                  {formatVersionDate(new Date(confirmVersion.createdAt))}
+                </span>
+                <span>
+                  {countEntries(confirmVersion.changes)} perubahan di{" "}
+                  {confirmVersion.changes.length} bagian
+                </span>
               </div>
-            ) : (
-              <p className="text-muted-foreground">
-                Versi ini sama dengan CV saat ini — tidak ada yang berubah.
+
+              {confirmVersion.changes.length > 0 ? (
+                <div className="max-h-[45vh] overflow-auto rounded-lg border bg-muted/20 font-mono text-xs scrollbar-thin">
+                  {confirmVersion.changes.map((section) => (
+                    <div key={section.label} className="border-b last:border-0">
+                      <div className="sticky top-0 border-b bg-muted/80 px-3 py-1.5 font-sans text-[11px] font-medium backdrop-blur">
+                        {section.label}
+                      </div>
+                      <div className="divide-y divide-border/40">
+                        {section.entries.map((e, i) => {
+                          const style = KIND_STYLE[e.kind];
+                          return (
+                            <div
+                              key={`${e.kind}-${e.text}-${i}`}
+                              className={`flex gap-2 px-3 py-1.5 ${style.cls}`}
+                            >
+                              <span
+                                aria-hidden
+                                className="w-2 shrink-0 select-none font-bold"
+                              >
+                                {style.sign}
+                              </span>
+                              <span className="break-words">{e.text}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground">
+                  Versi ini sama dengan versi sekarang — tidak ada yang berubah.
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                <span className="text-emerald-700 dark:text-emerald-400">
+                  + dikembalikan
+                </span>
+                <span className="text-red-700 dark:text-red-400">
+                  - akan hilang
+                </span>
+                <span className="text-amber-700 dark:text-amber-500">
+                  ~ diubah
+                </span>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Versi sekarang akan disimpan sebagai versi baru terlebih dahulu,
+                jadi tidak ada data yang hilang permanen.
               </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Jangan khawatir: konten CV saat ini akan disimpan sebagai versi
-              baru terlebih dahulu, jadi tidak ada data yang hilang.
-            </p>
-          </div>
+            </div>
+          ) : null}
+
           <AlertDialogFooter>
             <AlertDialogCancel disabled={restoreMutation.isPending}>
               Batal

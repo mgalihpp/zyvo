@@ -43,11 +43,16 @@ const PERSONAL_LABELS: Record<string, string> = {
   photo: "Foto",
 };
 
-/** One human-readable change entry sent to the history panel. */
+/** One diff line inside a section: restore = add back, remove, edit, info. */
+export interface VersionChangeEntry {
+  kind: "restore" | "remove" | "edit" | "info";
+  text: string;
+}
+
+/** One changed section sent to the history panel, with per-item diff lines. */
 export interface VersionChange {
   label: string;
-  /** e.g. `"CV Lama" → "CV Baru"`, or `PT A ditambahkan; PT B diubah`. */
-  detail: string;
+  entries: VersionChangeEntry[];
 }
 
 const eq = (a: unknown, b: unknown) =>
@@ -62,32 +67,41 @@ function itemName(item: unknown): string | null {
 }
 
 /**
- * Describes what restoring `version` would change relative to `current`, in
- * "current → version" direction. For list sections the detail names the items
- * that would be added back / removed / edited.
+ * Diff lines describing what restoring `version` would change relative to
+ * `current`. For list sections each line names the item that would be added
+ * back / removed / edited.
  */
 function describeChange(
   key: (typeof DIFF_FIELDS)[number][0],
   version: unknown,
   current: unknown,
-): string {
+): VersionChangeEntry[] {
   // Short scalar values: show the actual before → after.
   if (key === "title" || key === "templateId") {
-    return `"${current ?? "—"}" → "${version ?? "—"}"`;
+    return [
+      { kind: "remove", text: `${current ?? "—"}` },
+      { kind: "restore", text: `${version ?? "—"}` },
+    ];
   }
 
   if (key === "summary") {
-    if (!current && version) return "Ringkasan akan dikembalikan";
-    if (current && !version) return "Ringkasan akan dikosongkan";
-    return "Isi ringkasan berbeda";
+    if (!current && version)
+      return [{ kind: "restore", text: "Ringkasan akan dikembalikan" }];
+    if (current && !version)
+      return [{ kind: "remove", text: "Ringkasan akan dikosongkan" }];
+    return [{ kind: "edit", text: "Isi ringkasan berbeda" }];
   }
 
   if (key === "personal") {
     const a = (current ?? {}) as Record<string, unknown>;
     const b = (version ?? {}) as Record<string, unknown>;
     const changed = Object.keys(PERSONAL_LABELS).filter((k) => !eq(a[k], b[k]));
-    if (changed.length === 0) return "Data pribadi berbeda";
-    return changed.map((k) => PERSONAL_LABELS[k]).join(", ");
+    if (changed.length === 0)
+      return [{ kind: "edit", text: "Data pribadi berbeda" }];
+    return changed.map((k) => ({
+      kind: "edit" as const,
+      text: PERSONAL_LABELS[k],
+    }));
   }
 
   if (key === "typography" || key === "colors") {
@@ -95,47 +109,52 @@ function describeChange(
     const b = (version ?? {}) as Record<string, unknown>;
     const n = new Set([...Object.keys(a), ...Object.keys(b)]);
     const count = [...n].filter((k) => !eq(a[k], b[k])).length;
-    return `${count} pengaturan berbeda`;
+    return [{ kind: "edit", text: `${count} pengaturan berbeda` }];
   }
 
   // List sections: name what gets added back, removed, or edited.
   const cur = Array.isArray(current) ? current : [];
   const ver = Array.isArray(version) ? version : [];
-  const parts: string[] = [];
 
   const curNames = cur.map(itemName);
   const verNames = ver.map(itemName);
 
-  const added = verNames.filter(
-    (n): n is string => n !== null && !curNames.includes(n),
-  );
-  const removed = curNames.filter(
-    (n): n is string => n !== null && !verNames.includes(n),
-  );
+  const entries: VersionChangeEntry[] = [];
+
+  for (const n of verNames) {
+    if (n !== null && !curNames.includes(n)) {
+      entries.push({ kind: "restore", text: n });
+    }
+  }
+  for (const n of curNames) {
+    if (n !== null && !verNames.includes(n)) {
+      entries.push({ kind: "remove", text: n });
+    }
+  }
   // Same-name items whose content differs.
-  const edited = verNames.filter(
-    (n): n is string =>
+  for (const n of verNames) {
+    if (
       n !== null &&
       curNames.includes(n) &&
-      !eq(ver[verNames.indexOf(n)], cur[curNames.indexOf(n)]),
-  );
-
-  const list = (names: string[]) =>
-    names.length > 2
-      ? `${names.slice(0, 2).join(", ")} +${names.length - 2} lainnya`
-      : names.join(", ");
-
-  if (added.length) parts.push(`${list(added)} akan dikembalikan`);
-  if (removed.length) parts.push(`${list(removed)} akan dihapus`);
-  if (edited.length) parts.push(`${list(edited)} akan diubah`);
-
-  if (parts.length === 0) {
-    // Unnamed items or pure reorder — fall back to counts.
-    return cur.length === ver.length
-      ? "Urutan atau isi item berbeda"
-      : `${cur.length} item → ${ver.length} item`;
+      !eq(ver[verNames.indexOf(n)], cur[curNames.indexOf(n)])
+    ) {
+      entries.push({ kind: "edit", text: n });
+    }
   }
-  return parts.join(" · ");
+
+  if (entries.length === 0) {
+    // Unnamed items or pure reorder — fall back to counts.
+    return [
+      {
+        kind: "info",
+        text:
+          cur.length === ver.length
+            ? "Urutan atau isi item berbeda"
+            : `${cur.length} item → ${ver.length} item`,
+      },
+    ];
+  }
+  return entries;
 }
 
 /**
@@ -150,7 +169,7 @@ function diffChanges(
   return DIFF_FIELDS.filter(([key]) => !eq(version[key], current[key])).map(
     ([key, label]) => ({
       label,
-      detail: describeChange(key, version[key], current[key]),
+      entries: describeChange(key, version[key], current[key]),
     }),
   );
 }
