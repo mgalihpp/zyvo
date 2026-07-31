@@ -1,6 +1,11 @@
 "use client";
 
-import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  MoreHorizontalIcon,
+  PaletteIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +50,7 @@ export function ColumnHeader({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(column.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   const updateColumns = trpc.jobTracker.updateColumns.useMutation({
     onSuccess: () => {
@@ -70,6 +76,7 @@ export function ColumnHeader({
   }
 
   function setColor(color: ColumnColor) {
+    setColorPickerOpen(false);
     updateColumns.mutate({
       columns: columns.map((c) => (c.id === column.id ? { ...c, color } : c)),
     });
@@ -143,27 +150,11 @@ export function ColumnHeader({
               <PencilIcon />
               Ubah Nama
             </DropdownMenuItem>
-            {/* Swatch row — not a menu item; clicking a swatch sets the color. */}
-            <div className="flex items-center gap-1.5 px-2 py-1.5">
-              {COLUMN_COLOR_NAMES.map((colorName) => {
-                const selected = getColumnColor(column) === colorName;
-                return (
-                  <button
-                    key={colorName}
-                    type="button"
-                    aria-label={COLUMN_COLOR_LABELS[colorName]}
-                    aria-pressed={selected}
-                    className={cn(
-                      "size-4 rounded-full transition-transform hover:scale-110",
-                      COLUMN_COLORS[colorName].swatch,
-                      selected &&
-                        "ring-2 ring-foreground/60 ring-offset-1 ring-offset-popover",
-                    )}
-                    onClick={() => setColor(colorName)}
-                  />
-                );
-              })}
-            </div>
+            {/* One action item — the actual picker lives in a dialog. */}
+            <DropdownMenuItem onClick={() => setColorPickerOpen(true)}>
+              <PaletteIcon />
+              Warna
+            </DropdownMenuItem>
             {column.kind === "custom" && (
               <DropdownMenuItem
                 variant="destructive"
@@ -176,6 +167,45 @@ export function ColumnHeader({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <Dialog open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Warna kolom &quot;{column.name}&quot;</DialogTitle>
+            <DialogDescription>
+              Pilih warna untuk menandai kolom ini.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-4 gap-3">
+            {COLUMN_COLOR_NAMES.map((colorName) => {
+              const selected = getColumnColor(column) === colorName;
+              return (
+                <button
+                  key={colorName}
+                  type="button"
+                  aria-pressed={selected}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-lg border p-3 transition-colors hover:bg-accent",
+                    selected && "border-primary bg-accent",
+                  )}
+                  onClick={() => setColor(colorName)}
+                >
+                  <span
+                    className={cn(
+                      "size-5 rounded-full",
+                      COLUMN_COLORS[colorName].swatch,
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {COLUMN_COLOR_LABELS[colorName]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent className="sm:max-w-sm">
