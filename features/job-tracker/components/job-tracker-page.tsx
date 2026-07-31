@@ -4,6 +4,7 @@ import type { JobApplication } from "@prisma/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ApplicationDetailSheet } from "@/features/job-tracker/components/application-detail-sheet";
 import { ApplicationDialog } from "@/features/job-tracker/components/application-dialog";
 import { BoardToolbar } from "@/features/job-tracker/components/board-toolbar";
 import { KanbanBoard } from "@/features/job-tracker/components/kanban-board";
@@ -32,6 +33,8 @@ export function JobTrackerPage() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<JobApplication | undefined>();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
 
   if (isLoading) return <BoardSkeleton />;
 
@@ -52,6 +55,7 @@ export function JobTrackerPage() {
   const columns = data.board.columns as BoardColumn[];
   const defaultColumnId =
     [...columns].sort((a, b) => a.order - b.order)[0]?.id ?? "";
+  const selectedApp = data.applications.find((a) => a.id === selectedAppId);
 
   return (
     <div className="space-y-4 px-4 py-6">
@@ -73,6 +77,17 @@ export function JobTrackerPage() {
         columns={columns}
         applications={data.applications}
         onCardClick={(app) => {
+          setSelectedAppId(app.id);
+          setSheetOpen(true);
+        }}
+      />
+      <ApplicationDetailSheet
+        app={selectedApp}
+        columns={columns}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onEdit={(app) => {
+          setSheetOpen(false);
           setEditingApp(app);
           setDialogOpen(true);
         }}
