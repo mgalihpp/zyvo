@@ -1,6 +1,7 @@
 "use client";
 
 import type { JobApplication } from "@prisma/client";
+import { SparklesIcon } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +28,12 @@ const ApplicationDetailSheet = lazy(() =>
       default: m.ApplicationDetailSheet,
     }),
   ),
+);
+
+const AiAssistantModal = lazy(() =>
+  import("@/features/job-tracker/components/ai-assistant-modal").then((m) => ({
+    default: m.AiAssistantModal,
+  })),
 );
 
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
@@ -93,6 +100,7 @@ export function JobTrackerPage() {
   const [editingApp, setEditingApp] = useState<JobApplication | undefined>();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
+  const [aiOpen, setAiOpen] = useState(false);
 
   if (isLoading) return <BoardSkeleton />;
 
@@ -169,6 +177,21 @@ export function JobTrackerPage() {
           columns={columns}
           defaultColumnId={defaultColumnId}
           application={editingApp}
+        />
+      </Suspense>
+      <Button
+        size="icon"
+        aria-label="Asisten AI"
+        onClick={() => setAiOpen(true)}
+        className="fixed right-6 bottom-6 z-40 size-12 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg transition-transform hover:scale-105 hover:from-violet-600 hover:to-fuchsia-700"
+      >
+        <SparklesIcon className="size-5" />
+      </Button>
+      <Suspense fallback={null}>
+        <AiAssistantModal
+          open={aiOpen}
+          onOpenChange={setAiOpen}
+          applications={data.applications}
         />
       </Suspense>
     </div>
