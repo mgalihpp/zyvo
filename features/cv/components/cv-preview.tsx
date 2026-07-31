@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { EyeIcon, Minus, Plus } from "lucide-react";
 import { type PointerEvent, Suspense, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,12 +44,15 @@ export function CvPreview() {
   const organizations = useCvStore((s) => s.organizations);
   const projects = useCvStore((s) => s.projects);
   const custom = useCvStore((s) => s.custom);
+  // A past version being previewed from the history panel, if any.
+  const previewContent = useCvStore((s) => s.previewContent);
+  const setPreviewContent = useCvStore((s) => s.setPreviewContent);
 
   // Live-preview uncommitted color edits while the colors panel is open.
   const effectiveColors =
     activePanel === "colors" && draftColors ? draftColors : colors;
 
-  const content: CvContent = {
+  const liveContent: CvContent = {
     title,
     templateId,
     typography,
@@ -67,7 +70,10 @@ export function CvPreview() {
     custom,
   };
 
-  const template = getTemplate(templateId);
+  // Version preview wins over the live draft (read-only look-back).
+  const content = previewContent ?? liveContent;
+
+  const template = getTemplate(content.templateId);
   const Template = template.lazyComponent;
 
   const [zoom, setZoom] = useState(1);
@@ -108,6 +114,21 @@ export function CvPreview() {
 
   return (
     <div className="relative h-full bg-neutral-100 dark:bg-neutral-900">
+      {previewContent ? (
+        <div className="absolute inset-x-0 top-4 z-10 mx-auto flex w-fit items-center gap-3 rounded-full border border-amber-500/50 bg-background/95 py-1.5 pl-4 pr-1.5 text-xs shadow-md backdrop-blur">
+          <span className="flex items-center gap-1.5 font-medium">
+            <EyeIcon className="size-3.5 text-amber-600 dark:text-amber-500" />
+            Pratinjau versi lama
+          </span>
+          <Button
+            size="sm"
+            className="h-6 rounded-full px-2.5 text-xs"
+            onClick={() => setPreviewContent(null)}
+          >
+            Kembali ke versi sekarang
+          </Button>
+        </div>
+      ) : null}
       {/* Scroll lives on this inner box only, so zooming the CV scrolls the CV
        * — the zoom pill sits on the non-scrolling parent and stays put. */}
       <div
@@ -128,7 +149,10 @@ export function CvPreview() {
              * panel opens. */}
             <div
               className="w-[794px]"
-              style={cvRootStyle({ typography, colors: effectiveColors })}
+              style={cvRootStyle({
+                typography: content.typography,
+                colors: content.colors,
+              })}
             >
               <CvPaginator
                 pagination={template.pagination}

@@ -103,6 +103,17 @@ model CV {
   @@map("cv")
 }
 
+model CvVersion {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cvId      String   @db.ObjectId
+  userId    String
+  content   Json     // full snapshot: title, templateId, typography, colors, all sections
+  createdAt DateTime @default(now())
+
+  @@index([cvId, createdAt(sort: Desc)])
+  @@map("cv_version")
+}
+
 type Typography {
   fontHeading   String
   fontBody      String
