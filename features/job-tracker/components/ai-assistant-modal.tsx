@@ -525,8 +525,9 @@ export function AiAssistantModal({
               </Button>
               {!jdText.trim() && (
                 <p className="text-xs text-muted-foreground">
-                  Butuh deskripsi lowongan — isi di form lamaran atau paste di
-                  atas.
+                  Analisis butuh deskripsi lowongan. Paste dulu di kolom
+                  &quot;Deskripsi lowongan&quot; di atas, lalu tombol ini bisa
+                  diklik.
                 </p>
               )}
               {analysis && (
