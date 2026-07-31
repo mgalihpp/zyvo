@@ -2,17 +2,17 @@
 
 import { ClockIcon, FileTextIcon, HistoryIcon, InfoIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
@@ -287,19 +287,19 @@ export function HistoryPanel() {
         )}
       </div>
 
-      <AlertDialog
+      <Dialog
         open={confirmId !== null}
         onOpenChange={(open) => {
           if (!open) setConfirmId(null);
         }}
       >
-        <AlertDialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl scrollbar-thin">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Pulihkan versi ini?</AlertDialogTitle>
-            <AlertDialogDescription>
+        <DialogContent className="sm:max-w-3xl" scrollable>
+          <DialogHeader>
+            <DialogTitle>Pulihkan versi ini?</DialogTitle>
+            <DialogDescription>
               Periksa perubahan di bawah sebelum memulihkan.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
 
           {confirmVersion ? (
             <div className="space-y-3">
@@ -344,10 +344,13 @@ export function HistoryPanel() {
             </div>
           ) : null}
 
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={restoreMutation.isPending}>
+          <DialogFooter>
+            <DialogClose
+              render={<Button variant="outline" />}
+              disabled={restoreMutation.isPending}
+            >
               Batal
-            </AlertDialogCancel>
+            </DialogClose>
             <Button
               loading={restoreMutation.isPending}
               loadingText="Memulihkan..."
@@ -359,9 +362,9 @@ export function HistoryPanel() {
             >
               Pulihkan
             </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
