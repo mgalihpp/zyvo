@@ -29,6 +29,9 @@ const AiPanel = lazy(() =>
     default: m.AiPanel,
   })),
 );
+const HistoryPanel = lazy(() =>
+  import("./history-panel").then((m) => ({ default: m.HistoryPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -165,6 +168,23 @@ function ExportSkeleton() {
   );
 }
 
+/** Fallback for the lazy history panel: header + a stack of version rows. */
+function HistorySkeleton() {
+  return (
+    <div>
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-64" />
+      </div>
+      <div className="space-y-3 p-4">
+        {["a", "b", "c"].map((id) => (
+          <Skeleton key={id} className="h-14 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PersonalPanel() {
   return (
     <div>
@@ -224,6 +244,12 @@ function ActivePanel() {
             <AiPanel />
           </Suspense>
         </div>
+      );
+    case "history":
+      return (
+        <Suspense fallback={<HistorySkeleton />}>
+          <HistoryPanel />
+        </Suspense>
       );
     case "export":
       return (
