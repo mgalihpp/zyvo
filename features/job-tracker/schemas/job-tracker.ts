@@ -27,7 +27,8 @@ export const boardColumnSchema = z.object({
   name: z.string().min(1).max(60),
   kind: columnKindSchema,
   order: z.number().int().min(0),
-  color: columnColorSchema.optional(),
+  // nullish: Prisma returns `null` for docs saved before the field existed.
+  color: columnColorSchema.nullish(),
 });
 export type BoardColumn = z.infer<typeof boardColumnSchema>;
 
