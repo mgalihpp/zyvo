@@ -7,6 +7,7 @@ import {
   HistoryIcon,
   InfoIcon,
   RotateCcwIcon,
+  XIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -185,6 +186,12 @@ export function HistoryPanel() {
     [versions.data, confirmId],
   );
 
+  /** Version being previewed in the editor, for the panel's focused view. */
+  const previewedVersion = useMemo(
+    () => versions.data?.find((v) => v.id === previewId) ?? null,
+    [versions.data, previewId],
+  );
+
   // Show a version in the live CV editor preview (read-only, nothing saved).
   const previewVersion = async (versionId: string) => {
     if (!cvId) return;
@@ -237,7 +244,92 @@ export function HistoryPanel() {
       </div>
 
       <div className="p-4">
-        {versions.isLoading ? (
+        {previewedVersion ? (
+          // Preview mode: the editor shows this version; the panel focuses on
+          // its full diff so the user can see exactly what would change.
+          <TooltipProvider delay={300}>
+            <div className="space-y-3">
+              <div className="rounded-lg border border-amber-500/50 bg-amber-500/[0.06] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold">
+                        {formatRelative(new Date(previewedVersion.createdAt))}
+                      </p>
+                      <Badge className="h-4 bg-amber-500/15 px-1.5 text-[10px] text-amber-700 dark:text-amber-500">
+                        Pratinjau
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatVersionDate(new Date(previewedVersion.createdAt))}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1.5">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label="Pulihkan versi ini"
+                            onClick={() => setConfirmId(previewedVersion.id)}
+                          />
+                        }
+                      >
+                        <RotateCcwIcon />
+                      </TooltipTrigger>
+                      <TooltipContent>Pulihkan versi ini</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon-sm"
+                            variant="ghost"
+                            aria-label="Tutup pratinjau"
+                            onClick={() => {
+                              setPreviewContent(null);
+                              setPreviewId(null);
+                            }}
+                          />
+                        }
+                      >
+                        <XIcon />
+                      </TooltipTrigger>
+                      <TooltipContent>Tutup pratinjau</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Editor sedang menampilkan versi ini. Perubahan di bawah adalah
+                  perbandingan dengan versi sekarang.
+                </p>
+              </div>
+
+              {previewedVersion.changes.length > 0 ? (
+                previewedVersion.changes.map((change) => (
+                  <DiffFile key={change.label} change={change} />
+                ))
+              ) : (
+                <p className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground">
+                  Versi ini sama dengan versi sekarang — tidak ada yang berubah.
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-muted-foreground">
+                <span className="text-emerald-700 dark:text-emerald-400">
+                  + dikembalikan
+                </span>
+                <span className="text-red-700 dark:text-red-400">
+                  - akan hilang
+                </span>
+                <span className="text-amber-700 dark:text-amber-500">
+                  ~ diubah
+                </span>
+              </div>
+            </div>
+          </TooltipProvider>
+        ) : versions.isLoading ? (
           <div className="space-y-3">
             {["a", "b", "c"].map((id) => (
               <Skeleton key={id} className="h-32 w-full rounded-lg" />
@@ -285,7 +377,7 @@ export function HistoryPanel() {
                               <Button
                                 size="icon-sm"
                                 variant={
-                                  previewId === v.id ? "default" : "outline"
+                                  previewId === v.id ? "default" : "ghost"
                                 }
                                 aria-label="Pratinjau di editor"
                                 loading={loadingPreviewId === v.id}
@@ -306,7 +398,7 @@ export function HistoryPanel() {
                             render={
                               <Button
                                 size="icon-sm"
-                                variant="outline"
+                                variant="ghost"
                                 aria-label="Pulihkan versi ini"
                                 onClick={() => setConfirmId(v.id)}
                               />
