@@ -47,7 +47,7 @@ Layout:
 
 ## 4. Floating action button
 
-In `job-tracker-page.tsx`: `fixed bottom-6 right-6`, round, Sparkles icon + "AI" label, gradient accent. Rendered only when the board query succeeds (not on `UpsellView`). Click opens the modal with no pre-selected application (picker defaults to first application / empty).
+In `job-tracker-page.tsx`: `fixed bottom-6 right-6`, round, Sparkles icon only (no text label), violet gradient accent. Rendered only when the board query succeeds (not on `UpsellView`). Click opens the modal with no pre-selected application (picker defaults to first application / empty).
 
 ## 5. Builder cleanup
 
