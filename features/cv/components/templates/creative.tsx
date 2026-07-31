@@ -52,8 +52,8 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     >
                       <span
                         className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
-                        // level 1 (expert) = 100%, 5 (beginner) = 20%
-                        style={{ width: `${((6 - s.level) / 5) * 100}%` }}
+                        // level 5 (expert) = 100%, 1 (beginner) = 20%
+                        style={{ width: `${(s.level / 5) * 100}%` }}
                       />
                     </span>
                   </li>

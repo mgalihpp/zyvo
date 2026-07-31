@@ -39,7 +39,7 @@ export const educationSchema = z.object({
   gpa: z.string().max(20).optional().default(""),
 });
 
-/** Proficiency level on a 1–5 scale (1 = expert, 5 = beginner in the UI). */
+/** Proficiency level on a 1–5 scale (1 = beginner, 5 = expert in the UI). */
 const levelSchema = z.number().int().min(1).max(5).optional().default(3);
 
 export const skillSchema = z.object({
