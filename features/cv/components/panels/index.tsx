@@ -218,9 +218,7 @@ function ActivePanel() {
           />
           <Suspense
             fallback={
-              <div className="p-4 text-sm text-muted-foreground">
-                Memuat...
-              </div>
+              <div className="p-4 text-sm text-muted-foreground">Memuat...</div>
             }
           >
             <AiPanel />

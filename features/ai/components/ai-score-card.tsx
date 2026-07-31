@@ -28,7 +28,12 @@ function ScoreRing({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <div className="relative size-16">
-        <svg className="size-full -rotate-90" viewBox="0 0 72 72">
+        <svg
+          className="size-full -rotate-90"
+          viewBox="0 0 72 72"
+          role="img"
+          aria-label={`${label}: ${value} dari 100`}
+        >
           <circle
             cx="36"
             cy="36"
@@ -56,9 +61,7 @@ function ScoreRing({ label, value }: { label: string; value: number }) {
           {value}
         </span>
       </div>
-      <span className="text-center text-xs text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-center text-xs text-muted-foreground">{label}</span>
     </div>
   );
 }
