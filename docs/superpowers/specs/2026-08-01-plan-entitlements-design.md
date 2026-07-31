@@ -74,7 +74,8 @@ wrapper over `assertFeature(ctx, "jobTracker")`. The 10 call sites in
    naturally: view/edit/export still work).
 3. **Premium templates** — add `premium?: boolean` to `TemplateMeta` in
    `features/cv/components/templates/registry.ts`; mark templates in
-   `index.ts` (`classic` stays free; final list confirmed at implementation).
+   `index.ts`. Free: classic, minimal, modern, fresh-graduate, professional;
+   premium: executive, creative, elegant, compact.
    Server enforcement in `cv.update` when `templateId` changes to a premium
    template, and in `cv.create` if template is part of input. Export route
    needs no check (premium template can never be persisted by a free user).
