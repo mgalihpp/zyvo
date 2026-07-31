@@ -459,6 +459,34 @@ export const cvRouter = createTRPCRouter({
       }));
     }),
 
+  /**
+   * Full content of one version, for previewing it in the live CV editor
+   * without persisting anything.
+   */
+  getVersion: protectedProcedure
+    .input(z.object({ cvId: z.string(), versionId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const cv = await ctx.prisma.cV.findUnique({
+        where: { id: input.cvId },
+        select: { userId: true },
+      });
+      if (!cv || cv.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      const version = await ctx.prisma.cvVersion.findUnique({
+        where: { id: input.versionId },
+      });
+      if (!version || version.cvId !== input.cvId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Versi tidak ditemukan",
+        });
+      }
+
+      return { id: version.id, content: version.content };
+    }),
+
   restoreVersion: protectedProcedure
     .input(z.object({ cvId: z.string(), versionId: z.string() }))
     .mutation(async ({ ctx, input }) => {

@@ -176,6 +176,11 @@ export interface CvState extends CvContent {
   /** Overwrites all content fields after a server-side restore. Does NOT bump
    *  revision — the restored state is already persisted. */
   replaceContent: (content: CvContent) => void;
+
+  /** When set, the CV preview renders this content (a past version) instead
+   *  of the live draft. Never persisted; cleared by passing null. */
+  previewContent: CvContent | null;
+  setPreviewContent: (content: CvContent | null) => void;
 }
 
 const emptyContent: CvContent = {
@@ -259,9 +264,13 @@ export const createCvStore = (init?: CvStoreInit) =>
       set({
         ...content,
         draftColors: null,
+        previewContent: null,
         saveStatus: "saved",
         lastSavedAt: Date.now(),
       }),
+
+    previewContent: null,
+    setPreviewContent: (previewContent) => set({ previewContent }),
 
     setTitle: (title) => set((s) => ({ title, ...touch()(s) })),
     // Selecting a template always applies that template's default palette and

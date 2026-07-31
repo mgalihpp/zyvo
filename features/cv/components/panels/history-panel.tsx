@@ -1,6 +1,13 @@
 "use client";
 
-import { ClockIcon, FileTextIcon, HistoryIcon, InfoIcon } from "lucide-react";
+import {
+  ClockIcon,
+  EyeIcon,
+  FileTextIcon,
+  HistoryIcon,
+  InfoIcon,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +21,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
@@ -153,7 +166,13 @@ function DiffFile({
 export function HistoryPanel() {
   const cvId = useCvStore((s) => s.cvId);
   const replaceContent = useCvStore((s) => s.replaceContent);
+  const setPreviewContent = useCvStore((s) => s.setPreviewContent);
+  const previewContent = useCvStore((s) => s.previewContent);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  /** Version whose content is being fetched for the editor preview. */
+  const [loadingPreviewId, setLoadingPreviewId] = useState<string | null>(null);
+  /** Version currently shown in the CV editor preview. */
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
   const versions = trpc.cv.listVersions.useQuery(
@@ -165,6 +184,25 @@ export function HistoryPanel() {
     () => versions.data?.find((v) => v.id === confirmId) ?? null,
     [versions.data, confirmId],
   );
+
+  // Show a version in the live CV editor preview (read-only, nothing saved).
+  const previewVersion = async (versionId: string) => {
+    if (!cvId) return;
+    // Toggle off if this version is already being previewed.
+    if (previewContent && previewId === versionId) {
+      setPreviewContent(null);
+      setPreviewId(null);
+      return;
+    }
+    setLoadingPreviewId(versionId);
+    try {
+      const version = await utils.cv.getVersion.fetch({ cvId, versionId });
+      setPreviewContent(version.content as CvContent);
+      setPreviewId(versionId);
+    } finally {
+      setLoadingPreviewId(null);
+    }
+  };
 
   const restoreMutation = trpc.cv.restoreVersion.useMutation({
     onSuccess: (cv) => {
@@ -178,6 +216,7 @@ export function HistoryPanel() {
         ...rest
       } = cv;
       replaceContent(rest as CvContent);
+      setPreviewId(null);
       setConfirmId(null);
       utils.cv.listVersions.invalidate({ cvId: cv.id });
     },
@@ -209,71 +248,106 @@ export function HistoryPanel() {
             Gagal memuat riwayat. Coba lagi nanti.
           </p>
         ) : versions.data && versions.data.length > 0 ? (
-          <ol className="space-y-3">
-            {versions.data.map((v, index) => {
-              const isNewest = index === 0;
-              return (
-                <li
-                  key={v.id}
-                  className={cn(
-                    "rounded-lg border p-3 transition-colors",
-                    isNewest ? "border-primary/50" : "hover:border-primary/40",
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold">
-                          {formatRelative(new Date(v.createdAt))}
-                        </p>
-                        {isNewest ? (
-                          <Badge className="h-4 px-1.5 text-[10px]">
-                            Terbaru
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {formatVersionDate(new Date(v.createdAt))}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="shrink-0"
-                      onClick={() => setConfirmId(v.id)}
-                    >
-                      Pulihkan
-                    </Button>
-                  </div>
-
-                  <div className="mt-2.5 space-y-2">
-                    {v.changes.length > 0 ? (
-                      v.changes
-                        .slice(0, 2)
-                        .map((change) => (
-                          <DiffFile
-                            key={change.label}
-                            change={change}
-                            maxEntries={3}
-                          />
-                        ))
-                    ) : (
-                      <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
-                        <div className="px-2.5 py-1.5 text-muted-foreground">
-                          Tidak ada perubahan pada bagian ini
-                        </div>
-                      </div>
+          <TooltipProvider delay={300}>
+            <ol className="space-y-3">
+              {versions.data.map((v, index) => {
+                const isNewest = index === 0;
+                return (
+                  <li
+                    key={v.id}
+                    className={cn(
+                      "rounded-lg border p-3 transition-colors",
+                      isNewest
+                        ? "border-primary/50"
+                        : "hover:border-primary/40",
                     )}
-                    {v.changes.length > 2 ? (
-                      <p className="text-xs text-muted-foreground">
-                        +{v.changes.length - 2} bagian lainnya
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold">
+                            {formatRelative(new Date(v.createdAt))}
+                          </p>
+                          {isNewest ? (
+                            <Badge className="h-4 px-1.5 text-[10px]">
+                              Terbaru
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {formatVersionDate(new Date(v.createdAt))}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 gap-1.5">
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                size="icon-sm"
+                                variant={
+                                  previewId === v.id ? "default" : "outline"
+                                }
+                                aria-label="Pratinjau di editor"
+                                loading={loadingPreviewId === v.id}
+                                onClick={() => previewVersion(v.id)}
+                              />
+                            }
+                          >
+                            <EyeIcon />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {previewId === v.id
+                              ? "Tutup pratinjau"
+                              : "Pratinjau di editor"}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                size="icon-sm"
+                                variant="outline"
+                                aria-label="Pulihkan versi ini"
+                                onClick={() => setConfirmId(v.id)}
+                              />
+                            }
+                          >
+                            <RotateCcwIcon />
+                          </TooltipTrigger>
+                          <TooltipContent>Pulihkan versi ini</TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </div>
+
+                    <div className="mt-2.5 space-y-2">
+                      {v.changes.length > 0 ? (
+                        v.changes
+                          .slice(0, 2)
+                          .map((change) => (
+                            <DiffFile
+                              key={change.label}
+                              change={change}
+                              maxEntries={3}
+                            />
+                          ))
+                      ) : (
+                        <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
+                          <div className="px-2.5 py-1.5 text-muted-foreground">
+                            Tidak ada perubahan pada bagian ini
+                          </div>
+                        </div>
+                      )}
+                      {v.changes.length > 2 ? (
+                        <p className="text-xs text-muted-foreground">
+                          +{v.changes.length - 2} bagian lainnya
+                        </p>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </TooltipProvider>
         ) : (
           <div className="flex flex-col items-center gap-2 py-10 text-center">
             <div className="flex size-10 items-center justify-center rounded-full bg-muted">
