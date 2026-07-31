@@ -1,5 +1,6 @@
 "use client";
 
+import { FileTextIcon, MessageSquareIcon } from "lucide-react";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +8,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { AiCoverLetterModal } from "@/features/ai/components/ai-cover-letter-modal";
+import { AiInterviewModal } from "@/features/ai/components/ai-interview-modal";
 import { CvPreview } from "@/features/cv/components/cv-preview";
 import { useCVAnalyticsTracking } from "@/features/cv/hooks/use-cv-analytics-tracking";
 import { useCvAutosave } from "@/features/cv/hooks/use-cv-autosave";
@@ -63,6 +66,8 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
   useEffect(() => setMounted(true), []);
 
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [interviewOpen, setInterviewOpen] = useState(false);
 
   const editor = <PanelContent initialUser={initialUser} />;
   const preview = <CvPreview />;
@@ -71,6 +76,22 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
     <div className="flex h-screen flex-col">
       <div className="absolute right-4 top-3 z-10 flex items-center gap-3">
         <SaveIndicator />
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setCoverLetterOpen(true)}
+        >
+          <FileTextIcon />
+          <span className="hidden sm:inline">Surat Lamaran</span>
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setInterviewOpen(true)}
+        >
+          <MessageSquareIcon />
+          <span className="hidden sm:inline">Interview Prep</span>
+        </Button>
         {mounted && isMobile ? (
           <div className="flex rounded-md border bg-background p-0.5">
             <Button
@@ -140,6 +161,15 @@ function BuilderLayout({ initialUser }: { initialUser: BuilderUser }) {
       <Suspense fallback={null}>
         <EditorDialog />
       </Suspense>
+
+      <AiCoverLetterModal
+        open={coverLetterOpen}
+        onClose={() => setCoverLetterOpen(false)}
+      />
+      <AiInterviewModal
+        open={interviewOpen}
+        onClose={() => setInterviewOpen(false)}
+      />
     </div>
   );
 }
