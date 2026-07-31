@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { AiToolbar } from "@/features/ai/components/ai-toolbar";
 import {
   type CertificationInput,
   type CustomInput,
@@ -48,7 +49,7 @@ import {
 } from "@/features/cv/schemas/cv";
 import type { EditorSection } from "@/features/cv/stores/cv-store";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
-import { AiToolbar, InfoBanner, TipsBanner } from "./_ai-tools";
+import { InfoBanner, TipsBanner } from "./_ai-tools";
 
 const SECTION_TITLES: Record<EditorSection, string> = {
   summary: "Profil",
@@ -137,20 +138,12 @@ function EditorBody({
     <TipsBanner />
   ) : null;
 
-  const showAiToolbar = !isLevel && section !== "summary";
-
   if (section === "summary") {
     return <SummaryBody />;
   }
 
   return (
-    <SectionBody
-      section={section}
-      mode={mode}
-      index={index}
-      banner={banner}
-      showAiToolbar={showAiToolbar}
-    />
+    <SectionBody section={section} mode={mode} index={index} banner={banner} />
   );
 }
 
@@ -174,7 +167,11 @@ function SummaryBody() {
             placeholder="Paragraf singkat yang merangkum pengalaman, keunggulan, dan tujuan karier Anda."
           />
         </Field>
-        <AiToolbar />
+        <AiToolbar
+          fieldType="ringkasan"
+          value={summary ?? ""}
+          onChange={setSummary}
+        />
       </div>
       <DialogFooter className="sm:flex-col">
         <Button
@@ -276,13 +273,11 @@ function SectionBody({
   mode,
   index,
   banner,
-  showAiToolbar,
 }: {
   section: ListSection;
   mode: "add" | "edit";
   index: number | null;
   banner: React.ReactNode;
-  showAiToolbar: boolean;
 }) {
   const cfg = useSectionConfig(section);
   const closeEditor = useCvStore((s) => s.closeEditor);
@@ -316,7 +311,6 @@ function SectionBody({
             // biome-ignore lint/suspicious/noExplicitAny: patch matches item shape
             onChange={(patch: any) => cfg.update(index, patch)}
           />
-          {showAiToolbar && <AiToolbar />}
         </div>
 
         <DialogFooter className="sm:flex-col">
@@ -391,8 +385,6 @@ function SectionBody({
             </div>
           </div>
         ))}
-
-        {showAiToolbar && <AiToolbar />}
       </div>
 
       <DialogFooter className="flex-col sm:flex-col">
@@ -528,6 +520,11 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan tanggung jawab dan pencapaian Anda. Gunakan poin-poin atau kalimat singkat."
+        />
+        <AiToolbar
+          fieldType="deskripsi pengalaman"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -698,6 +695,11 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian singkat mengenai sertifikasi ini."
         />
+        <AiToolbar
+          fieldType="deskripsi sertifikasi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
+        />
       </Field>
     </div>
   );
@@ -737,6 +739,11 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan peran dan kontribusi Anda."
+        />
+        <AiToolbar
+          fieldType="deskripsi organisasi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -786,6 +793,11 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Apa yang dilakukan proyek ini dan peran Anda di dalamnya."
         />
+        <AiToolbar
+          fieldType="deskripsi proyek"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
+        />
       </Field>
     </div>
   );
@@ -809,6 +821,11 @@ function CustomForm({ value, onChange }: FormProps<CustomInput>) {
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian tambahan."
+        />
+        <AiToolbar
+          fieldType="deskripsi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>

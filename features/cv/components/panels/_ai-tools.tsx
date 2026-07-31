@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  BriefcaseIcon,
-  ChevronDownIcon,
-  InfoIcon,
-  LanguagesIcon,
-  PenLineIcon,
-  ShrinkIcon,
-  Undo2Icon,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronDownIcon, InfoIcon } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -64,35 +55,5 @@ export function InfoBanner({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** AI action toolbar (UI only — not wired to a model yet). */
-export function AiToolbar() {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        aria-label="Urungkan"
-        disabled
-      >
-        <Undo2Icon />
-      </Button>
-      <Button type="button" variant="outline" disabled>
-        <BriefcaseIcon data-icon="inline-start" />
-        Formalkan
-      </Button>
-      <Button type="button" variant="outline" disabled>
-        <ShrinkIcon data-icon="inline-start" />
-        Persingkat
-      </Button>
-      <Button type="button" variant="outline" disabled>
-        <PenLineIcon data-icon="inline-start" />
-        Perbaiki kalimat
-      </Button>
-      <Button type="button" variant="outline" disabled>
-        <LanguagesIcon data-icon="inline-start" />
-        Terjemahkan B. Inggris
-      </Button>
-    </div>
-  );
-}
+// AiToolbar has been superseded by the live version in
+// features/ai/components/ai-toolbar.tsx (wired to trpc.ai.improve).
