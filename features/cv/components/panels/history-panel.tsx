@@ -9,7 +9,7 @@ import {
   RotateCcwIcon,
   XIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -174,6 +174,12 @@ export function HistoryPanel() {
   const [loadingPreviewId, setLoadingPreviewId] = useState<string | null>(null);
   /** Version currently shown in the CV editor preview. */
   const [previewId, setPreviewId] = useState<string | null>(null);
+
+  // Preview can also be dismissed from the editor banner ("Kembali ke versi
+  // sekarang"); when the store clears, drop the panel's preview state too.
+  useEffect(() => {
+    if (!previewContent) setPreviewId(null);
+  }, [previewContent]);
 
   const utils = trpc.useUtils();
   const versions = trpc.cv.listVersions.useQuery(
