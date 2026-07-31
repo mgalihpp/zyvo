@@ -195,7 +195,7 @@ function ContextFields({
       {!hasStoredJd && (
         <div className="rounded-xl border border-dashed border-violet-300/60 bg-violet-500/[0.03] p-4 dark:border-violet-500/30">
           <span className="mb-1 block text-xs font-medium">
-            Deskripsi lowongan (opsional)
+            Deskripsi lowongan <span className="text-destructive">*</span>
           </span>
           <Textarea
             value={manualJd}
@@ -290,7 +290,7 @@ export function AiAssistantModal({
     onSuccess: (data) => setAnalysis(data),
   });
 
-  const ready = Boolean(snapshot) && !cvLoading;
+  const ready = Boolean(snapshot) && !cvLoading && Boolean(jdText.trim());
 
   const scoreColor = !analysis
     ? ""
@@ -509,7 +509,7 @@ export function AiAssistantModal({
               {contextFields}
               <Button
                 className={ctaClass}
-                disabled={!ready || !jdText.trim()}
+                disabled={!ready}
                 onClick={() =>
                   snapshot &&
                   analyzeMutation.mutate({
@@ -523,13 +523,6 @@ export function AiAssistantModal({
                 <SparklesIcon aria-hidden="true" />
                 Analisis Kesesuaian
               </Button>
-              {!jdText.trim() && (
-                <p className="text-xs text-muted-foreground">
-                  Analisis butuh deskripsi lowongan. Paste dulu di kolom
-                  &quot;Deskripsi lowongan&quot; di atas, lalu tombol ini bisa
-                  diklik.
-                </p>
-              )}
               {analysis && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
