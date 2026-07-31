@@ -7,7 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ApplicationDetailSheet } from "@/features/job-tracker/components/application-detail-sheet";
 import { ApplicationDialog } from "@/features/job-tracker/components/application-dialog";
 import { BoardToolbar } from "@/features/job-tracker/components/board-toolbar";
+import { ColumnHeader } from "@/features/job-tracker/components/column-header";
 import { KanbanBoard } from "@/features/job-tracker/components/kanban-board";
+import { StatsCards } from "@/features/job-tracker/components/stats-cards";
 import { UpsellView } from "@/features/job-tracker/components/upsell-view";
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
 import { trpc } from "@/lib/trpc/client";
@@ -73,9 +75,13 @@ export function JobTrackerPage() {
           }}
         />
       </div>
+      <StatsCards />
       <KanbanBoard
         columns={columns}
         applications={data.applications}
+        renderColumnHeader={(column, count) => (
+          <ColumnHeader column={column} columns={columns} count={count} />
+        )}
         onCardClick={(app) => {
           setSelectedAppId(app.id);
           setSheetOpen(true);

@@ -8,7 +8,9 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { JobApplication } from "@prisma/client";
+import { PlusIcon } from "lucide-react";
 import { useMemo } from "react";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { KanbanColumn } from "@/features/job-tracker/components/kanban-column";
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
@@ -78,6 +80,28 @@ export function KanbanBoard({
     },
   });
 
+  const addColumnMutation = trpc.jobTracker.updateColumns.useMutation({
+    onSuccess: () => {
+      utils.jobTracker.getBoard.invalidate();
+    },
+    onError: (err) => toast.add({ title: err.message }),
+  });
+
+  function handleAddColumn() {
+    const maxOrder = columns.reduce((m, c) => Math.max(m, c.order), -1);
+    addColumnMutation.mutate({
+      columns: [
+        ...columns,
+        {
+          id: crypto.randomUUID(),
+          name: "Kolom Baru",
+          kind: "custom",
+          order: maxOrder + 1,
+        },
+      ],
+    });
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
@@ -111,6 +135,16 @@ export function KanbanBoard({
           );
         })}
         {boardActions}
+        <Button
+          variant="outline"
+          className="w-40 shrink-0"
+          loading={addColumnMutation.isPending}
+          loadingText="Menambahkan..."
+          onClick={handleAddColumn}
+        >
+          <PlusIcon data-icon="inline-start" aria-hidden="true" />
+          Tambah Kolom
+        </Button>
       </div>
     </DndContext>
   );
