@@ -164,6 +164,37 @@
   }
 }
 
+/* Thanos-snap dissolve: card blurs, drifts up, and crumbles to dust via a
+ * sweeping mask. Played on a positioned ghost after a trash-zone drop. */
+@keyframes thanos-snap {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+    mask-image: linear-gradient(to top, black 0%, black 80%, black 100%);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-24px) scale(1.06) rotate(3deg);
+    mask-image: linear-gradient(
+      to top,
+      transparent 0%,
+      transparent 80%,
+      black 100%
+    );
+  }
+}
+.thanos-snap {
+  animation: thanos-snap 0.6s ease-out forwards;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .thanos-snap {
+    animation-duration: 0.01s;
+  }
+}
+
 /* Scroll-reveal: elements start hidden/translated and animate in when the
  * `data-reveal` attribute flips to "shown" (set by the Reveal component's
  * IntersectionObserver). Honors reduced-motion by showing content instantly. */
