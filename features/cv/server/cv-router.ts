@@ -6,6 +6,41 @@ import {
   emptyPersonal,
 } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
+import type { CV, PrismaClient } from "@prisma/client";
+
+const SNAPSHOT_INTERVAL_MS = 10 * 60 * 1000;
+const MAX_VERSIONS = 30;
+
+/**
+ * Persists a full-content snapshot of a CV row and trims history to the
+ * newest MAX_VERSIONS. Content is stored as a plain JSON blob — versions are
+ * read-only and only ever restored wholesale, so no composite types needed.
+ */
+async function snapshotCv(prisma: PrismaClient, cv: CV): Promise<void> {
+  const {
+    id: _id,
+    userId,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    ...content
+  } = cv;
+
+  await prisma.cvVersion.create({
+    data: { cvId: cv.id, userId, content },
+  });
+
+  const stale = await prisma.cvVersion.findMany({
+    where: { cvId: cv.id },
+    orderBy: { createdAt: "desc" },
+    skip: MAX_VERSIONS,
+    select: { id: true },
+  });
+  if (stale.length > 0) {
+    await prisma.cvVersion.deleteMany({
+      where: { id: { in: stale.map((v) => v.id) } },
+    });
+  }
+}
 
 /**
  * CV router. All procedures are scoped to the authenticated user and enforce
@@ -83,13 +118,32 @@ export const cvRouter = createTRPCRouter({
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: cvUpdateSchema }))
     .mutation(async ({ ctx, input }) => {
+      // Full row (not just userId): the pre-update content is what gets
+      // snapshotted when the 10-minute window has elapsed.
       const existing = await ctx.prisma.cV.findUnique({
         where: { id: input.id },
-        select: { userId: true },
       });
 
       if (!existing || existing.userId !== ctx.session.user.id) {
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      // Best-effort snapshot of the pre-update state, at most once per
+      // SNAPSHOT_INTERVAL_MS. Never blocks the save itself.
+      try {
+        const latest = await ctx.prisma.cvVersion.findFirst({
+          where: { cvId: input.id },
+          orderBy: { createdAt: "desc" },
+          select: { createdAt: true },
+        });
+        if (
+          !latest ||
+          Date.now() - latest.createdAt.getTime() > SNAPSHOT_INTERVAL_MS
+        ) {
+          await snapshotCv(ctx.prisma, existing);
+        }
+      } catch (err) {
+        console.error("cv version snapshot failed", err);
       }
 
       const updated = await ctx.prisma.cV.update({
