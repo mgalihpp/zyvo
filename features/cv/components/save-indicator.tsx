@@ -16,15 +16,15 @@ export function SaveIndicator() {
   const status = useCvStore((s) => s.saveStatus);
   const { label, Icon, tone } = CONFIG[status];
 
-  if (status === "idle") return null;
-
   return (
     <span
+      aria-hidden={status === "idle"}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-300 ease-out",
         tone === "muted" && "bg-muted text-muted-foreground",
         tone === "ok" && "bg-green-500/10 text-green-600 dark:text-green-400",
         tone === "error" && "bg-destructive/10 text-destructive",
+        status === "idle" && "pointer-events-none -translate-y-1 opacity-0",
       )}
     >
       {Icon && (
