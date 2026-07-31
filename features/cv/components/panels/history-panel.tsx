@@ -293,7 +293,7 @@ export function HistoryPanel() {
           if (!open) setConfirmId(null);
         }}
       >
-        <AlertDialogContent className="sm:max-w-2xl">
+        <AlertDialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl scrollbar-thin">
           <AlertDialogHeader>
             <AlertDialogTitle>Pulihkan versi ini?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -309,7 +309,7 @@ export function HistoryPanel() {
               </p>
 
               {confirmVersion.changes.length > 0 ? (
-                <div className="max-h-[45vh] space-y-3 overflow-auto scrollbar-thin">
+                <div className="space-y-3">
                   {confirmVersion.changes.map((change) => (
                     <DiffFile
                       key={change.label}
