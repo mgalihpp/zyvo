@@ -264,7 +264,12 @@ export function KanbanBoard({
     reordered.splice(to, 0, moved);
 
     // Optimistic: update the cached board's column order immediately.
-    const next = reordered.map((c, i) => ({ ...c, order: i }));
+    const next = reordered.map((c, i) => ({
+      ...c,
+      order: i,
+      // nullish -> null: cache shape matches the Prisma-derived server type.
+      color: c.color ?? null,
+    }));
     utils.jobTracker.getBoard.setData(undefined, (old) =>
       old ? { ...old, board: { ...old.board, columns: next } } : old,
     );
