@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Classic ATS-friendly CV template. Single column, semantic headings, no
@@ -12,7 +12,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-10 text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <CvPage className="p-10">
       <header className="border-b border-[var(--cv-color-accent)] pb-4">
         <h1 className="text-[1.6em] font-bold tracking-tight text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
@@ -259,7 +259,7 @@ export function ClassicTemplate({ cv }: TemplateProps) {
           </div>
         </Section>
       ) : null}
-    </article>
+    </CvPage>
   );
 }
 

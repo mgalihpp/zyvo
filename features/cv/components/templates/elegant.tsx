@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Elegant single-column template. Centered header with a large circular photo,
@@ -9,7 +9,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:min-h-[297mm] print:[print-color-adjust:exact]">
+    <CvPage>
       <header className="px-12 pt-10 pb-6 text-center">
         {p.photo ? (
           <div className="mb-4 flex justify-center">
@@ -53,7 +53,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Pengalaman">
             <div className="space-y-5">
               {cv.experience.map((exp, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Posisi"}
@@ -80,7 +80,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Pendidikan">
             <div className="space-y-4">
               {cv.education.map((edu, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {edu.school || "Institusi"}
@@ -162,7 +162,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Sertifikasi">
             <div className="space-y-2">
               {cv.certifications.map((c, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <p className="text-[0.9em] font-medium text-[var(--cv-color-heading)]">
                     {c.name}
                   </p>
@@ -181,7 +181,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Proyek">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {proj.name}
@@ -213,7 +213,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Organisasi">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {org.role || "Posisi"}
@@ -256,7 +256,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           <Section title="Tambahan">
             <div className="space-y-2">
               {cv.custom.map((item, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                     {item.title}
                   </h3>
@@ -271,7 +271,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           </Section>
         ) : null}
       </div>
-    </article>
+    </CvPage>
   );
 }
 

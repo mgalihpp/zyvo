@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Modern two-column template. A tinted left sidebar holds contact details,
@@ -15,8 +15,14 @@ export function ModernTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto grid min-h-[1123px] w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[34%_1fr] sm:grid-rows-[1fr] print:min-h-[297mm] print:grid-cols-[34%_1fr] print:grid-rows-[1fr] print:[print-color-adjust:exact]">
-      <aside className="bg-[var(--cv-color-accent)] p-6 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
+    <CvPage
+      className="grid grid-cols-1 sm:grid-cols-[34%_1fr] sm:grid-rows-[1fr] print:grid-cols-[34%_1fr] print:grid-rows-[1fr]"
+      style={{
+        background:
+          "linear-gradient(to right, var(--cv-color-accent) 34%, var(--cv-color-bg) 34%)",
+      }}
+    >
+      <aside className="p-6 text-[var(--cv-color-on-accent)]">
         <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
         </h1>
@@ -245,7 +251,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
           </MainSection>
         ) : null}
       </div>
-    </article>
+    </CvPage>
   );
 }
 

@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Executive template. Single column with a full-width accent header band; the
@@ -9,7 +9,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:min-h-[297mm] print:[print-color-adjust:exact]">
+    <CvPage>
       <header className="bg-[var(--cv-color-accent)] px-10 py-8 print:[print-color-adjust:exact]">
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1">
@@ -52,7 +52,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Pengalaman Kerja">
             <div className="space-y-4">
               {cv.experience.map((exp, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Posisi"}
@@ -79,7 +79,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Pendidikan">
             <div className="space-y-3">
               {cv.education.map((edu, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {edu.school || "Institusi"}
@@ -161,7 +161,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Sertifikasi">
             <div className="space-y-2">
               {cv.certifications.map((c, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <p className="text-[0.9em] font-medium text-[var(--cv-color-heading)]">
                     {c.name}
                   </p>
@@ -180,7 +180,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Proyek">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {proj.name}
@@ -212,7 +212,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Organisasi">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {org.role || "Posisi"}
@@ -255,7 +255,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           <Section title="Tambahan">
             <div className="space-y-2">
               {cv.custom.map((item, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                     {item.title}
                   </h3>
@@ -270,7 +270,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
           </Section>
         ) : null}
       </div>
-    </article>
+    </CvPage>
   );
 }
 
