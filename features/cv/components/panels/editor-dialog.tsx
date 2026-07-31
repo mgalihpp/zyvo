@@ -1,9 +1,15 @@
 "use client";
 
-import { CalendarIcon, CircleMinusIcon, PlusIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CircleMinusIcon,
+  PlusIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +25,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -412,19 +419,37 @@ function SectionBody({
   );
 }
 
-/** Date input with a free-text field plus a calendar popover helper. */
+const MONTH_NAMES_ID = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+] as const;
+
+/** Date input with a free-text field plus a month-year picker popover. */
 function DateField({
   label,
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
 
   return (
     <Field>
@@ -434,6 +459,7 @@ function DateField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          disabled={disabled}
         />
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
@@ -442,28 +468,54 @@ function DateField({
                 <InputGroupButton
                   size="icon-xs"
                   variant="secondary"
-                  aria-label="Pilih tanggal"
+                  aria-label="Pilih bulan & tahun"
+                  disabled={disabled}
                 >
                   <CalendarIcon />
                 </InputGroupButton>
               }
             />
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  if (date) {
-                    onChange(
-                      date.toLocaleDateString("id-ID", {
-                        month: "long",
-                        year: "numeric",
-                      }),
-                    );
-                  }
-                  setOpen(false);
-                }}
-              />
+            <PopoverContent className="w-auto p-3" align="end">
+              {/* Year navigation */}
+              <div className="mb-3 flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setPickerYear((y) => y - 1)}
+                  aria-label="Tahun sebelumnya"
+                >
+                  <ChevronLeftIcon className="size-4" />
+                </Button>
+                <span className="text-sm font-medium">{pickerYear}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setPickerYear((y) => y + 1)}
+                  aria-label="Tahun berikutnya"
+                >
+                  <ChevronRightIcon className="size-4" />
+                </Button>
+              </div>
+              {/* Month grid */}
+              <div className="grid grid-cols-3 gap-1.5">
+                {MONTH_NAMES_ID.map((monthName, idx) => (
+                  <Button
+                    key={idx}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      onChange(`${monthName} ${pickerYear}`);
+                      setOpen(false);
+                    }}
+                  >
+                    {monthName.slice(0, 3)}
+                  </Button>
+                ))}
+              </div>
             </PopoverContent>
           </Popover>
         </InputGroupAddon>
@@ -500,10 +552,23 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
         />
         <DateField
           label="Selesai"
-          value={value.endDate ?? ""}
-          onChange={(v) => onChange({ endDate: v })}
+          value={value.current ? "Sekarang" : (value.endDate ?? "")}
+          onChange={(v) => onChange({ endDate: v, current: false })}
           placeholder="Sekarang"
+          disabled={!!value.current}
         />
+        <Label className="col-span-2 -mt-2 text-muted-foreground">
+          <Checkbox
+            checked={!!value.current}
+            onCheckedChange={(checked) =>
+              onChange({
+                current: !!checked,
+                endDate: checked ? "" : (value.endDate ?? ""),
+              })
+            }
+          />
+          Saya masih bekerja di posisi ini
+        </Label>
         <Field>
           <FieldLabel>Alamat</FieldLabel>
           <Input
