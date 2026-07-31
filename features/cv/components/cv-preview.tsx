@@ -4,10 +4,10 @@ import { Minus, Plus } from "lucide-react";
 import { type PointerEvent, Suspense, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCvPageBreaks } from "@/features/cv/hooks/use-cv-page-breaks";
 import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
+import { CvPaginator } from "./cv-paginator";
 import { getTemplate } from "./templates";
 
 const ZOOM_MIN = 0.5;
@@ -67,12 +67,10 @@ export function CvPreview() {
     custom,
   };
 
-  const Template = getTemplate(templateId).lazyComponent;
+  const template = getTemplate(templateId);
+  const Template = template.lazyComponent;
 
   const [zoom, setZoom] = useState(1);
-
-  const previewRef = useRef<HTMLDivElement>(null);
-  const pageBreaks = useCvPageBreaks(previewRef);
 
   // Grab-to-pan: drag anywhere on the preview to scroll. Skip when the pointer
   // starts on a form control/link so text selection & inputs still work.
@@ -129,24 +127,15 @@ export function CvPreview() {
              * WYSIWYG vs the PDF and never reflows narrower when the editor
              * panel opens. */}
             <div
-              ref={previewRef}
-              className="relative w-[794px]"
+              className="w-[794px]"
               style={cvRootStyle({ typography, colors: effectiveColors })}
             >
-              <Template cv={content} />
-              {pageBreaks.map((y, i) => (
-                <div
-                  key={i}
-                  className="pointer-events-none absolute left-0 right-0 z-10 flex items-center gap-2"
-                  style={{ top: y }}
-                >
-                  <span className="h-px flex-1 border-t-2 border-dashed border-foreground/30" />
-                  <span className="rounded-full bg-foreground/70 px-2 py-0.5 text-[10px] font-semibold text-background">
-                    Hal {i + 2}
-                  </span>
-                  <span className="h-px flex-1 border-t-2 border-dashed border-foreground/30" />
-                </div>
-              ))}
+              <CvPaginator
+                pagination={template.pagination}
+                pageGapClass="gap-6"
+              >
+                <Template cv={content} />
+              </CvPaginator>
             </div>
           </div>
         </Suspense>
