@@ -15,6 +15,10 @@ import { scoreSystemPrompt } from "@/features/ai/server/prompts/score";
 import { cvContentSchema } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
+const DEFAULT_MODEL = process.env.DEFAULT_MODEL ?? "openai/gpt-4o";
+const DEFAULT_MODEL_MINI =
+  process.env.DEFAULT_MODEL_MINI ?? "openai/gpt-4o-mini";
+
 const cvSnapshotInput = z.string().max(5000);
 
 async function collectStream(
@@ -40,7 +44,7 @@ export const aiRouter = createTRPCRouter({
       await checkRateLimit(ctx.session.user.id, "ai:improve", 20);
 
       const stream = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o-mini",
+        model: DEFAULT_MODEL_MINI,
         stream: true,
         messages: [
           { role: "system", content: improverSystemPrompt(input.fieldType) },
@@ -62,7 +66,7 @@ export const aiRouter = createTRPCRouter({
       await checkRateLimit(ctx.session.user.id, "ai:score", 20);
 
       const response = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o-mini",
+        model: DEFAULT_MODEL_MINI,
         stream: false,
         messages: [
           { role: "system", content: scoreSystemPrompt },
@@ -114,7 +118,7 @@ export const aiRouter = createTRPCRouter({
       await checkRateLimit(ctx.session.user.id, "ai:chat", 5);
 
       const stream = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: DEFAULT_MODEL,
         stream: true,
         messages: [
           { role: "system", content: chatSystemPrompt(input.cvSnapshot) },
@@ -138,7 +142,7 @@ export const aiRouter = createTRPCRouter({
       await checkRateLimit(ctx.session.user.id, "ai:analyzeJD", 20);
 
       const response = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: DEFAULT_MODEL,
         stream: false,
         messages: [
           { role: "system", content: analyzerSystemPrompt },
@@ -193,7 +197,7 @@ export const aiRouter = createTRPCRouter({
         : `CV:\n${input.cvSnapshot}`;
 
       const stream = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: DEFAULT_MODEL,
         stream: true,
         messages: [
           { role: "system", content: coverLetterSystemPrompt(input.tone) },
@@ -218,7 +222,7 @@ export const aiRouter = createTRPCRouter({
       await checkRateLimit(ctx.session.user.id, "ai:generate", 5);
 
       const response = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o",
+        model: DEFAULT_MODEL,
         stream: false,
         messages: [
           { role: "system", content: generatorSystemPrompt },
@@ -266,7 +270,7 @@ export const aiRouter = createTRPCRouter({
         : `CV:\n${input.cvSnapshot}`;
 
       const response = await openrouter.chat.completions.create({
-        model: "openai/gpt-4o-mini",
+        model: DEFAULT_MODEL_MINI,
         stream: false,
         messages: [
           { role: "system", content: interviewPrepSystemPrompt },
