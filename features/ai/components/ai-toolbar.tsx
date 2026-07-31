@@ -7,8 +7,12 @@ import {
   SparklesIcon,
   Undo2Icon,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAiImprove } from "@/features/ai/hooks/use-ai-stream";
+import {
+  type ImproveAction,
+  useAiImprove,
+} from "@/features/ai/hooks/use-ai-stream";
 
 interface AiToolbarProps {
   fieldType: string;
@@ -16,9 +20,53 @@ interface AiToolbarProps {
   onChange: (v: string) => void;
 }
 
+const ACTIONS: {
+  action: ImproveAction;
+  label: string;
+  loadingText: string;
+  Icon: typeof SparklesIcon;
+}[] = [
+  {
+    action: "formalize",
+    label: "Formalkan",
+    loadingText: "Memformalkan...",
+    Icon: BriefcaseIcon,
+  },
+  {
+    action: "shorten",
+    label: "Persingkat",
+    loadingText: "Mempersingkat...",
+    Icon: ShrinkIcon,
+  },
+  {
+    action: "improve",
+    label: "Perbaiki kalimat",
+    loadingText: "Memperbaiki...",
+    Icon: SparklesIcon,
+  },
+  {
+    action: "expand",
+    label: "Kembangkan",
+    loadingText: "Mengembangkan...",
+    Icon: PenLineIcon,
+  },
+];
+
 /** Inline AI action toolbar wired to the ai.improve tRPC procedure. */
 export function AiToolbar({ fieldType, value, onChange }: AiToolbarProps) {
   const { improve, undo, canUndo, isPending, error } = useAiImprove(fieldType);
+  const [pendingAction, setPendingAction] = useState<ImproveAction | null>(
+    null,
+  );
+
+  async function run(action: ImproveAction) {
+    setPendingAction(action);
+    try {
+      await improve(value, action, onChange);
+    } finally {
+      setPendingAction(null);
+    }
+  }
 
   return (
     <div className="space-y-1.5">
@@ -33,50 +81,22 @@ export function AiToolbar({ fieldType, value, onChange }: AiToolbarProps) {
         >
           <Undo2Icon />
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={isPending || !value.trim()}
-          onClick={() => improve(value, "formalize", onChange)}
-        >
-          <BriefcaseIcon data-icon="inline-start" />
-          Formalkan
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={isPending || !value.trim()}
-          onClick={() => improve(value, "shorten", onChange)}
-        >
-          <ShrinkIcon data-icon="inline-start" />
-          Persingkat
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={isPending || !value.trim()}
-          onClick={() => improve(value, "improve", onChange)}
-        >
-          <SparklesIcon data-icon="inline-start" />
-          Perbaiki kalimat
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={isPending || !value.trim()}
-          onClick={() => improve(value, "expand", onChange)}
-        >
-          <PenLineIcon data-icon="inline-start" />
-          Kembangkan
-        </Button>
+        {ACTIONS.map(({ action, label, loadingText, Icon }) => (
+          <Button
+            key={action}
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPending || !value.trim()}
+            loading={isPending && pendingAction === action}
+            loadingText={loadingText}
+            onClick={() => run(action)}
+          >
+            <Icon data-icon="inline-start" />
+            {label}
+          </Button>
+        ))}
       </div>
-      {isPending && (
-        <p className="text-xs text-muted-foreground">AI sedang memproses...</p>
-      )}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );

@@ -24,6 +24,11 @@ const ColorsPanel = lazy(() =>
 const ExportPanel = lazy(() =>
   import("./export-panel").then((m) => ({ default: m.ExportPanel })),
 );
+const AiPanel = lazy(() =>
+  import("@/features/ai/components/ai-panel").then((m) => ({
+    default: m.AiPanel,
+  })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -160,17 +165,6 @@ function ExportSkeleton() {
   );
 }
 
-function Placeholder({ title, note }: { title: string; note: string }) {
-  return (
-    <div>
-      <PanelHeader title={title} />
-      <div className="flex items-center justify-center p-6 text-center text-sm text-muted-foreground">
-        {note}
-      </div>
-    </div>
-  );
-}
-
 function PersonalPanel() {
   return (
     <div>
@@ -217,7 +211,21 @@ function ActivePanel() {
       );
     case "ai":
       return (
-        <Placeholder title="Asisten AI" note="Fitur AI akan hadir di sini." />
+        <div>
+          <PanelHeader
+            title="Asisten AI"
+            note="Analisis, skor, dan perbaikan CV dengan AI."
+          />
+          <Suspense
+            fallback={
+              <div className="p-4 text-sm text-muted-foreground">
+                Memuat...
+              </div>
+            }
+          >
+            <AiPanel />
+          </Suspense>
+        </div>
       );
     case "export":
       return (
