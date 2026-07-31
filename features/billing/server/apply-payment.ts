@@ -32,8 +32,17 @@ export async function applyPayment(
       provider.fraud_status === "accept");
 
   if (isPaid) {
+    const existing = await prisma.subscription.findUnique({
+      where: { userId: tx.userId },
+    });
     const daysToAdd = tx.period === "yearly" ? 365 : 30;
-    const expiresAt = new Date(Date.now() + daysToAdd * 24 * 60 * 60 * 1000);
+    const base =
+      existing && existing.expiresAt > new Date()
+        ? existing.expiresAt
+        : new Date();
+    const expiresAt = new Date(
+      base.getTime() + daysToAdd * 24 * 60 * 60 * 1000,
+    );
 
     await prisma.$transaction([
       prisma.transaction.update({
