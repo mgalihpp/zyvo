@@ -269,6 +269,7 @@ export function CvList({
       toast.add({
         title: "Gagal mengunduh CV",
         description: err instanceof Error ? err.message : undefined,
+        type: "error",
       });
     } finally {
       setDownloading(null);

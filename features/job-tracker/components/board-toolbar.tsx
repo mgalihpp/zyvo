@@ -16,7 +16,7 @@ export function BoardToolbar({ onAdd }: { onAdd: () => void }) {
       a.click();
       URL.revokeObjectURL(url);
     },
-    onError: (err) => toast.add({ title: err.message }),
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
 
   return (

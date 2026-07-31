@@ -42,7 +42,7 @@ export function ColumnHeader({
       utils.jobTracker.getBoard.invalidate();
       utils.jobTracker.getStats.invalidate();
     },
-    onError: (err) => toast.add({ title: err.message }),
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
 
   function commitRename() {
