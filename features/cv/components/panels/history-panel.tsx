@@ -419,27 +419,20 @@ export function HistoryPanel() {
 
                     <div className="mt-2.5 space-y-2">
                       {v.changes.length > 0 ? (
-                        v.changes
-                          .slice(0, 2)
-                          .map((change) => (
-                            <DiffFile
-                              key={change.label}
-                              change={change}
-                              maxEntries={3}
-                            />
-                          ))
-                      ) : (
-                        <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
-                          <div className="px-2.5 py-1.5 text-muted-foreground">
-                            Tidak ada perubahan pada bagian ini
-                          </div>
-                        </div>
-                      )}
-                      {v.changes.length > 2 ? (
                         <p className="text-xs text-muted-foreground">
-                          +{v.changes.length - 2} bagian lainnya
+                          {v.changes
+                            .map((change) => change.label)
+                            .slice(0, 3)
+                            .join(" · ")}
+                          {v.changes.length > 3
+                            ? ` · +${v.changes.length - 3} lainnya`
+                            : ""}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Sama dengan versi sekarang
+                        </p>
+                      )}
                     </div>
                   </li>
                 );
