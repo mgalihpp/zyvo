@@ -1,4 +1,8 @@
 import { lazy } from "react";
+import {
+  CREATIVE_PAGE_BACKGROUND,
+  MODERN_PAGE_BACKGROUND,
+} from "./page-backgrounds";
 import type { TemplateMeta, TemplateRegistry } from "./registry";
 
 // Lazy renderers used by the live preview (one active template at a time).
@@ -46,6 +50,7 @@ export const TEMPLATES: TemplateMeta[] = [
     description: "Dua kolom dengan sidebar gelap untuk kontak & keahlian.",
     categories: ["professional", "two-column", "new"],
     lazyComponent: ModernLazy,
+    pagination: { pageBackground: MODERN_PAGE_BACKGROUND },
   },
   {
     id: "professional",
@@ -81,6 +86,7 @@ export const TEMPLATES: TemplateMeta[] = [
     description: "Sidebar bold dengan foto, cocok untuk desainer & kreator.",
     categories: ["creative", "two-column", "new"],
     lazyComponent: CreativeLazy,
+    pagination: { pageBackground: CREATIVE_PAGE_BACKGROUND },
   },
   {
     id: "elegant",
@@ -119,5 +125,6 @@ export function getTemplate(id: string | undefined): TemplateMeta {
 export type {
   TemplateCategory,
   TemplateMeta,
+  TemplatePagination,
 } from "./registry";
 export { TEMPLATE_CATEGORIES } from "./registry";

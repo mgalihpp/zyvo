@@ -1,3 +1,4 @@
+import { MODERN_PAGE_BACKGROUND } from "./page-backgrounds";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -17,10 +18,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
   return (
     <CvPage
       className="grid grid-cols-1 sm:grid-cols-[34%_1fr] sm:grid-rows-[1fr] print:grid-cols-[34%_1fr] print:grid-rows-[1fr]"
-      style={{
-        background:
-          "linear-gradient(to right, var(--cv-color-accent) 34%, var(--cv-color-bg) 34%)",
-      }}
+      style={{ background: MODERN_PAGE_BACKGROUND }}
     >
       <aside className="p-6 text-[var(--cv-color-on-accent)]">
         <h1 className="text-[1.35em] font-bold leading-tight font-[family-name:var(--cv-font-heading)]">

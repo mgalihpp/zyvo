@@ -1,3 +1,4 @@
+import { CREATIVE_PAGE_BACKGROUND } from "./page-backgrounds";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -11,10 +12,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
   return (
     <CvPage
       className="grid grid-cols-1 sm:grid-cols-[40%_1fr] sm:grid-rows-[1fr] print:grid-cols-[40%_1fr] print:grid-rows-[1fr]"
-      style={{
-        background:
-          "linear-gradient(to right, var(--cv-color-accent) 40%, var(--cv-color-bg) 40%)",
-      }}
+      style={{ background: CREATIVE_PAGE_BACKGROUND }}
     >
       <aside className="p-7 text-[var(--cv-color-on-accent)]">
         {p.photo ? (
