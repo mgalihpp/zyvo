@@ -1,3 +1,4 @@
+import type { CV, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -6,10 +7,54 @@ import {
   emptyPersonal,
 } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
-import type { CV, Prisma, PrismaClient } from "@prisma/client";
 
 const SNAPSHOT_INTERVAL_MS = 10 * 60 * 1000;
 const MAX_VERSIONS = 30;
+
+/** CV content fields that version diffs are computed over, with UI labels. */
+const DIFF_FIELDS = [
+  ["title", "Judul"],
+  ["templateId", "Template"],
+  ["typography", "Tipografi"],
+  ["colors", "Warna"],
+  ["personal", "Informasi Pribadi"],
+  ["summary", "Ringkasan"],
+  ["experience", "Pengalaman"],
+  ["education", "Pendidikan"],
+  ["skills", "Keahlian"],
+  ["interpersonal", "Interpersonal"],
+  ["languages", "Bahasa"],
+  ["certifications", "Sertifikasi"],
+  ["organizations", "Organisasi"],
+  ["projects", "Proyek"],
+  ["custom", "Bagian Kustom"],
+] as const;
+
+/**
+ * Labels of content fields that differ between two snapshots. Deep-compares
+ * via JSON since both sides come from Prisma rows with stable key order.
+ */
+function diffLabels(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>,
+): string[] {
+  return DIFF_FIELDS.filter(
+    ([key]) =>
+      JSON.stringify(a[key] ?? null) !== JSON.stringify(b[key] ?? null),
+  ).map(([, label]) => label);
+}
+
+/** Strips identity/timestamp fields from a CV row, leaving only content. */
+function cvContentOf(cv: CV): Record<string, unknown> {
+  const {
+    id: _id,
+    userId: _userId,
+    createdAt: _createdAt,
+    updatedAt: _updatedAt,
+    ...content
+  } = cv;
+  return content;
+}
 
 /**
  * Persists a full-content snapshot of a CV row and trims history to the
@@ -17,16 +62,12 @@ const MAX_VERSIONS = 30;
  * read-only and only ever restored wholesale, so no composite types needed.
  */
 async function snapshotCv(prisma: PrismaClient, cv: CV): Promise<void> {
-  const {
-    id: _id,
-    userId,
-    createdAt: _createdAt,
-    updatedAt: _updatedAt,
-    ...content
-  } = cv;
-
   await prisma.cvVersion.create({
-    data: { cvId: cv.id, userId, content },
+    data: {
+      cvId: cv.id,
+      userId: cv.userId,
+      content: cvContentOf(cv) as Prisma.InputJsonValue,
+    },
   });
 
   const stale = await prisma.cvVersion.findMany({
@@ -211,19 +252,26 @@ export const cvRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const cv = await ctx.prisma.cV.findUnique({
         where: { id: input.cvId },
-        select: { userId: true },
       });
       if (!cv || cv.userId !== ctx.session.user.id) {
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
       }
 
-      // Content is excluded: the panel only needs timestamps, and snapshots
-      // are full CV blobs that would bloat the payload.
-      return ctx.prisma.cvVersion.findMany({
+      const versions = await ctx.prisma.cvVersion.findMany({
         where: { cvId: input.cvId },
         orderBy: { createdAt: "desc" },
-        select: { id: true, createdAt: true },
+        select: { id: true, createdAt: true, content: true },
       });
+
+      // Content itself stays server-side (full CV blobs would bloat the
+      // payload); each version instead carries the section labels that differ
+      // from the CURRENT CV — i.e. what restoring it would change.
+      const current = cvContentOf(cv);
+      return versions.map((v) => ({
+        id: v.id,
+        createdAt: v.createdAt,
+        changes: diffLabels(v.content as Record<string, unknown>, current),
+      }));
     }),
 
   restoreVersion: protectedProcedure
