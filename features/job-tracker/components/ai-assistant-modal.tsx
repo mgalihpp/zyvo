@@ -1,7 +1,13 @@
 "use client";
 
 import type { JobApplication } from "@prisma/client";
-import { ChevronDownIcon, SparklesIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  FileTextIcon,
+  MessageSquareIcon,
+  SearchCheckIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -210,11 +216,20 @@ export function AiAssistantModal({
             )}
           </div>
 
-          <Tabs defaultValue="cover-letter">
-            <TabsList className="w-full">
-              <TabsTrigger value="cover-letter">Surat Lamaran</TabsTrigger>
-              <TabsTrigger value="interview">Interview Prep</TabsTrigger>
-              <TabsTrigger value="analysis">Analisis Lowongan</TabsTrigger>
+          <Tabs defaultValue="cover-letter" orientation="vertical">
+            <TabsList className="w-44 shrink-0 self-start">
+              <TabsTrigger value="cover-letter">
+                <FileTextIcon aria-hidden="true" />
+                Surat Lamaran
+              </TabsTrigger>
+              <TabsTrigger value="interview">
+                <MessageSquareIcon aria-hidden="true" />
+                Interview Prep
+              </TabsTrigger>
+              <TabsTrigger value="analysis">
+                <SearchCheckIcon aria-hidden="true" />
+                Analisis Lowongan
+              </TabsTrigger>
             </TabsList>
 
             {/* Surat Lamaran */}
