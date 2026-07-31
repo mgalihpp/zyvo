@@ -1,6 +1,6 @@
 "use client";
 
-import { ClockIcon, HistoryIcon } from "lucide-react";
+import { ClockIcon, FileTextIcon, HistoryIcon, InfoIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   AlertDialog,
@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
 
 /** "31 Jul 2026, 14.02" in the user's locale. */
 function formatVersionDate(date: Date) {
@@ -49,10 +50,11 @@ interface ChangeEntry {
 
 interface VersionChange {
   label: string;
+  file: string;
   entries: ChangeEntry[];
 }
 
-/** Diff gutter marker + color per entry kind, mirroring a code diff. */
+/** Diff gutter marker + row color per entry kind, mirroring a code diff. */
 const KIND_STYLE: Record<ChangeEntry["kind"], { sign: string; cls: string }> = {
   restore: {
     sign: "+",
@@ -66,15 +68,91 @@ const KIND_STYLE: Record<ChangeEntry["kind"], { sign: string; cls: string }> = {
   info: { sign: " ", cls: "text-muted-foreground" },
 };
 
-/** Total diff lines across all changed sections. */
-function countEntries(changes: VersionChange[]) {
-  return changes.reduce((n, c) => n + c.entries.length, 0);
+/** Net +N/-N counters for a section's entries (shown in the file header). */
+function sectionCounts(entries: ChangeEntry[]) {
+  let plus = 0;
+  let minus = 0;
+  for (const e of entries) {
+    if (e.kind === "restore") plus++;
+    else if (e.kind === "remove") minus++;
+  }
+  return { plus, minus };
+}
+
+/**
+ * Code-diff style rendering of one changed section: a "file" header
+ * (pengalaman.cv  +2 -1) above numbered, colored diff rows.
+ */
+function DiffFile({
+  change,
+  withLineNumbers = false,
+  maxEntries,
+}: {
+  change: VersionChange;
+  withLineNumbers?: boolean;
+  maxEntries?: number;
+}) {
+  const { plus, minus } = sectionCounts(change.entries);
+  const entries =
+    maxEntries !== undefined
+      ? change.entries.slice(0, maxEntries)
+      : change.entries;
+  const hidden = change.entries.length - entries.length;
+
+  return (
+    <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
+      <div className="flex items-center gap-1.5 border-b bg-muted/60 px-2.5 py-1.5">
+        <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
+        <span className="truncate font-medium">{change.file}</span>
+        <span className="ml-auto flex shrink-0 gap-2">
+          {plus > 0 ? (
+            <span className="text-emerald-700 dark:text-emerald-400">
+              +{plus}
+            </span>
+          ) : null}
+          {minus > 0 ? (
+            <span className="text-red-700 dark:text-red-400">-{minus}</span>
+          ) : null}
+        </span>
+      </div>
+      <div>
+        {entries.map((e, i) => {
+          const style = KIND_STYLE[e.kind];
+          return (
+            <div
+              key={`${e.kind}-${e.text}-${i}`}
+              className={cn("flex", style.cls)}
+            >
+              {withLineNumbers ? (
+                <span
+                  aria-hidden
+                  className="w-7 shrink-0 select-none border-r border-border/40 bg-muted/40 px-1.5 py-1 text-right text-muted-foreground/70"
+                >
+                  {i + 1}
+                </span>
+              ) : null}
+              <span className="flex min-w-0 gap-1.5 px-2.5 py-1">
+                <span aria-hidden className="shrink-0 select-none font-bold">
+                  {style.sign}
+                </span>
+                <span className="break-words">{e.text}</span>
+              </span>
+            </div>
+          );
+        })}
+        {hidden > 0 ? (
+          <div className="px-2.5 py-1 text-muted-foreground">
+            … {hidden} baris lainnya
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export function HistoryPanel() {
   const cvId = useCvStore((s) => s.cvId);
   const replaceContent = useCvStore((s) => s.replaceContent);
-  const lastSavedAt = useCvStore((s) => s.lastSavedAt);
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
@@ -119,26 +197,11 @@ export function HistoryPanel() {
         </p>
       </div>
 
-      <div className="space-y-3 p-4">
-        {/* The live CV, pinned above the saved snapshots so "sekarang" is
-            never confused with the newest snapshot below it. */}
-        <div className="rounded-lg border border-primary/50 bg-primary/[0.04] p-3">
-          <div className="flex items-center gap-1.5">
-            <span aria-hidden className="size-2 rounded-full bg-primary" />
-            <p className="text-sm font-medium">Versi sekarang</p>
-            <Badge className="h-4 px-1.5 text-[10px]">Aktif</Badge>
-          </div>
-          <p className="mt-0.5 pl-3.5 text-xs text-muted-foreground">
-            {lastSavedAt
-              ? `Tersimpan ${formatRelative(new Date(lastSavedAt))}`
-              : "CV yang sedang Anda edit"}
-          </p>
-        </div>
-
+      <div className="p-4">
         {versions.isLoading ? (
           <div className="space-y-3">
             {["a", "b", "c"].map((id) => (
-              <Skeleton key={id} className="h-16 w-full rounded-lg" />
+              <Skeleton key={id} className="h-32 w-full rounded-lg" />
             ))}
           </div>
         ) : versions.isError ? (
@@ -146,32 +209,67 @@ export function HistoryPanel() {
             Gagal memuat riwayat. Coba lagi nanti.
           </p>
         ) : versions.data && versions.data.length > 0 ? (
-          <ol className="space-y-2">
-            {versions.data.map((v) => {
-              const total = countEntries(v.changes);
+          <ol className="space-y-3">
+            {versions.data.map((v, index) => {
+              const isNewest = index === 0;
               return (
                 <li
                   key={v.id}
-                  className="flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors hover:border-primary/40"
+                  className={cn(
+                    "rounded-lg border p-3 transition-colors",
+                    isNewest ? "border-primary/50" : "hover:border-primary/40",
+                  )}
                 >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">
-                      {formatRelative(new Date(v.createdAt))}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {total > 0
-                        ? `${total} perubahan · ${v.changes.length} bagian`
-                        : "Sama dengan versi sekarang"}
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold">
+                          {formatRelative(new Date(v.createdAt))}
+                        </p>
+                        {isNewest ? (
+                          <Badge className="h-4 px-1.5 text-[10px]">
+                            Terbaru
+                          </Badge>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {formatVersionDate(new Date(v.createdAt))}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={() => setConfirmId(v.id)}
+                    >
+                      Pulihkan
+                    </Button>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="shrink-0"
-                    onClick={() => setConfirmId(v.id)}
-                  >
-                    Lihat
-                  </Button>
+
+                  <div className="mt-2.5 space-y-2">
+                    {v.changes.length > 0 ? (
+                      v.changes
+                        .slice(0, 2)
+                        .map((change) => (
+                          <DiffFile
+                            key={change.label}
+                            change={change}
+                            maxEntries={3}
+                          />
+                        ))
+                    ) : (
+                      <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
+                        <div className="px-2.5 py-1.5 text-muted-foreground">
+                          Tidak ada perubahan pada bagian ini
+                        </div>
+                      </div>
+                    )}
+                    {v.changes.length > 2 ? (
+                      <p className="text-xs text-muted-foreground">
+                        +{v.changes.length - 2} bagian lainnya
+                      </p>
+                    ) : null}
+                  </div>
                 </li>
               );
             })}
@@ -199,50 +297,25 @@ export function HistoryPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Pulihkan versi ini?</AlertDialogTitle>
             <AlertDialogDescription>
-              Perbandingan versi sekarang dengan versi yang dipilih.
+              Periksa perubahan di bawah sebelum memulihkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           {confirmVersion ? (
             <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <ClockIcon className="size-3.5 shrink-0" />
-                  {formatVersionDate(new Date(confirmVersion.createdAt))}
-                </span>
-                <span>
-                  {countEntries(confirmVersion.changes)} perubahan di{" "}
-                  {confirmVersion.changes.length} bagian
-                </span>
-              </div>
+              <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <ClockIcon className="size-3.5 shrink-0" />
+                Versi {formatVersionDate(new Date(confirmVersion.createdAt))}
+              </p>
 
               {confirmVersion.changes.length > 0 ? (
-                <div className="max-h-[45vh] overflow-auto rounded-lg border bg-muted/20 font-mono text-xs scrollbar-thin">
-                  {confirmVersion.changes.map((section) => (
-                    <div key={section.label} className="border-b last:border-0">
-                      <div className="sticky top-0 border-b bg-muted/80 px-3 py-1.5 font-sans text-[11px] font-medium backdrop-blur">
-                        {section.label}
-                      </div>
-                      <div className="divide-y divide-border/40">
-                        {section.entries.map((e, i) => {
-                          const style = KIND_STYLE[e.kind];
-                          return (
-                            <div
-                              key={`${e.kind}-${e.text}-${i}`}
-                              className={`flex gap-2 px-3 py-1.5 ${style.cls}`}
-                            >
-                              <span
-                                aria-hidden
-                                className="w-2 shrink-0 select-none font-bold"
-                              >
-                                {style.sign}
-                              </span>
-                              <span className="break-words">{e.text}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                <div className="max-h-[45vh] space-y-3 overflow-auto scrollbar-thin">
+                  {confirmVersion.changes.map((change) => (
+                    <DiffFile
+                      key={change.label}
+                      change={change}
+                      withLineNumbers
+                    />
                   ))}
                 </div>
               ) : (
@@ -251,7 +324,7 @@ export function HistoryPanel() {
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-muted-foreground">
                 <span className="text-emerald-700 dark:text-emerald-400">
                   + dikembalikan
                 </span>
@@ -263,9 +336,10 @@ export function HistoryPanel() {
                 </span>
               </div>
 
-              <p className="text-xs text-muted-foreground">
-                Versi sekarang akan disimpan sebagai versi baru terlebih dahulu,
-                jadi tidak ada data yang hilang permanen.
+              <p className="flex gap-1.5 border-t pt-3 text-xs text-muted-foreground">
+                <InfoIcon className="mt-0.5 size-3.5 shrink-0" />
+                Konten CV saat ini akan disimpan sebagai versi baru terlebih
+                dahulu, jadi tidak ada data yang hilang.
               </p>
             </div>
           ) : null}

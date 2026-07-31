@@ -52,7 +52,14 @@ export interface VersionChangeEntry {
 /** One changed section sent to the history panel, with per-item diff lines. */
 export interface VersionChange {
   label: string;
+  /** Pseudo file name shown in the diff header, e.g. "pengalaman.cv". */
+  file: string;
   entries: VersionChangeEntry[];
+}
+
+/** "Pengalaman" → "pengalaman.cv" for the diff-style section header. */
+function fileNameOf(label: string): string {
+  return `${label.toLowerCase().replace(/\s+/g, "-")}.cv`;
 }
 
 const eq = (a: unknown, b: unknown) =>
@@ -64,6 +71,50 @@ function itemName(item: unknown): string | null {
   const o = item as Record<string, unknown>;
   const name = o.company ?? o.school ?? o.name ?? o.title;
   return typeof name === "string" && name.trim() ? name : null;
+}
+
+const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : "");
+
+/**
+ * Multi-line rendering of a list item for the diff view: a title line
+ * ("Frontend Developer, PT Kreasi Digital") followed by description lines and
+ * a date range, mirroring how the item reads on the CV itself.
+ */
+function itemLines(item: unknown): string[] {
+  if (!item || typeof item !== "object") return [];
+  const o = item as Record<string, unknown>;
+
+  const name = itemName(item) ?? "";
+  const role = str(o.role) || str(o.degree) || str(o.issuer) || str(o.type);
+  const title = role && name ? `${role}, ${name}` : name || role;
+
+  const lines: string[] = title ? [title] : [];
+
+  const description = str(o.description);
+  if (description) {
+    for (const line of description.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (trimmed) lines.push(trimmed);
+    }
+  }
+
+  const start = str(o.startDate);
+  const end = o.current === true ? "Sekarang" : str(o.endDate);
+  const date = str(o.date) || [start, end].filter(Boolean).join(" - ");
+  if (date) lines.push(date);
+
+  const level = str(o.level as unknown) || str(o.gpa);
+  if (level) lines.push(level);
+
+  return lines;
+}
+
+/** Expands one list item into diff entries of the given kind. */
+function itemEntries(
+  kind: VersionChangeEntry["kind"],
+  item: unknown,
+): VersionChangeEntry[] {
+  return itemLines(item).map((text) => ({ kind, text }));
 }
 
 /**
@@ -112,7 +163,7 @@ function describeChange(
     return [{ kind: "edit", text: `${count} pengaturan berbeda` }];
   }
 
-  // List sections: name what gets added back, removed, or edited.
+  // List sections: full item lines for what gets added back, removed, edited.
   const cur = Array.isArray(current) ? current : [];
   const ver = Array.isArray(version) ? version : [];
 
@@ -121,24 +172,27 @@ function describeChange(
 
   const entries: VersionChangeEntry[] = [];
 
-  for (const n of verNames) {
+  for (let i = 0; i < ver.length; i++) {
+    const n = verNames[i];
     if (n !== null && !curNames.includes(n)) {
-      entries.push({ kind: "restore", text: n });
+      entries.push(...itemEntries("restore", ver[i]));
     }
   }
-  for (const n of curNames) {
+  for (let i = 0; i < cur.length; i++) {
+    const n = curNames[i];
     if (n !== null && !verNames.includes(n)) {
-      entries.push({ kind: "remove", text: n });
+      entries.push(...itemEntries("remove", cur[i]));
     }
   }
-  // Same-name items whose content differs.
-  for (const n of verNames) {
+  // Same-name items whose content differs: show the version's lines as edits.
+  for (let i = 0; i < ver.length; i++) {
+    const n = verNames[i];
     if (
       n !== null &&
       curNames.includes(n) &&
-      !eq(ver[verNames.indexOf(n)], cur[curNames.indexOf(n)])
+      !eq(ver[i], cur[curNames.indexOf(n)])
     ) {
-      entries.push({ kind: "edit", text: n });
+      entries.push(...itemEntries("edit", ver[i]));
     }
   }
 
@@ -169,6 +223,7 @@ function diffChanges(
   return DIFF_FIELDS.filter(([key]) => !eq(version[key], current[key])).map(
     ([key, label]) => ({
       label,
+      file: fileNameOf(label),
       entries: describeChange(key, version[key], current[key]),
     }),
   );
