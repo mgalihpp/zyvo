@@ -10,11 +10,24 @@ export const columnKindSchema = z.enum([
 ]);
 export type ColumnKind = z.infer<typeof columnKindSchema>;
 
+export const columnColorSchema = z.enum([
+  "blue",
+  "green",
+  "yellow",
+  "purple",
+  "red",
+  "orange",
+  "pink",
+  "gray",
+]);
+export type ColumnColor = z.infer<typeof columnColorSchema>;
+
 export const boardColumnSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1).max(60),
   kind: columnKindSchema,
   order: z.number().int().min(0),
+  color: columnColorSchema.optional(),
 });
 export type BoardColumn = z.infer<typeof boardColumnSchema>;
 

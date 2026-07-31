@@ -254,6 +254,7 @@ type JobBoardColumn {
   name  String // user-renamable label
   kind  String // "applied" | "interview" | "offer" | "accepted" | "rejected" | "custom"
   order Int
+  color String? // preset color name; null = fallback by kind
 }
 
 model JobApplication {
