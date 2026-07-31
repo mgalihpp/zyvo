@@ -182,7 +182,9 @@ function ContextFields({
           ) : (
             <TriangleAlertIcon className="size-3.5" aria-hidden="true" />
           )}
-          {jdText ? "JD: tersedia" : "JD: tidak ada"}
+          {jdText
+            ? "Deskripsi lowongan tersedia"
+            : "Belum ada deskripsi lowongan"}
         </span>
         {!cvId && (
           <span className="text-xs text-muted-foreground">
