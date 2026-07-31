@@ -1,6 +1,7 @@
 import type { CV, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { toCvContent } from "@/features/cv/lib/cv-content";
 import {
   cvContentSchema,
   cvUpdateSchema,
@@ -505,7 +506,12 @@ export const cvRouter = createTRPCRouter({
         });
       }
 
-      return { id: version.id, content: version.content };
+      // Normalize the raw stored blob (versions can predate `personal` being
+      // non-null) into CvContent so the preview cast in history-panel is safe.
+      return {
+        id: version.id,
+        content: toCvContent(version.content as unknown as CV),
+      };
     }),
 
   restoreVersion: protectedProcedure
@@ -530,7 +536,11 @@ export const cvRouter = createTRPCRouter({
       // first (unconditionally — bypasses the 10-minute window on purpose).
       await snapshotCv(ctx.prisma, cv);
 
-      const content = version.content as Prisma.CVUpdateInput;
+      // Normalize before writing so a null-personal version can't reintroduce
+      // the null crash in the editor preview.
+      const content = toCvContent(
+        version.content as unknown as CV,
+      ) as unknown as Prisma.CVUpdateInput;
       return ctx.prisma.cV.update({
         where: { id: input.cvId },
         data: content,
