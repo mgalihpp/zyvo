@@ -2,7 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { KanbanBoard } from "@/features/job-tracker/components/kanban-board";
 import { UpsellView } from "@/features/job-tracker/components/upsell-view";
+import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
 import { trpc } from "@/lib/trpc/client";
 
 function BoardSkeleton() {
@@ -43,7 +45,11 @@ export function JobTrackerPage() {
 
   return (
     <div className="px-4 py-6">
-      <pre>{JSON.stringify(data.board.columns, null, 2)}</pre>
+      <KanbanBoard
+        columns={data.board.columns as BoardColumn[]}
+        applications={data.applications}
+        onCardClick={() => {}}
+      />
     </div>
   );
 }
