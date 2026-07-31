@@ -62,7 +62,8 @@ export default function PlanPage() {
   const [polling, setPolling] = useState(false);
   const pollCount = useRef(0);
 
-  const { data: subscription, refetch: refetchSubscription } = useSubscription();
+  const { data: subscription, refetch: refetchSubscription } =
+    useSubscription();
   const createToken = useCreateSnapToken();
   const cancel = useCancelTransaction();
   const confirmPayment = useConfirmPayment();

@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { coreGet, corePost, snapPost } from "@/features/billing/lib/midtrans";
 import { getAmount } from "@/features/billing/lib/plans";
-import { applyPayment, TERMINAL_FAILED } from "@/features/billing/server/apply-payment";
+import {
+  applyPayment,
+  TERMINAL_FAILED,
+} from "@/features/billing/server/apply-payment";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 export const billingRouter = createTRPCRouter({
@@ -110,8 +113,7 @@ export const billingRouter = createTRPCRouter({
 
       const isPaid =
         res.transaction_status === "settlement" ||
-        (res.transaction_status === "capture" &&
-          res.fraud_status === "accept");
+        (res.transaction_status === "capture" && res.fraud_status === "accept");
 
       if (!isPaid) return { paid: false };
 

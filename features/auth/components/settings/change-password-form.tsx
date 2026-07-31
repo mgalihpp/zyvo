@@ -34,7 +34,7 @@ export default function ChangePasswordForm({
       });
       return;
     }
-    toast.add({ title: "Kata sandi berhasil diubah" });
+    toast.add({ title: "Kata sandi berhasil diubah", type: "success" });
     onClose();
   };
 
