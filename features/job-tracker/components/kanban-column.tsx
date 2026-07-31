@@ -4,6 +4,10 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { JobApplication } from "@prisma/client";
 import { ApplicationCard } from "@/features/job-tracker/components/application-card";
+import {
+  COLUMN_COLORS,
+  getColumnColor,
+} from "@/features/job-tracker/lib/column-colors";
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
 import { cn } from "@/lib/utils";
 
@@ -40,21 +44,31 @@ export function KanbanColumn({
   // Only highlight when a *card* hovers the column, not another column.
   const isCardOver = isOver && active?.data.current?.type !== "column";
 
+  const color = COLUMN_COLORS[getColumnColor(column)];
+
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
-        "flex max-h-full w-72 shrink-0 flex-col gap-2 rounded-xl bg-muted/40 p-3",
+        "flex max-h-full w-72 shrink-0 flex-col gap-2 overflow-hidden rounded-xl bg-muted/40 px-3 pb-3",
         isCardOver && "ring-2 ring-primary/40 ring-inset",
         isDragging && "z-10 opacity-80 shadow-lg",
       )}
     >
+      {/* Column accent bar — full-bleed across the top. */}
+      <div className={cn("-mx-3 h-1 shrink-0", color.bar)} aria-hidden="true" />
       {/* Drag handle: the header area moves the column. */}
       <div {...attributes} {...listeners} className="cursor-grab">
         {header ?? (
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm font-semibold">{column.name}</span>
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <span
+                className={cn("size-2 rounded-full", color.dot)}
+                aria-hidden="true"
+              />
+              {column.name}
+            </span>
             <span className="text-xs text-muted-foreground">
               {applications.length}
             </span>
