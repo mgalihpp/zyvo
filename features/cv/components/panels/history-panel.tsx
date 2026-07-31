@@ -419,15 +419,14 @@ export function HistoryPanel() {
 
                     <div className="mt-2.5 space-y-2">
                       {v.changes.length > 0 ? (
-                        <p className="text-xs text-muted-foreground">
-                          {v.changes
-                            .map((change) => change.label)
-                            .slice(0, 3)
-                            .join(" · ")}
-                          {v.changes.length > 3
-                            ? ` · +${v.changes.length - 3} lainnya`
-                            : ""}
-                        </p>
+                        <>
+                          <DiffFile change={v.changes[0]} maxEntries={3} />
+                          {v.changes.length > 1 ? (
+                            <p className="text-xs text-muted-foreground">
+                              +{v.changes.length - 1} bagian lainnya
+                            </p>
+                          ) : null}
+                        </>
                       ) : (
                         <p className="text-xs text-muted-foreground">
                           Sama dengan versi sekarang
