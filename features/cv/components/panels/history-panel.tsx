@@ -115,7 +115,12 @@ function DiffFile({
 
   return (
     <div className="overflow-hidden rounded-md border bg-muted/20 font-mono text-xs">
-      <div className="flex items-center gap-1.5 border-b bg-muted/60 px-2.5 py-1.5">
+      <div
+        className={cn(
+          "flex items-center gap-1.5 bg-muted/60 px-2.5 py-1.5",
+          maxEntries === 0 ? "" : "border-b",
+        )}
+      >
         <FileTextIcon className="size-3.5 shrink-0 text-muted-foreground" />
         <span className="truncate font-medium">{change.file}</span>
         <span className="ml-auto flex shrink-0 gap-2">
@@ -129,37 +134,40 @@ function DiffFile({
           ) : null}
         </span>
       </div>
-      <div>
-        {entries.map((e, i) => {
-          const style = KIND_STYLE[e.kind];
-          return (
-            <div
-              key={`${e.kind}-${e.text}-${i}`}
-              className={cn("flex", style.cls)}
-            >
-              {withLineNumbers ? (
-                <span
-                  aria-hidden
-                  className="w-7 shrink-0 select-none border-r border-border/40 bg-muted/40 px-1.5 py-1 text-right text-muted-foreground/70"
-                >
-                  {i + 1}
+      {/* maxEntries={0} renders a compact header-only card (name + counters). */}
+      {maxEntries === 0 ? null : (
+        <div>
+          {entries.map((e, i) => {
+            const style = KIND_STYLE[e.kind];
+            return (
+              <div
+                key={`${e.kind}-${e.text}-${i}`}
+                className={cn("flex", style.cls)}
+              >
+                {withLineNumbers ? (
+                  <span
+                    aria-hidden
+                    className="w-7 shrink-0 select-none border-r border-border/40 bg-muted/40 px-1.5 py-1 text-right text-muted-foreground/70"
+                  >
+                    {i + 1}
+                  </span>
+                ) : null}
+                <span className="flex min-w-0 gap-1.5 px-2.5 py-1">
+                  <span aria-hidden className="shrink-0 select-none font-bold">
+                    {style.sign}
+                  </span>
+                  <span className="break-words">{e.text}</span>
                 </span>
-              ) : null}
-              <span className="flex min-w-0 gap-1.5 px-2.5 py-1">
-                <span aria-hidden className="shrink-0 select-none font-bold">
-                  {style.sign}
-                </span>
-                <span className="break-words">{e.text}</span>
-              </span>
+              </div>
+            );
+          })}
+          {hidden > 0 ? (
+            <div className="px-2.5 py-1 text-muted-foreground">
+              … {hidden} baris lainnya
             </div>
-          );
-        })}
-        {hidden > 0 ? (
-          <div className="px-2.5 py-1 text-muted-foreground">
-            … {hidden} baris lainnya
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
@@ -420,7 +428,7 @@ export function HistoryPanel() {
                     <div className="mt-2.5 space-y-2">
                       {v.changes.length > 0 ? (
                         <>
-                          <DiffFile change={v.changes[0]} maxEntries={3} />
+                          <DiffFile change={v.changes[0]} maxEntries={0} />
                           {v.changes.length > 1 ? (
                             <p className="text-xs text-muted-foreground">
                               +{v.changes.length - 1} bagian lainnya
