@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
 import { TemplateGallery } from "@/features/cv/components/dashboard/template-gallery";
+import { constructMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = constructMetadata({ title: "Template" });
 
 /** Template — browse available templates and start a CV from one. */
 export default async function TemplatesPage() {

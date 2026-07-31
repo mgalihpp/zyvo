@@ -1,10 +1,14 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
 import { CvList } from "@/features/cv/components/dashboard/cv-list";
+import { constructMetadata } from "@/lib/seo";
 import { getServerTrpc } from "@/server/trpc/server";
+
+export const metadata: Metadata = constructMetadata({ title: "Dashboard" });
 
 /** Resume — main dashboard page, FlowCV style. */
 export default async function DashboardPage() {

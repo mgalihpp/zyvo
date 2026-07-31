@@ -12,7 +12,7 @@ import { FAQS } from "@/features/marketing/lib/faq-data";
 import { constructMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = constructMetadata({
-  title: "Zyvo — CV Impian, dalam Hitungan Menit",
+  title: "Zyvo | Buat CV profesional dalam hitungan menit",
   alternates: { canonical: `${siteConfig.url}/` },
 });
 

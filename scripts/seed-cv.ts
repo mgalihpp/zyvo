@@ -74,7 +74,11 @@ const mockCVs = [
       { name: "GraphQL", level: 3 },
       { name: "Tailwind CSS", level: 2 },
     ],
-    interpersonal: [{ name: "Team Leadership" }, { name: "Mentoring" }, { name: "Cross-team Communication" }],
+    interpersonal: [
+      { name: "Team Leadership" },
+      { name: "Mentoring" },
+      { name: "Cross-team Communication" },
+    ],
     languages: [
       { name: "Indonesian", level: "Native" },
       { name: "English", level: "Professional" },
@@ -101,7 +105,8 @@ const mockCVs = [
         name: "Indonesian Developers Community",
         role: "Chapter Lead",
         date: "2020 – Present",
-        description: "Organized monthly meetups and workshops for 200+ members.",
+        description:
+          "Organized monthly meetups and workshops for 200+ members.",
       },
     ],
     projects: [
@@ -110,14 +115,16 @@ const mockCVs = [
         type: "Open Source",
         date: "2022 – Present",
         skill: "React, TypeScript, Vite",
-        description: "Component library with 1.2k GitHub stars; maintainer of 3 core packages.",
+        description:
+          "Component library with 1.2k GitHub stars; maintainer of 3 core packages.",
       },
       {
         name: "E-commerce Analytics Dashboard",
         type: "Personal",
         date: "2021",
         skill: "Next.js, Recharts, PostgreSQL",
-        description: "Real-time sales dashboard processing 100k events/day for a local retailer.",
+        description:
+          "Real-time sales dashboard processing 100k events/day for a local retailer.",
       },
     ],
     custom: [],
@@ -178,7 +185,11 @@ const mockCVs = [
       { name: "Adobe XD", level: 3 },
       { name: "HTML/CSS", level: 3 },
     ],
-    interpersonal: [{ name: "Stakeholder Management" }, { name: "Collaboration" }, { name: "Presentation" }],
+    interpersonal: [
+      { name: "Stakeholder Management" },
+      { name: "Collaboration" },
+      { name: "Presentation" },
+    ],
     languages: [
       { name: "Indonesian", level: "Native" },
       { name: "English", level: "Fluent" },
@@ -197,7 +208,8 @@ const mockCVs = [
         name: "Designers Meetup Yogyakarta",
         role: "Co-founder",
         date: "2019 – Present",
-        description: "Community of 500+ designers hosting monthly sharing sessions.",
+        description:
+          "Community of 500+ designers hosting monthly sharing sessions.",
       },
     ],
     projects: [
@@ -206,7 +218,8 @@ const mockCVs = [
         type: "Work",
         date: "2021 – Present",
         skill: "Figma, Storybook, React",
-        description: "Component library with theming, accessibility support, and documentation.",
+        description:
+          "Component library with theming, accessibility support, and documentation.",
       },
     ],
     custom: [],
