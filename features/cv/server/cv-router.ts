@@ -30,18 +30,129 @@ const DIFF_FIELDS = [
   ["custom", "Bagian Kustom"],
 ] as const;
 
+/** Human labels for subfields of the `personal` object. */
+const PERSONAL_LABELS: Record<string, string> = {
+  fullName: "Nama",
+  headline: "Headline",
+  email: "Email",
+  phone: "Telepon",
+  location: "Lokasi",
+  website: "Website",
+  linkedin: "LinkedIn",
+  github: "GitHub",
+  photo: "Foto",
+};
+
+/** One human-readable change entry sent to the history panel. */
+export interface VersionChange {
+  label: string;
+  /** e.g. `"CV Lama" → "CV Baru"`, or `PT A ditambahkan; PT B diubah`. */
+  detail: string;
+}
+
+const eq = (a: unknown, b: unknown) =>
+  JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+/** Display name of a section list item (company, school, skill name, …). */
+function itemName(item: unknown): string | null {
+  if (!item || typeof item !== "object") return null;
+  const o = item as Record<string, unknown>;
+  const name = o.company ?? o.school ?? o.name ?? o.title;
+  return typeof name === "string" && name.trim() ? name : null;
+}
+
 /**
- * Labels of content fields that differ between two snapshots. Deep-compares
- * via JSON since both sides come from Prisma rows with stable key order.
+ * Describes what restoring `version` would change relative to `current`, in
+ * "current → version" direction. For list sections the detail names the items
+ * that would be added back / removed / edited.
  */
-function diffLabels(
-  a: Record<string, unknown>,
-  b: Record<string, unknown>,
-): string[] {
-  return DIFF_FIELDS.filter(
-    ([key]) =>
-      JSON.stringify(a[key] ?? null) !== JSON.stringify(b[key] ?? null),
-  ).map(([, label]) => label);
+function describeChange(
+  key: (typeof DIFF_FIELDS)[number][0],
+  version: unknown,
+  current: unknown,
+): string {
+  // Short scalar values: show the actual before → after.
+  if (key === "title" || key === "templateId") {
+    return `"${current ?? "—"}" → "${version ?? "—"}"`;
+  }
+
+  if (key === "summary") {
+    if (!current && version) return "Ringkasan akan dikembalikan";
+    if (current && !version) return "Ringkasan akan dikosongkan";
+    return "Isi ringkasan berbeda";
+  }
+
+  if (key === "personal") {
+    const a = (current ?? {}) as Record<string, unknown>;
+    const b = (version ?? {}) as Record<string, unknown>;
+    const changed = Object.keys(PERSONAL_LABELS).filter((k) => !eq(a[k], b[k]));
+    if (changed.length === 0) return "Data pribadi berbeda";
+    return changed.map((k) => PERSONAL_LABELS[k]).join(", ");
+  }
+
+  if (key === "typography" || key === "colors") {
+    const a = (current ?? {}) as Record<string, unknown>;
+    const b = (version ?? {}) as Record<string, unknown>;
+    const n = new Set([...Object.keys(a), ...Object.keys(b)]);
+    const count = [...n].filter((k) => !eq(a[k], b[k])).length;
+    return `${count} pengaturan berbeda`;
+  }
+
+  // List sections: name what gets added back, removed, or edited.
+  const cur = Array.isArray(current) ? current : [];
+  const ver = Array.isArray(version) ? version : [];
+  const parts: string[] = [];
+
+  const curNames = cur.map(itemName);
+  const verNames = ver.map(itemName);
+
+  const added = verNames.filter(
+    (n): n is string => n !== null && !curNames.includes(n),
+  );
+  const removed = curNames.filter(
+    (n): n is string => n !== null && !verNames.includes(n),
+  );
+  // Same-name items whose content differs.
+  const edited = verNames.filter(
+    (n): n is string =>
+      n !== null &&
+      curNames.includes(n) &&
+      !eq(ver[verNames.indexOf(n)], cur[curNames.indexOf(n)]),
+  );
+
+  const list = (names: string[]) =>
+    names.length > 2
+      ? `${names.slice(0, 2).join(", ")} +${names.length - 2} lainnya`
+      : names.join(", ");
+
+  if (added.length) parts.push(`${list(added)} akan dikembalikan`);
+  if (removed.length) parts.push(`${list(removed)} akan dihapus`);
+  if (edited.length) parts.push(`${list(edited)} akan diubah`);
+
+  if (parts.length === 0) {
+    // Unnamed items or pure reorder — fall back to counts.
+    return cur.length === ver.length
+      ? "Urutan atau isi item berbeda"
+      : `${cur.length} item → ${ver.length} item`;
+  }
+  return parts.join(" · ");
+}
+
+/**
+ * Human-readable list of what restoring `version` would change, compared to
+ * `current`. Deep-compares via JSON since both sides come from Prisma rows
+ * with stable key order.
+ */
+function diffChanges(
+  version: Record<string, unknown>,
+  current: Record<string, unknown>,
+): VersionChange[] {
+  return DIFF_FIELDS.filter(([key]) => !eq(version[key], current[key])).map(
+    ([key, label]) => ({
+      label,
+      detail: describeChange(key, version[key], current[key]),
+    }),
+  );
 }
 
 /** Strips identity/timestamp fields from a CV row, leaving only content. */
@@ -264,13 +375,13 @@ export const cvRouter = createTRPCRouter({
       });
 
       // Content itself stays server-side (full CV blobs would bloat the
-      // payload); each version instead carries the section labels that differ
-      // from the CURRENT CV — i.e. what restoring it would change.
+      // payload); each version instead carries a human-readable list of what
+      // restoring it would change relative to the CURRENT CV.
       const current = cvContentOf(cv);
       return versions.map((v) => ({
         id: v.id,
         createdAt: v.createdAt,
-        changes: diffLabels(v.content as Record<string, unknown>, current),
+        changes: diffChanges(v.content as Record<string, unknown>, current),
       }));
     }),
 
