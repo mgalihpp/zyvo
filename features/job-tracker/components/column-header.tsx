@@ -19,8 +19,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
+import {
+  COLUMN_COLOR_LABELS,
+  COLUMN_COLOR_NAMES,
+  COLUMN_COLORS,
+  getColumnColor,
+} from "@/features/job-tracker/lib/column-colors";
+import type {
+  BoardColumn,
+  ColumnColor,
+} from "@/features/job-tracker/schemas/job-tracker";
 import { trpc } from "@/lib/trpc/client";
+import { cn } from "@/lib/utils";
 
 export function ColumnHeader({
   column,
@@ -59,6 +69,12 @@ export function ColumnHeader({
     });
   }
 
+  function setColor(color: ColumnColor) {
+    updateColumns.mutate({
+      columns: columns.map((c) => (c.id === column.id ? { ...c, color } : c)),
+    });
+  }
+
   function deleteColumn() {
     const remaining = columns
       .filter((c) => c.id !== column.id)
@@ -87,13 +103,20 @@ export function ColumnHeader({
       ) : (
         <button
           type="button"
-          className="truncate text-sm font-semibold"
+          className="flex min-w-0 items-center gap-2 text-sm font-semibold"
           onClick={() => {
             setName(column.name);
             setEditing(true);
           }}
         >
-          {column.name}
+          <span
+            className={cn(
+              "size-2 shrink-0 rounded-full",
+              COLUMN_COLORS[getColumnColor(column)].dot,
+            )}
+            aria-hidden="true"
+          />
+          <span className="truncate">{column.name}</span>
         </button>
       )}
       <div className="flex shrink-0 items-center gap-1">
@@ -120,6 +143,27 @@ export function ColumnHeader({
               <PencilIcon />
               Ubah Nama
             </DropdownMenuItem>
+            {/* Swatch row — not a menu item; clicking a swatch sets the color. */}
+            <div className="flex items-center gap-1.5 px-2 py-1.5">
+              {COLUMN_COLOR_NAMES.map((colorName) => {
+                const selected = getColumnColor(column) === colorName;
+                return (
+                  <button
+                    key={colorName}
+                    type="button"
+                    aria-label={COLUMN_COLOR_LABELS[colorName]}
+                    aria-pressed={selected}
+                    className={cn(
+                      "size-4 rounded-full transition-transform hover:scale-110",
+                      COLUMN_COLORS[colorName].swatch,
+                      selected &&
+                        "ring-2 ring-foreground/60 ring-offset-1 ring-offset-popover",
+                    )}
+                    onClick={() => setColor(colorName)}
+                  />
+                );
+              })}
+            </div>
             {column.kind === "custom" && (
               <DropdownMenuItem
                 variant="destructive"
