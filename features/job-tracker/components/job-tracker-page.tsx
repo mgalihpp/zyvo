@@ -4,9 +4,9 @@ import type { JobApplication } from "@prisma/client";
 import { SparklesIcon } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { BoardToolbar } from "@/features/job-tracker/components/board-toolbar";
 import { ColumnHeader } from "@/features/job-tracker/components/column-header";
+import { JobTrackerSkeleton } from "@/features/job-tracker/components/job-tracker-skeleton";
 import { StatsCards } from "@/features/job-tracker/components/stats-cards";
 import { UpsellView } from "@/features/job-tracker/components/upsell-view";
 
@@ -39,58 +39,6 @@ const AiAssistantModal = lazy(() =>
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
 import { trpc } from "@/lib/trpc/client";
 
-function BoardSkeleton() {
-  return (
-    <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-2">
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-7 w-36" />
-          <Skeleton className="h-7 w-28" />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-32 w-full" />
-        ))}
-      </div>
-      <div className="flex items-start gap-4 overflow-x-auto pb-2">
-        {Array.from({ length: 5 }, (_, i) => (
-          <div
-            key={i}
-            className="w-72 shrink-0 space-y-2 rounded-xl bg-muted/40 p-3"
-          >
-            <div className="flex items-center justify-between gap-1 px-1">
-              <Skeleton className="h-4 w-20" />
-              <div className="flex shrink-0 items-center gap-1">
-                <Skeleton className="h-3 w-4" />
-                <Skeleton className="size-6" />
-              </div>
-            </div>
-            {Array.from({ length: 2 }, (_, j) => (
-              <div
-                key={j}
-                className="space-y-2 rounded-lg bg-card px-3 py-3 ring-1 ring-foreground/10"
-              >
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-                <div className="flex flex-wrap gap-1">
-                  <Skeleton className="h-5 w-16 rounded-full" />
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
-        <Skeleton className="h-7 w-40 shrink-0" />
-      </div>
-    </div>
-  );
-}
-
 export function JobTrackerPage() {
   const { data, isLoading, error, refetch } = trpc.jobTracker.getBoard.useQuery(
     undefined,
@@ -102,7 +50,7 @@ export function JobTrackerPage() {
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
   const [aiOpen, setAiOpen] = useState(false);
 
-  if (isLoading) return <BoardSkeleton />;
+  if (isLoading) return <JobTrackerSkeleton />;
 
   if (error) {
     if (error.data?.code === "FORBIDDEN") return <UpsellView />;
@@ -140,7 +88,7 @@ export function JobTrackerPage() {
         />
       </div>
       <StatsCards />
-      <Suspense fallback={<BoardSkeleton />}>
+      <Suspense fallback={<JobTrackerSkeleton />}>
         <KanbanBoard
           columns={columns}
           applications={data.applications}
