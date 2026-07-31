@@ -272,6 +272,7 @@ model JobApplication {
   cvId         String? // optional ref to owned CV
   followUpDate DateTime?
   notes        String?
+  jobDescription String? // pasted JD text, used by AI assistant modal
   timeline     JobTimelineEvent[]
   appliedAt    DateTime           @default(now())
   createdAt    DateTime           @default(now())

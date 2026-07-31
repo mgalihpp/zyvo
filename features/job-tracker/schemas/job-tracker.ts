@@ -45,6 +45,7 @@ export const applicationInputSchema = z.object({
   cvId: z.string().optional(),
   followUpDate: z.coerce.date().optional(),
   notes: z.string().max(5000).optional(),
+  jobDescription: z.string().max(3000).optional(),
   appliedAt: z.coerce.date().optional(),
 });
 export type ApplicationInput = z.infer<typeof applicationInputSchema>;

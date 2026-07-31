@@ -56,6 +56,7 @@ const formSchema = z.object({
   followUpDate: z.string().optional(),
   appliedAt: z.string().optional(),
   notes: z.string().max(5000).optional(),
+  jobDescription: z.string().max(3000).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -85,6 +86,7 @@ function toPayload(values: FormValues) {
       : undefined,
     appliedAt: values.appliedAt ? new Date(values.appliedAt) : undefined,
     notes: values.notes || undefined,
+    jobDescription: values.jobDescription || undefined,
   };
 }
 
@@ -106,6 +108,7 @@ function defaultsFor(
       followUpDate: "",
       appliedAt: toDateInput(new Date()),
       notes: "",
+      jobDescription: "",
     };
   }
   return {
@@ -121,6 +124,7 @@ function defaultsFor(
     followUpDate: toDateInput(application.followUpDate),
     appliedAt: toDateInput(application.appliedAt),
     notes: application.notes ?? "",
+    jobDescription: application.jobDescription ?? "",
   };
 }
 
@@ -529,6 +533,23 @@ export function ApplicationDialog({
                   id={field.name}
                   rows={3}
                   placeholder="cth. Referral dari teman, interview tahap 2 minggu depan..."
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="jobDescription"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor={field.name}>Deskripsi Lowongan</FieldLabel>
+                <Textarea
+                  {...field}
+                  id={field.name}
+                  rows={4}
+                  placeholder="Paste deskripsi lowongan di sini — dipakai untuk fitur AI (opsional)"
                 />
                 <FieldError errors={[fieldState.error]} />
               </Field>
