@@ -3,6 +3,7 @@
 import type { JobApplication } from "@prisma/client";
 import {
   BriefcaseIcon,
+  CheckCircle2Icon,
   ChevronDownIcon,
   FileTextIcon,
   LightbulbIcon,
@@ -10,6 +11,7 @@ import {
   PenLineIcon,
   SearchCheckIcon,
   SparklesIcon,
+  TriangleAlertIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -169,12 +171,17 @@ function ContextFields({
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            "rounded-md px-2 py-0.5 text-xs font-medium",
+            "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium",
             jdText
               ? "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-400"
               : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-400",
           )}
         >
+          {jdText ? (
+            <CheckCircle2Icon className="size-3.5" aria-hidden="true" />
+          ) : (
+            <TriangleAlertIcon className="size-3.5" aria-hidden="true" />
+          )}
           {jdText ? "JD: tersedia" : "JD: tidak ada"}
         </span>
         {!cvId && (
