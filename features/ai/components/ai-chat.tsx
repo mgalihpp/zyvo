@@ -54,7 +54,6 @@ export function AiChat() {
         <div className="max-h-80 space-y-3 overflow-y-auto pr-1 scrollbar-thin">
           {messages.map((msg, i) => (
             <div
-              // biome-ignore lint/suspicious/noArrayIndexKey: append-only chat log
               key={i}
               className={
                 msg.role === "user"
