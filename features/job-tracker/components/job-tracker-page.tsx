@@ -1,7 +1,11 @@
 "use client";
 
+import type { JobApplication } from "@prisma/client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ApplicationDialog } from "@/features/job-tracker/components/application-dialog";
+import { BoardToolbar } from "@/features/job-tracker/components/board-toolbar";
 import { KanbanBoard } from "@/features/job-tracker/components/kanban-board";
 import { UpsellView } from "@/features/job-tracker/components/upsell-view";
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
@@ -26,6 +30,8 @@ export function JobTrackerPage() {
     undefined,
     { retry: false },
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingApp, setEditingApp] = useState<JobApplication | undefined>();
 
   if (isLoading) return <BoardSkeleton />;
 
@@ -43,12 +49,40 @@ export function JobTrackerPage() {
 
   if (!data) return null;
 
+  const columns = data.board.columns as BoardColumn[];
+  const defaultColumnId =
+    [...columns].sort((a, b) => a.order - b.order)[0]?.id ?? "";
+
   return (
-    <div className="px-4 py-6">
+    <div className="space-y-4 px-4 py-6">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold">Pelacak Lamaran</h1>
+          <p className="text-sm text-muted-foreground">
+            Kelola semua lamaran kerjamu di satu papan.
+          </p>
+        </div>
+        <BoardToolbar
+          onAdd={() => {
+            setEditingApp(undefined);
+            setDialogOpen(true);
+          }}
+        />
+      </div>
       <KanbanBoard
-        columns={data.board.columns as BoardColumn[]}
+        columns={columns}
         applications={data.applications}
-        onCardClick={() => {}}
+        onCardClick={(app) => {
+          setEditingApp(app);
+          setDialogOpen(true);
+        }}
+      />
+      <ApplicationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        columns={columns}
+        defaultColumnId={defaultColumnId}
+        application={editingApp}
       />
     </div>
   );

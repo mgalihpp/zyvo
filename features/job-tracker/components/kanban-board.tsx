@@ -25,10 +25,7 @@ export function KanbanBoard({
   applications: JobApplication[];
   onCardClick: (app: JobApplication) => void;
   /** Optional per-column header renderer (Task 11: rename/delete menu). */
-  renderColumnHeader?: (
-    column: BoardColumn,
-    count: number,
-  ) => React.ReactNode;
+  renderColumnHeader?: (column: BoardColumn, count: number) => React.ReactNode;
   /** Optional extra node at the right end of the board (Task 11: add column). */
   boardActions?: React.ReactNode;
 }) {
