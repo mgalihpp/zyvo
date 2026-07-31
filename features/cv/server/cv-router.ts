@@ -6,7 +6,7 @@ import {
   emptyPersonal,
 } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
-import type { CV, PrismaClient } from "@prisma/client";
+import type { CV, Prisma, PrismaClient } from "@prisma/client";
 
 const SNAPSHOT_INTERVAL_MS = 10 * 60 * 1000;
 const MAX_VERSIONS = 30;
@@ -204,5 +204,54 @@ export const cvRouter = createTRPCRouter({
       await ctx.prisma.cV.delete({ where: { id: input.id } });
 
       return { id: input.id };
+    }),
+
+  listVersions: protectedProcedure
+    .input(z.object({ cvId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const cv = await ctx.prisma.cV.findUnique({
+        where: { id: input.cvId },
+        select: { userId: true },
+      });
+      if (!cv || cv.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      // Content is excluded: the panel only needs timestamps, and snapshots
+      // are full CV blobs that would bloat the payload.
+      return ctx.prisma.cvVersion.findMany({
+        where: { cvId: input.cvId },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, createdAt: true },
+      });
+    }),
+
+  restoreVersion: protectedProcedure
+    .input(z.object({ cvId: z.string(), versionId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const cv = await ctx.prisma.cV.findUnique({ where: { id: input.cvId } });
+      if (!cv || cv.userId !== ctx.session.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      const version = await ctx.prisma.cvVersion.findUnique({
+        where: { id: input.versionId },
+      });
+      if (!version || version.cvId !== input.cvId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Versi tidak ditemukan",
+        });
+      }
+
+      // Restore never loses data: the current state becomes a new version
+      // first (unconditionally — bypasses the 10-minute window on purpose).
+      await snapshotCv(ctx.prisma, cv);
+
+      const content = version.content as Prisma.CVUpdateInput;
+      return ctx.prisma.cV.update({
+        where: { id: input.cvId },
+        data: content,
+      });
     }),
 });
