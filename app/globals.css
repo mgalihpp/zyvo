@@ -307,6 +307,25 @@
   }
 }
 
+/* Subtle grab bob for the drag-mock's hand cursor. */
+@keyframes mock-drag-cursor {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-1px, -2px) scale(0.94);
+  }
+}
+.mock-drag-cursor {
+  animation: mock-drag-cursor 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mock-drag-cursor {
+    animation: none;
+  }
+}
+
 /* Shine sweep for the featured pricing card. */
 @keyframes billing-shine {
   0% {
