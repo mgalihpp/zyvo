@@ -291,15 +291,15 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
               );
             })}
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-dashed"
-            onClick={() => router.push("/builder/new")}
-          >
-            <PlusIcon data-icon="inline-start" />
-            Buat CV Baru
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-dashed"
+              onClick={() => router.push("/builder/new")}
+            >
+              <PlusIcon data-icon="inline-start" />
+              Buat CV Baru
+            </Button>
           </div>
         )}
       </DialogContent>
