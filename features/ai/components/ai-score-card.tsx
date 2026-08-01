@@ -69,8 +69,10 @@ function ScoreRing({ label, value }: { label: string; value: number }) {
 export function AiScoreCard() {
   const getContent = useCvStore((s) => s.getContent);
   const [score, setScore] = useState<ScoreResult | null>(null);
+  const utils = trpc.useUtils();
   const mutation = trpc.ai.score.useMutation({
     onSuccess: (data) => setScore(data),
+    onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
 
   function runScore() {

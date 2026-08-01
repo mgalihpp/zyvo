@@ -25,7 +25,10 @@ export function AiGeneratorModal({ open, onClose }: Props) {
   const [field, setField] = useState("");
   const [summary, setSummary] = useState("");
 
-  const generateMutation = trpc.ai.generate.useMutation();
+  const utils = trpc.useUtils();
+  const generateMutation = trpc.ai.generate.useMutation({
+    onSettled: () => utils.ai.quotaStatus.invalidate(),
+  });
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => router.push(`/builder/${cv.id}`),
   });

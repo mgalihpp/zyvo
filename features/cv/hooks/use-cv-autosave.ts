@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { toast } from "@/components/ui/toast";
 import {
   useCvStore,
   useCvStoreApi,
@@ -48,7 +49,16 @@ export function useCvAutosave() {
               storeApi.getState().setSaveStatus("idle");
             }, SAVED_INDICATOR_MS);
           },
-          onError: () => storeApi.getState().setSaveStatus("error"),
+          onError: (err) => {
+            storeApi.getState().setSaveStatus("error");
+            // Surface server-side rejections (e.g. premium template gate) —
+            // otherwise the user only sees a silent "error" save state.
+            toast.add({
+              title: "Gagal menyimpan",
+              description: err.message,
+              type: "error",
+            });
+          },
         },
       );
     }, DEBOUNCE_MS);

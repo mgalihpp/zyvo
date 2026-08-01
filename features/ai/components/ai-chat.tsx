@@ -19,6 +19,7 @@ export function AiChat() {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const utils = trpc.useUtils();
   const mutation = trpc.ai.chat.useMutation({
     onSuccess: ({ result }) => {
       setMessages((prev) => [...prev, { role: "assistant", content: result }]);
@@ -27,6 +28,7 @@ export function AiChat() {
         50,
       );
     },
+    onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
 
   function send() {

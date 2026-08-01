@@ -1,11 +1,13 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { CheckIcon, X } from "lucide-react";
+import { CheckIcon, LockIcon, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import {
   TEMPLATE_CATEGORIES,
@@ -181,6 +183,12 @@ function TemplateCard({
       {/* Portrait A4 thumbnail */}
       <div className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-primary/30">
         <CvThumbnail cv={cv} className="w-full" aspectRatio="1 / 1.414" />
+        {template.premium ? (
+          <Badge className="absolute left-2 top-2 shadow" variant="secondary">
+            <LockIcon aria-hidden="true" />
+            Premium
+          </Badge>
+        ) : null}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 p-6 text-center opacity-0 transition-all duration-200 group-hover/thumb:bg-black/60 group-hover/thumb:opacity-100">
           <span className="text-lg font-bold text-white">
             PRATINJAU &nbsp;&rarr;
@@ -219,6 +227,7 @@ export function TemplateGallery({
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
 
   const filtered =

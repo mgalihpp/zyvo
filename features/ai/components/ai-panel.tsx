@@ -3,6 +3,7 @@
 import { GaugeIcon, MessageSquareIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AiChat } from "./ai-chat";
+import { AiQuotaLine } from "./ai-quota-line";
 import { AiScoreCard } from "./ai-score-card";
 
 export function AiPanel() {
@@ -18,6 +19,7 @@ export function AiPanel() {
           AI Chat
         </TabsTrigger>
       </TabsList>
+      <AiQuotaLine className="px-4 pt-2 text-xs text-muted-foreground" />
       <TabsContent value="score" className="min-h-0 overflow-y-auto p-4">
         <AiScoreCard />
       </TabsContent>

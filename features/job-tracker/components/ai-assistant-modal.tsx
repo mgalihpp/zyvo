@@ -280,14 +280,19 @@ export function AiAssistantModal({
     setManualJd("");
   }, [appId, cvId]);
 
+  const utils = trpc.useUtils();
+  const invalidateQuota = () => utils.ai.quotaStatus.invalidate();
   const coverLetterMutation = trpc.ai.coverLetter.useMutation({
     onSuccess: ({ result }) => setCoverLetter(result),
+    onSettled: invalidateQuota,
   });
   const interviewMutation = trpc.ai.interviewPrep.useMutation({
     onSuccess: (data) => setQuestions(data.questions),
+    onSettled: invalidateQuota,
   });
   const analyzeMutation = trpc.ai.analyzeJD.useMutation({
     onSuccess: (data) => setAnalysis(data),
+    onSettled: invalidateQuota,
   });
 
   const ready = Boolean(snapshot) && !cvLoading && Boolean(jdText.trim());

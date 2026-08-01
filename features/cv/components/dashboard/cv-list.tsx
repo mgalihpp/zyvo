@@ -216,12 +216,14 @@ export function CvList({
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
   const duplicateMutation = trpc.cv.duplicate.useMutation({
     onSuccess: (cv) => {
       analytics.track("cv_duplicated", { cv_id: cv.id });
       utils.cv.list.invalidate();
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
   const deleteMutation = trpc.cv.delete.useMutation({
     onSuccess: (result) => {
