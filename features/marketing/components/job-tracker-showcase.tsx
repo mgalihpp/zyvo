@@ -436,7 +436,7 @@ export function JobTrackerShowcase() {
             "h-10 gap-1.5 px-6 text-sm",
           )}
         >
-          Coba Job Tracker gratis
+          Coba Job Tracker
           <ArrowRightIcon className="size-4" />
         </Link>
       </div>

@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PLANS } from "@/features/billing/lib/plans";
 import { BoardPreview } from "@/features/job-tracker/components/board-preview";
 import { cn } from "@/lib/utils";
@@ -30,8 +29,6 @@ type Feature = {
   icon: React.ComponentType<any>;
   title: string;
   description: string;
-  /** AI feature gets the violet accent used across the app's AI surfaces. */
-  accent?: boolean;
 };
 
 const FEATURES: Feature[] = [
@@ -46,7 +43,6 @@ const FEATURES: Feature[] = [
     title: "Asisten AI",
     description:
       "Buat surat lamaran, siapkan pertanyaan interview, dan analisis kecocokan CV dengan lowongan — otomatis.",
-    accent: true,
   },
   {
     icon: TrendingUpIcon,
@@ -74,33 +70,19 @@ const FEATURES: Feature[] = [
   },
 ];
 
-function FeatureCard({ icon: Icon, title, description, accent }: Feature) {
+function FeatureCard({ icon: Icon, title, description }: Feature) {
   return (
-    <Card
-      className={cn(
-        "relative overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm",
-        accent && "border-violet-500/30 bg-violet-500/[0.03]",
-      )}
-    >
-      <CardHeader className="pb-3">
-        <div
-          className={cn(
-            "mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl",
-            accent
-              ? "bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white"
-              : "bg-primary/10 text-primary",
-          )}
-        >
-          <Icon className="size-5" aria-hidden="true" />
-        </div>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_8px_40px_-12px_color-mix(in_oklch,var(--primary)_35%,transparent)]">
+      <span className="flex size-10 items-center justify-center rounded-xl border bg-background text-primary shadow-sm ring-1 ring-primary/10">
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <h3 className="mt-4 text-base font-semibold tracking-tight text-foreground">
+        {title}
+      </h3>
+      <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+        {description}
+      </p>
+    </div>
   );
 }
 
@@ -128,10 +110,6 @@ export function UpsellView() {
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           <Link href="/dashboard/billing" className={primaryCtaClass}>
-            <SparklesIcon
-              className="size-4 transition-transform group-hover/cta:scale-110"
-              aria-hidden="true"
-            />
             Upgrade Sekarang
             <ArrowRightIcon
               className="size-4 transition-transform group-hover/cta:translate-x-0.5"
@@ -169,10 +147,6 @@ export function UpsellView() {
 
       {/* Closing CTA */}
       <Link href="/dashboard/billing" className={primaryCtaClass}>
-        <SparklesIcon
-          className="size-4 transition-transform group-hover/cta:scale-110"
-          aria-hidden="true"
-        />
         Upgrade Sekarang
         <ArrowRightIcon
           className="size-4 transition-transform group-hover/cta:translate-x-0.5"

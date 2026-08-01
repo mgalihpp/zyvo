@@ -36,19 +36,26 @@ const AiAssistantModal = lazy(() =>
   })),
 );
 
+import { useSubscription } from "@/features/billing/hooks/use-billing";
 import type { BoardColumn } from "@/features/job-tracker/schemas/job-tracker";
 import { trpc } from "@/lib/trpc/client";
 
 export function JobTrackerPage() {
+  const { data: subscription, isLoading: isSubLoading } = useSubscription();
+  const isPaid = !!subscription;
   const { data, isLoading, error, refetch } = trpc.jobTracker.getBoard.useQuery(
     undefined,
-    { retry: false },
+    { enabled: isPaid, retry: false },
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<JobApplication | undefined>();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
   const [aiOpen, setAiOpen] = useState(false);
+
+  if (isSubLoading) return <JobTrackerSkeleton />;
+
+  if (!isPaid) return <UpsellView />;
 
   if (isLoading) return <JobTrackerSkeleton />;
 
