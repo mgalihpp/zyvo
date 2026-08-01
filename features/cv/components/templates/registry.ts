@@ -51,6 +51,8 @@ export interface TemplateMeta {
   name: string;
   description: string;
   categories: TemplateCategory[];
+  /** Gated behind Basic/Pro. Source of truth: features/cv/lib/premium-templates.ts */
+  premium?: boolean;
   /**
    * Lazy renderer for the single active template in the live preview. Only the
    * selected template's chunk is fetched, keeping the preview bundle small.

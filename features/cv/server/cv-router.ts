@@ -1,8 +1,12 @@
 import type { CV, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { assertCvSlot } from "@/features/billing/server/entitlements";
+import {
+  assertCvSlot,
+  assertFeature,
+} from "@/features/billing/server/entitlements";
 import { toCvContent } from "@/features/cv/lib/cv-content";
+import { isPremiumTemplate } from "@/features/cv/lib/premium-templates";
 import {
   cvContentSchema,
   cvUpdateSchema,
@@ -347,6 +351,9 @@ export const cvRouter = createTRPCRouter({
     .input(cvContentSchema.partial().optional())
     .mutation(async ({ ctx, input }) => {
       await assertCvSlot(ctx);
+      if (isPremiumTemplate(input?.templateId)) {
+        await assertFeature(ctx, "premiumTemplates");
+      }
       const cv = await ctx.prisma.cV.create({
         data: {
           userId: ctx.session.user.id,
@@ -376,6 +383,16 @@ export const cvRouter = createTRPCRouter({
 
       if (!existing || existing.userId !== ctx.session.user.id) {
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      // Only *changing to* a premium template is gated — a downgraded user
+      // whose CV already uses one can keep saving content edits.
+      if (
+        input.data.templateId &&
+        input.data.templateId !== existing.templateId &&
+        isPremiumTemplate(input.data.templateId)
+      ) {
+        await assertFeature(ctx, "premiumTemplates");
       }
 
       // Best-effort snapshot of the pre-update state, at most once per
