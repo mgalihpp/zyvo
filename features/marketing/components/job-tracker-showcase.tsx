@@ -391,6 +391,36 @@ export function JobTrackerShowcase() {
                 {item.description}
               </p>
 
+              {item.title === "Pipeline Kanban" && (
+                <div className="mt-4 space-y-2">
+                  {[
+                    { name: "Dilamar", color: "blue", count: 3 },
+                    { name: "Interview", color: "yellow", count: 2 },
+                    { name: "Offer", color: "purple", count: 1 },
+                  ].map((col) => (
+                    <div key={col.name} className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "size-2 shrink-0 rounded-full",
+                          COLUMN_COLORS[col.color as ColumnColor].dot,
+                        )}
+                      />
+                      <span className="w-16 shrink-0 text-[0.7rem] text-muted-foreground">
+                        {col.name}
+                      </span>
+                      <div className="flex flex-1 gap-1">
+                        {Array.from({ length: col.count }, (_, i) => (
+                          <span
+                            key={i}
+                            className="h-6 flex-1 rounded border bg-background shadow-sm"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {item.title === "Statistik & insight" && (
                 <div className="mt-4 space-y-1.5">
                   {FUNNEL.map((stage, stageIndex) => {
