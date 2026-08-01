@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { CheckIcon, LockIcon, X } from "lucide-react";
+import { CheckIcon, Crown, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -184,8 +184,11 @@ function TemplateCard({
       <div className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-primary/30">
         <CvThumbnail cv={cv} className="w-full" aspectRatio="1 / 1.414" />
         {template.premium ? (
-          <Badge className="absolute left-2 top-2 shadow" variant="secondary">
-            <LockIcon aria-hidden="true" />
+          <Badge className="absolute left-2 top-2 border-amber-200/60 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-amber-50 shadow-[0_0_12px_rgba(251,191,36,0.55)]">
+            <Crown
+              aria-hidden="true"
+              className="fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+            />
             Premium
           </Badge>
         ) : null}
