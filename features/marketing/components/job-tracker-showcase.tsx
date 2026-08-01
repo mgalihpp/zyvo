@@ -7,6 +7,7 @@ import {
   KanbanSquareIcon,
   MailIcon,
   SheetIcon,
+  SparklesIcon,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -390,6 +391,27 @@ export function JobTrackerShowcase() {
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                 {item.description}
               </p>
+
+              {item.title === "Email follow-up AI" && (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg bg-muted p-2 font-sans text-[0.65rem] leading-5 text-foreground">
+                    <p className="text-muted-foreground">
+                      To: hr@traveloka.com
+                    </p>
+                    <p className="text-muted-foreground">
+                      Subject: Tindak lanjut lamaran
+                    </p>
+                    <p className="mt-1">
+                      Halo Tim Traveloka, saya ingin menindaklanjuti lamaran
+                      saya untuk posisi Backend Engineer...
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] font-medium text-violet-600 dark:text-violet-400">
+                    <SparklesIcon className="size-3" />
+                    Buat Email
+                  </span>
+                </div>
+              )}
 
               {item.title === "Pipeline Kanban" && (
                 <div className="mt-4 space-y-2">
