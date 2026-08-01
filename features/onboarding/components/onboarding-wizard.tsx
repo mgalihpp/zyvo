@@ -12,9 +12,8 @@ import {
 } from "@/features/onboarding/components/step-choose-method";
 import { StepChooseTemplate } from "@/features/onboarding/components/step-choose-template";
 import { StepImportCv } from "@/features/onboarding/components/step-import-cv";
+import { ONBOARDING_SKIP_COOKIE } from "@/features/onboarding/lib/constants";
 import { trpc } from "@/lib/trpc/client";
-
-export const ONBOARDING_SKIP_COOKIE = "zyvo_onboarding_skipped";
 
 type Step = 1 | 2 | 3;
 type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
