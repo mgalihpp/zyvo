@@ -23,7 +23,7 @@ export function StepChooseMethod({
       icon: FileUp,
       title: "Import CV",
       description:
-        "Upload CV lama (PDF/DOCX) atau paste teksnya — AI akan mengisi semuanya otomatis.",
+        "Upload CV lama kamu dengan format (PDF/DOCX) atau paste teksnya.",
     },
   ];
 
