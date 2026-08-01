@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { BillingHeader } from "@/features/billing/components/billing-header";
 import { BillingSkeleton } from "@/features/billing/components/billing-skeleton";
+import { ResumeAlert } from "@/features/billing/components/resume-alert";
 import { useCheckout } from "@/features/billing/hooks/use-checkout";
+import { PLANS } from "@/features/billing/lib/plans";
 
 const MobilePlanList = lazy(() =>
   import("@/features/billing/components/mobile-plan-card").then((m) => ({
@@ -43,8 +45,17 @@ export function PlanUpsellDialog({
   title?: string;
   description: string;
 }) {
-  const { yearly, setYearly, loadingPlanId, subscription, handleUpgrade } =
-    useCheckout();
+  const {
+    yearly,
+    setYearly,
+    loadingPlanId,
+    subscription,
+    showResume,
+    pendingPlanId,
+    handleUpgrade,
+    handleResumePayment,
+    dismissResume,
+  } = useCheckout();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,6 +69,13 @@ export function PlanUpsellDialog({
         </DialogHeader>
 
         <div className="space-y-4">
+          {showResume && pendingPlanId && (
+            <ResumeAlert
+              planName={PLANS[pendingPlanId].label}
+              onContinue={handleResumePayment}
+              onDismiss={dismissResume}
+            />
+          )}
           <div className="flex justify-center">
             <BillingHeader
               yearly={yearly}

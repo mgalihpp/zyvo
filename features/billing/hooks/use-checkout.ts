@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  useCancelTransaction,
   useConfirmPayment,
   useCreateSnapToken,
   usePollStatus,
@@ -16,6 +15,10 @@ const SNAP_VTWEB_BASE =
     : "https://app.sandbox.midtrans.com/snap/v2/vtweb";
 
 const RESUME_KEY = "zyvo-resume-payment";
+
+// 3s interval x 100 = 5 min of polling before giving up on a stale orderId.
+const MAX_POLLS = 100;
+const TERMINAL_FAILED = new Set(["expire", "cancel", "deny", "failure"]);
 
 type ResumeState = {
   orderId: string;
@@ -43,25 +46,48 @@ export function useCheckout() {
   const { data: subscription, refetch: refetchSubscription } =
     useSubscription();
   const createToken = useCreateSnapToken();
-  const cancel = useCancelTransaction();
   const confirmPayment = useConfirmPayment();
-  const { isPaid } = usePollStatus(orderId, polling);
+  const { status, isPaid, isError } = usePollStatus(orderId, polling);
 
   useEffect(() => {
-    if (!isPaid || !polling) return;
-    setPolling(false);
-    setOrderId(null);
-    setSnapToken(null);
-    setPendingPlanId(null);
-    setShowResume(false);
-    pollCount.current = 0;
-    if (orderId) {
+    if (!polling || !orderId) return;
+    const terminal = !!status && TERMINAL_FAILED.has(status);
+    if (isPaid || terminal) {
+      setPolling(false);
+      setOrderId(null);
+      setSnapToken(null);
+      setPendingPlanId(null);
+      setShowResume(false);
+      pollCount.current = 0;
+    }
+    if (isPaid) {
       confirmPayment
         .mutateAsync({ orderId })
         .catch(() => undefined)
         .finally(() => refetchSubscription());
     }
-  }, [isPaid, polling, orderId, confirmPayment, refetchSubscription]);
+  }, [isPaid, status, polling, orderId, confirmPayment, refetchSubscription]);
+
+  useEffect(() => {
+    // E-wallet deeplinks auto-close Snap without firing onClose. Keep the
+    // resume alert up while the transaction is still in flight so the user can
+    // get back to it; it disappears once the status settles or fails.
+    if (!orderId || !snapToken || !pendingPlanId) return;
+    if (status === "pending") setShowResume(true);
+  }, [status, orderId, snapToken, pendingPlanId]);
+
+  useEffect(() => {
+    if (!polling) return;
+    // "not_found" is a normal pre-method-selection state in Snap — never clear
+    // the checkout here. Just stop polling after a cap so a stale orderId from
+    // localStorage doesn't ping forever; the resume dialog still stays usable.
+    if (isError || status === "not_found") {
+      pollCount.current += 1;
+      if (pollCount.current >= MAX_POLLS) setPolling(false);
+      return;
+    }
+    pollCount.current = 0;
+  }, [isError, status, polling]);
 
   useEffect(() => {
     try {
@@ -93,7 +119,7 @@ export function useCheckout() {
     localStorage.setItem(RESUME_KEY, JSON.stringify(state));
   }, [orderId, snapToken, pendingPlanId, showResume]);
 
-  function openSnap(token: string, orderId: string) {
+  function openSnap(token: string) {
     if (!window.snap) {
       window.location.href = `${SNAP_VTWEB_BASE}/${token}`;
       return;
@@ -102,13 +128,10 @@ export function useCheckout() {
     window.snap.pay(token, {
       onSuccess: () => setPolling(true),
       onPending: () => setPolling(true),
-      onError: () => {
-        cancel.mutate({ orderId });
-        setOrderId(null);
-        setSnapToken(null);
-        setPendingPlanId(null);
-        setShowResume(false);
-      },
+      // onError also closes the popup without completing payment. Keep the
+      // order recoverable: show resume with the same snapToken so the customer
+      // can retry, instead of cancelling + wiping the checkout.
+      onError: () => setShowResume(true),
       onClose: () => setShowResume(true),
     });
 
@@ -127,15 +150,17 @@ export function useCheckout() {
         setPendingPlanId(planId);
         setShowResume(false);
         pollCount.current = 0;
-        openSnap(result.snapToken, result.orderId);
+        openSnap(result.snapToken);
       })
       .catch(() => setLoadingPlanId(null));
   }
 
   function handleResumePayment() {
     if (!snapToken || !orderId) return;
-    setShowResume(false);
-    openSnap(snapToken, orderId);
+    // Reopening reuses the same Snap token; onClose may not fire on a
+    // re-opened session. Keep the resume alert up (it is covered by the popup
+    // while Snap is open); status-based clearing handles the paid/terminal end.
+    openSnap(snapToken);
   }
 
   function dismissResume() {

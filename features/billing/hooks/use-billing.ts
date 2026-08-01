@@ -16,7 +16,7 @@ export function useConfirmPayment() {
 }
 
 export function usePollStatus(orderId: string | null, enabled: boolean) {
-  const { data } = trpc.billing.getStatus.useQuery(
+  const { data, isError } = trpc.billing.getStatus.useQuery(
     { orderId: orderId ?? "" },
     {
       enabled: !!orderId && enabled,
@@ -26,7 +26,7 @@ export function usePollStatus(orderId: string | null, enabled: boolean) {
   );
   const status = data?.transactionStatus ?? null;
   const isPaid = status === "settlement" || status === "capture";
-  return { status, isPaid };
+  return { status, isPaid, isError };
 }
 
 export function useCancelTransaction() {

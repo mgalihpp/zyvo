@@ -77,17 +77,28 @@ export const billingRouter = createTRPCRouter({
         where: { orderId: input.orderId },
         select: { userId: true },
       });
-      if (!tx || tx.userId !== ctx.session.user.id) {
+      if (!tx) {
+        return {
+          transactionStatus: "not_found" as const,
+          orderId: input.orderId,
+        };
+      }
+      if (tx.userId !== ctx.session.user.id) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Transaksi tidak ditemukan",
         });
       }
-      const res = await coreGet(`/${input.orderId}/status`);
-      return {
-        transactionStatus: (res.transaction_status as string) ?? "not_found",
-        orderId: input.orderId,
-      };
+      // Core API can 404 before the customer selects a payment method in Snap —
+      // that's "not attempted yet", not an error. Keep the order recoverable.
+      let transactionStatus = "not_found";
+      try {
+        const res = await coreGet(`/${input.orderId}/status`);
+        transactionStatus = (res.transaction_status as string) ?? "not_found";
+      } catch {
+        transactionStatus = "not_found";
+      }
+      return { transactionStatus, orderId: input.orderId };
     }),
 
   getSubscription: protectedProcedure.query(async ({ ctx }) => {
