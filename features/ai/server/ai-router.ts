@@ -2,17 +2,17 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { openrouter } from "@/features/ai/lib/openrouter";
 import { checkRateLimit } from "@/features/ai/lib/rate-limit";
+import { parseImportedCv } from "@/features/ai/server/import-cv";
 import { analyzerSystemPrompt } from "@/features/ai/server/prompts/analyzer";
 import { chatSystemPrompt } from "@/features/ai/server/prompts/chat";
 import { coverLetterSystemPrompt } from "@/features/ai/server/prompts/cover-letter";
 import { generatorSystemPrompt } from "@/features/ai/server/prompts/generator";
+import { importerSystemPrompt } from "@/features/ai/server/prompts/importer";
 import {
   improveActions,
   improverSystemPrompt,
 } from "@/features/ai/server/prompts/improver";
-import { importerSystemPrompt } from "@/features/ai/server/prompts/importer";
 import { interviewPrepSystemPrompt } from "@/features/ai/server/prompts/interview-prep";
-import { parseImportedCv } from "@/features/ai/server/import-cv";
 import { scoreSystemPrompt } from "@/features/ai/server/prompts/score";
 import {
   consumeAiQuota,
