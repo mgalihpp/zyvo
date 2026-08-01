@@ -53,7 +53,10 @@ export const FEATURES: {
   { label: "CV", values: { free: "1", basic: "3", pro: "Tak terbatas" } },
   { label: "Template Premium", values: { free: null, basic: true, pro: true } },
   { label: "Pelacak Lamaran", values: { free: null, basic: true, pro: true } },
-  { label: "Fitur AI", values: { free: null, basic: null, pro: true } },
+  {
+    label: "Fitur AI",
+    values: { free: "5/bulan", basic: "50/bulan", pro: "Tak terbatas" },
+  },
 ];
 
 export const FAQS = [
@@ -63,15 +66,15 @@ export const FAQS = [
   },
   {
     q: "Apa saja yang termasuk dalam paket Gratis?",
-    a: "1 CV dan unduhan PDF tak terbatas.",
+    a: "1 CV, unduhan PDF tak terbatas, dan 5 panggilan AI per bulan.",
   },
   {
     q: "Apa fitur tambahan di paket Basic?",
-    a: "Hingga 3 CV, Template Premium, dan akses ke Pelacak Lamaran.",
+    a: "Hingga 3 CV, Template Premium, akses ke Pelacak Lamaran, dan 50 panggilan AI per bulan.",
   },
   {
     q: "Apa fitur tambahan di paket Pro?",
-    a: "CV tak terbatas, Template Premium, Pelacak Lamaran, dan seluruh Fitur AI.",
+    a: "CV tak terbatas, Template Premium, Pelacak Lamaran, dan Fitur AI tanpa batas bulanan.",
   },
   {
     q: "Bisakah saya membatalkan langganan kapan saja?",
