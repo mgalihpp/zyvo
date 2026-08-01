@@ -184,7 +184,7 @@ function TemplateCard({
       <div className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-primary/30">
         <CvThumbnail cv={cv} className="w-full" aspectRatio="1 / 1.414" />
         {template.premium ? (
-          <Badge className="absolute left-2 top-2 border-amber-200/60 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-amber-50 shadow-[0_0_12px_rgba(251,191,36,0.55)]">
+          <Badge className="absolute left-2 top-2 h-4 px-1.5 text-[0.5625rem] [&>svg]:!size-2 border-amber-200/60 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-amber-50 shadow-[0_0_12px_rgba(251,191,36,0.55)]">
             <Crown
               aria-hidden="true"
               className="fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
