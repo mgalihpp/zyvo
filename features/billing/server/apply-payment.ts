@@ -37,7 +37,9 @@ export async function applyPayment(
     });
     const daysToAdd = tx.period === "yearly" ? 365 : 30;
     const base =
-      existing && existing.expiresAt > new Date()
+      existing &&
+      existing.status === "active" &&
+      existing.expiresAt > new Date()
         ? existing.expiresAt
         : new Date();
     const expiresAt = new Date(
