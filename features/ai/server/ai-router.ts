@@ -10,7 +10,9 @@ import {
   improveActions,
   improverSystemPrompt,
 } from "@/features/ai/server/prompts/improver";
+import { importerSystemPrompt } from "@/features/ai/server/prompts/importer";
 import { interviewPrepSystemPrompt } from "@/features/ai/server/prompts/interview-prep";
+import { parseImportedCv } from "@/features/ai/server/import-cv";
 import { scoreSystemPrompt } from "@/features/ai/server/prompts/score";
 import {
   consumeAiQuota,
@@ -265,6 +267,34 @@ export const aiRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Gagal membuat draft CV. Coba lagi.",
+        });
+      }
+    }),
+
+  importCv: protectedProcedure
+    .input(z.object({ text: z.string().min(50).max(15000) }))
+    .mutation(async ({ ctx, input }) => {
+      await checkRateLimit(ctx.session.user.id, "ai:importCv", 5);
+      await consumeAiQuota(ctx);
+
+      const response = await openrouter.chat.completions.create({
+        model: DEFAULT_MODEL,
+        stream: false,
+        messages: [
+          { role: "system", content: importerSystemPrompt },
+          { role: "user", content: input.text },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 4000,
+      });
+
+      const raw = response.choices[0]?.message?.content ?? "{}";
+      try {
+        return parseImportedCv(raw);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal membaca isi CV. Coba lagi.",
         });
       }
     }),
