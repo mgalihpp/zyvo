@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import { EditableTitle } from "@/features/cv/components/editable-title";
 import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
@@ -208,20 +209,27 @@ export function CvList({
     }
   }, [cvs, analytics]);
 
+  const upsell = usePlanUpsell();
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => {
       analytics.track("cv_created", { cv_id: cv.id });
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
-    onError: (err) => toast.add({ title: err.message, type: "error" }),
+    onError: (err) => {
+      if (!upsell.handleError(err))
+        toast.add({ title: err.message, type: "error" });
+    },
   });
   const duplicateMutation = trpc.cv.duplicate.useMutation({
     onSuccess: (cv) => {
       analytics.track("cv_duplicated", { cv_id: cv.id });
       utils.cv.list.invalidate();
     },
-    onError: (err) => toast.add({ title: err.message, type: "error" }),
+    onError: (err) => {
+      if (!upsell.handleError(err))
+        toast.add({ title: err.message, type: "error" });
+    },
   });
   const deleteMutation = trpc.cv.delete.useMutation({
     onSuccess: (result) => {
@@ -399,6 +407,8 @@ export function CvList({
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {upsell.dialog}
     </div>
   );
 }

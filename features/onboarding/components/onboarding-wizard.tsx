@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import {
   type OnboardingMethod,
   StepChooseMethod,
@@ -106,6 +107,7 @@ export function OnboardingWizard() {
   const [importError, setImportError] = useState<string | null>(null);
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const upsell = usePlanUpsell();
 
   const generateMutation = trpc.ai.generate.useMutation({
     onSettled: () => utils.ai.quotaStatus.invalidate(),
@@ -131,6 +133,10 @@ export function OnboardingWizard() {
       { templateId: id },
       {
         onError: (err) => {
+          if (upsell.handleError(err)) {
+            setTemplateId(null);
+            return;
+          }
           toast.add({ title: err.message, type: "error" });
           setTemplateId(null);
         },
@@ -154,6 +160,7 @@ export function OnboardingWizard() {
       // Navigation happens in createMutation.onSuccess; keep the spinner up.
     } catch (err) {
       setAiPending(false);
+      if (upsell.handleError(err)) return;
       setAiError(
         err instanceof Error ? err.message : "Terjadi kesalahan. Coba lagi.",
       );
@@ -173,6 +180,7 @@ export function OnboardingWizard() {
       // Navigation happens in createMutation.onSuccess; keep the spinner up.
     } catch (err) {
       setImportPhase("idle");
+      if (upsell.handleError(err)) return;
       setImportError(
         err instanceof Error ? err.message : "Terjadi kesalahan. Coba lagi.",
       );
@@ -265,6 +273,7 @@ export function OnboardingWizard() {
           Menyiapkan builder…
         </p>
       )}
+      {upsell.dialog}
     </div>
   );
 }

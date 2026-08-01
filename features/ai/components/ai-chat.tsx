@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { buildSnapshot } from "@/features/ai/lib/cv-snapshot";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
 
@@ -20,7 +21,9 @@ export function AiChat() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const utils = trpc.useUtils();
+  const upsell = usePlanUpsell();
   const mutation = trpc.ai.chat.useMutation({
+    onError: upsell.handleError,
     onSuccess: ({ result }) => {
       setMessages((prev) => [...prev, { role: "assistant", content: result }]);
       setTimeout(
@@ -99,9 +102,10 @@ export function AiChat() {
         </Button>
       </div>
 
-      {mutation.error && (
+      {mutation.error && mutation.error.data?.code !== "FORBIDDEN" && (
         <p className="text-xs text-destructive">{mutation.error.message}</p>
       )}
+      {upsell.dialog}
     </div>
   );
 }

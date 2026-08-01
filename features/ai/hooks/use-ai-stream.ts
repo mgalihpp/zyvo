@@ -9,13 +9,21 @@ export type ImproveAction = "improve" | "shorten" | "expand" | "formalize";
  * Hook for the AI content improver. Returns improved text directly.
  * Keeps previousValue for undo.
  */
-export function useAiImprove(fieldType: string) {
+export function useAiImprove(
+  fieldType: string,
+  onError?: (err: unknown) => void,
+) {
   const [previousValue, setPreviousValue] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [forbidden, setForbidden] = useState(false);
 
   const utils = trpc.useUtils();
   const mutation = trpc.ai.improve.useMutation({
-    onError: (err) => setError(err.message),
+    onError: (err) => {
+      setError(err.message);
+      setForbidden(err.data?.code === "FORBIDDEN");
+      onError?.(err);
+    },
     onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
 
@@ -26,6 +34,7 @@ export function useAiImprove(fieldType: string) {
   ): Promise<void> {
     if (!text.trim()) return;
     setError(null);
+    setForbidden(false);
     setPreviousValue(text);
     try {
       const { result } = await mutation.mutateAsync({
@@ -52,5 +61,6 @@ export function useAiImprove(fieldType: string) {
     canUndo: previousValue !== null,
     isPending: mutation.isPending,
     error,
+    forbidden,
   };
 }

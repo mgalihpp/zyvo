@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
+import { PremiumTemplateUpsellDialog } from "@/features/billing/components/premium-template-upsell-dialog";
+import { useSubscription } from "@/features/billing/hooks/use-billing";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import {
   TEMPLATE_CATEGORIES,
@@ -224,13 +227,22 @@ export function TemplateGallery({
   const utils = trpc.useUtils();
   const [filter, setFilter] = useState<Filter>("all");
   const [preview, setPreview] = useState<TemplateMeta | null>(null);
+  const { data: subscription } = useSubscription();
+  const canUsePremium = !!subscription;
+  const [upsellTemplate, setUpsellTemplate] = useState<TemplateMeta | null>(
+    null,
+  );
+  const upsell = usePlanUpsell();
 
   const createMutation = trpc.cv.create.useMutation({
     onSuccess: (cv) => {
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
-    onError: (err) => toast.add({ title: err.message, type: "error" }),
+    onError: (err) => {
+      if (!upsell.handleError(err))
+        toast.add({ title: err.message, type: "error" });
+    },
   });
 
   const filtered =
@@ -294,13 +306,28 @@ export function TemplateGallery({
           onOpenChange={(open) => {
             if (!open) setPreview(null);
           }}
-          onUse={() => createMutation.mutate({ templateId: preview.id })}
+          onUse={() => {
+            if (preview.premium && !canUsePremium) {
+              setUpsellTemplate(preview);
+              return;
+            }
+            createMutation.mutate({ templateId: preview.id });
+          }}
           busy={
             createMutation.isPending &&
             createMutation.variables?.templateId === preview.id
           }
         />
       )}
+
+      <PremiumTemplateUpsellDialog
+        open={!!upsellTemplate}
+        onOpenChange={(open) => {
+          if (!open) setUpsellTemplate(null);
+        }}
+        templateName={upsellTemplate?.name}
+      />
+      {upsell.dialog}
     </div>
   );
 }

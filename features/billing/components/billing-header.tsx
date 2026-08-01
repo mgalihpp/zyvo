@@ -5,12 +5,19 @@ import { cn } from "@/lib/utils";
 interface BillingHeaderProps {
   yearly: boolean;
   onYearlyChange: (yearly: boolean) => void;
+  showHeading?: boolean;
 }
 
-export function BillingHeader({ yearly, onYearlyChange }: BillingHeaderProps) {
+export function BillingHeader({
+  yearly,
+  onYearlyChange,
+  showHeading = true,
+}: BillingHeaderProps) {
   return (
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-3xl font-bold">Paket &amp; Harga</h1>
+      {showHeading && (
+        <h1 className="text-3xl font-bold">Paket &amp; Harga</h1>
+      )}
       <div className="flex items-center gap-1 rounded-full border bg-muted p-1 text-sm">
         <button
           type="button"

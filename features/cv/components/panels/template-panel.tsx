@@ -3,6 +3,8 @@
 import { CheckIcon, Crown } from "lucide-react";
 import { memo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { PremiumTemplateUpsellDialog } from "@/features/billing/components/premium-template-upsell-dialog";
+import { useSubscription } from "@/features/billing/hooks/use-billing";
 import {
   TEMPLATE_CATEGORIES,
   TEMPLATES,
@@ -121,6 +123,11 @@ export function TemplatePanel() {
   const setTemplateId = useCvStore((s) => s.setTemplateId);
   const analytics = useCVAnalytics();
   const [filter, setFilter] = useState<Filter>("all");
+  const { data: subscription } = useSubscription();
+  const canUsePremium = !!subscription;
+  const [upsellTemplate, setUpsellTemplate] = useState<TemplateMeta | null>(
+    null,
+  );
 
   const visible =
     filter === "all"
@@ -185,6 +192,10 @@ export function TemplatePanel() {
                 template_id: template.id,
                 template_name: template.name,
               });
+              if (template.premium && !canUsePremium) {
+                setUpsellTemplate(template);
+                return;
+              }
               setTemplateId(template.id);
             }}
           />
@@ -195,6 +206,14 @@ export function TemplatePanel() {
           </p>
         ) : null}
       </div>
+
+      <PremiumTemplateUpsellDialog
+        open={!!upsellTemplate}
+        onOpenChange={(open) => {
+          if (!open) setUpsellTemplate(null);
+        }}
+        templateName={upsellTemplate?.name}
+      />
     </div>
   );
 }
