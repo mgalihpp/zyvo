@@ -23,6 +23,9 @@ const ChangePasswordForm = lazy(
 const DeleteAccountForm = lazy(
   () => import("@/features/auth/components/settings/delete-account-form"),
 );
+const CancelSubscriptionDialog = lazy(
+  () => import("@/features/billing/components/cancel-subscription-dialog"),
+);
 const ActiveDevices = lazy(
   () => import("@/features/auth/components/settings/active-devices"),
 );
@@ -43,7 +46,11 @@ export default function SettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { hasPassword, refresh } = useHasPassword();
-  const { data: sub, isLoading: subLoading } = useSubscription();
+  const {
+    data: sub,
+    isLoading: subLoading,
+    refetch: refetchSub,
+  } = useSubscription();
 
   const [open, setOpen] = useState<"set" | "change" | "delete" | null>(null);
   const toggle = (key: "set" | "change" | "delete") =>
@@ -90,13 +97,23 @@ export default function SettingsPage() {
               )}
             </>
           )}
-          <Button
-            nativeButton={false}
-            render={<Link href="/dashboard/billing" />}
-            className="relative overflow-hidden px-6 bg-foreground text-background hover:bg-foreground/90 billing-shine"
-          >
-            Tingkatkan
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              nativeButton={false}
+              render={<Link href="/dashboard/billing" />}
+              className="relative overflow-hidden px-6 bg-foreground text-background hover:bg-foreground/90 billing-shine"
+            >
+              Tingkatkan
+            </Button>
+            {sub && (
+              <Suspense fallback={null}>
+                <CancelSubscriptionDialog
+                  plan={sub.plan as "basic" | "pro"}
+                  onCanceled={refetchSub}
+                />
+              </Suspense>
+            )}
+          </div>
         </CardContent>
       </Card>
 
