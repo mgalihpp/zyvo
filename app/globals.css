@@ -320,8 +320,41 @@
 .mock-drag-cursor {
   animation: mock-drag-cursor 1.4s ease-in-out infinite;
 }
+
+@keyframes cinematic-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes cinematic-stage-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.cinematic-float {
+  animation: cinematic-float 4s ease-in-out infinite;
+}
+
+.cinematic-stage-glow {
+  animation: cinematic-stage-glow 5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mock-drag-cursor {
+  .mock-drag-cursor,
+  .cinematic-float,
+  .cinematic-stage-glow {
     animation: none;
   }
 }
