@@ -12,6 +12,10 @@ import {
 } from "@/features/ai/server/prompts/improver";
 import { interviewPrepSystemPrompt } from "@/features/ai/server/prompts/interview-prep";
 import { scoreSystemPrompt } from "@/features/ai/server/prompts/score";
+import {
+  consumeAiQuota,
+  getAiQuotaStatus,
+} from "@/features/billing/server/entitlements";
 import { cvContentSchema } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
@@ -32,6 +36,10 @@ async function collectStream(
 }
 
 export const aiRouter = createTRPCRouter({
+  quotaStatus: protectedProcedure.query(async ({ ctx }) => {
+    return getAiQuotaStatus(ctx);
+  }),
+
   improve: protectedProcedure
     .input(
       z.object({
@@ -42,6 +50,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:improve", 20);
+      await consumeAiQuota(ctx);
 
       const stream = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL_MINI,
@@ -64,6 +73,7 @@ export const aiRouter = createTRPCRouter({
     .input(z.object({ cvSnapshot: cvSnapshotInput }))
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:score", 20);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL_MINI,
@@ -116,6 +126,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:chat", 5);
+      await consumeAiQuota(ctx);
 
       const stream = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -140,6 +151,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:analyzeJD", 20);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -191,6 +203,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:coverLetter", 20);
+      await consumeAiQuota(ctx);
 
       const userContent = input.jdText
         ? `CV:\n${input.cvSnapshot}\n\nJob Description:\n${input.jdText}`
@@ -220,6 +233,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:generate", 5);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -264,6 +278,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:interviewPrep", 20);
+      await consumeAiQuota(ctx);
 
       const userContent = input.jdText
         ? `CV:\n${input.cvSnapshot}\n\nJob Description:\n${input.jdText}`
