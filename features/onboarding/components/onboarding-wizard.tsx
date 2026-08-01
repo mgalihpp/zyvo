@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { AiGeneratorModal } from "@/features/ai/components/ai-generator-modal";
+import { StepAiGenerator } from "@/features/onboarding/components/step-ai-generator";
 import {
   type OnboardingMethod,
   StepChooseMethod,
@@ -18,20 +18,33 @@ import { trpc } from "@/lib/trpc/client";
 type Step = 1 | 2 | 3;
 type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
 
-const STEP_TITLES: Record<Step, { title: string; subtitle: string }> = {
-  1: {
-    title: "Bagaimana kamu ingin membuat CV?",
-    subtitle: "Pilih cara yang paling cocok untukmu.",
-  },
-  2: {
-    title: "Pilih template",
-    subtitle: "Semua template bisa diganti kapan saja di builder.",
-  },
-  3: {
+function getStepTitle(
+  step: Step,
+  method: OnboardingMethod | null,
+): { title: string; subtitle: string } {
+  if (step === 1) {
+    return {
+      title: "Bagaimana kamu ingin membuat CV?",
+      subtitle: "Pilih cara yang paling cocok untukmu.",
+    };
+  }
+  if (step === 2) {
+    return {
+      title: "Pilih template",
+      subtitle: "Semua template bisa diganti kapan saja di builder.",
+    };
+  }
+  if (method === "ai") {
+    return {
+      title: "Ceritakan tentang kamu",
+      subtitle: "AI akan menyusun draf CV lengkap dari info ini.",
+    };
+  }
+  return {
     title: "Import CV kamu",
     subtitle: "AI akan mengisi semua bagian CV secara otomatis.",
-  },
-};
+  };
+}
 
 export function OnboardingWizard() {
   const router = useRouter();
@@ -39,10 +52,14 @@ export function OnboardingWizard() {
   const [step, setStep] = useState<Step>(1);
   const [method, setMethod] = useState<OnboardingMethod | null>(null);
   const [templateId, setTemplateId] = useState<string | null>(null);
-  const [generatorOpen, setGeneratorOpen] = useState(false);
   const [importPhase, setImportPhase] = useState<ImportPhase>("idle");
   const [importError, setImportError] = useState<string | null>(null);
+  const [aiPending, setAiPending] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
+  const generateMutation = trpc.ai.generate.useMutation({
+    onSettled: () => utils.ai.quotaStatus.invalidate(),
+  });
   const importMutation = trpc.ai.importCv.useMutation({
     onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
@@ -55,7 +72,7 @@ export function OnboardingWizard() {
 
   function handleSelectTemplate(id: string) {
     setTemplateId(id);
-    if (method === "import") {
+    if (method === "import" || method === "ai") {
       setStep(3);
       return;
     }
@@ -69,6 +86,28 @@ export function OnboardingWizard() {
         },
       },
     );
+  }
+
+  async function handleAiGenerate(input: {
+    name: string;
+    field: string;
+    summary: string;
+  }) {
+    setAiError(null);
+    setAiPending(true);
+    try {
+      const content = await generateMutation.mutateAsync(input);
+      await createMutation.mutateAsync({
+        ...content,
+        templateId: templateId ?? "classic",
+      });
+      // Navigation happens in createMutation.onSuccess; keep the spinner up.
+    } catch (err) {
+      setAiPending(false);
+      setAiError(
+        err instanceof Error ? err.message : "Terjadi kesalahan. Coba lagi.",
+      );
+    }
   }
 
   async function handleImport(text: string) {
@@ -95,8 +134,8 @@ export function OnboardingWizard() {
     router.push("/dashboard");
   }
 
-  const { title, subtitle } = STEP_TITLES[step];
-  const busy = createMutation.isPending || importPhase !== "idle";
+  const { title, subtitle } = getStepTitle(step, method);
+  const busy = createMutation.isPending || importPhase !== "idle" || aiPending;
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col px-4 py-8">
@@ -150,16 +189,22 @@ export function OnboardingWizard() {
               setMethod(m);
               setStep(2);
             }}
-            onOpenAiGenerator={() => setGeneratorOpen(true)}
           />
         )}
         {step === 2 && <StepChooseTemplate onSelect={handleSelectTemplate} />}
-        {step === 3 && (
+        {step === 3 && method === "import" && (
           <StepImportCv
             onImport={handleImport}
             phase={importPhase}
             error={importError}
             onClearError={() => setImportError(null)}
+          />
+        )}
+        {step === 3 && method === "ai" && (
+          <StepAiGenerator
+            onGenerate={handleAiGenerate}
+            pending={aiPending}
+            error={aiError}
           />
         )}
       </div>
@@ -170,11 +215,6 @@ export function OnboardingWizard() {
           Menyiapkan builder…
         </p>
       )}
-
-      <AiGeneratorModal
-        open={generatorOpen}
-        onClose={() => setGeneratorOpen(false)}
-      />
     </div>
   );
 }

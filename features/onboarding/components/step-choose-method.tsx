@@ -2,14 +2,12 @@
 
 import { FileUp, PenLine, SparklesIcon } from "lucide-react";
 
-export type OnboardingMethod = "manual" | "import";
+export type OnboardingMethod = "manual" | "import" | "ai";
 
 export function StepChooseMethod({
   onSelect,
-  onOpenAiGenerator,
 }: {
   onSelect: (method: OnboardingMethod) => void;
-  onOpenAiGenerator: () => void;
 }) {
   const options = [
     {
@@ -51,7 +49,7 @@ export function StepChooseMethod({
 
       <button
         type="button"
-        onClick={onOpenAiGenerator}
+        onClick={() => onSelect("ai")}
         className="mx-auto flex items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
       >
         <SparklesIcon className="size-4" />
