@@ -32,3 +32,7 @@ export function usePollStatus(orderId: string | null, enabled: boolean) {
 export function useCancelTransaction() {
   return trpc.billing.cancelTransaction.useMutation();
 }
+
+export function useCancelSubscription() {
+  return trpc.billing.cancelSubscription.useMutation();
+}
