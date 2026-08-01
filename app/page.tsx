@@ -95,8 +95,8 @@ export default function Home() {
           <Hero />
           <FeaturesGrid />
           <HowItWorks />
-          <JobTrackerShowcase />
           <TemplatesShowcase />
+          <JobTrackerShowcase />
           <Pricing />
           <Faq />
           <CtaSection />
