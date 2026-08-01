@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
+import { CvPaginator } from "@/features/cv/components/cv-paginator";
+import { getTemplate } from "@/features/cv/components/templates";
 import { getEagerTemplate } from "@/features/cv/components/templates/eager";
 import { toCvContent } from "@/features/cv/lib/cv-content";
 import { cvRootStyle } from "@/features/cv/lib/cv-style";
@@ -27,15 +29,18 @@ export default async function CvPrintPage({
   if (!cv || cv.userId !== session.user.id) notFound();
 
   const content = toCvContent(cv);
+  const template = getTemplate(content.templateId);
   const Template = getEagerTemplate(content.templateId);
 
   return (
     <main
       data-print-root
-      className="mx-auto bg-white"
-      style={{ ...cvRootStyle(content), width: "210mm" }}
+      className="mx-auto w-[794px] bg-white"
+      style={cvRootStyle(content)}
     >
-      <Template cv={content} />
+      <CvPaginator pagination={template.pagination}>
+        <Template cv={content} />
+      </CvPaginator>
     </main>
   );
 }

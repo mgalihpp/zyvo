@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Professional template. A colored header band with the name and contact
@@ -14,7 +14,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.website, p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <CvPage>
       <header className="bg-[var(--cv-color-accent)] px-10 py-8 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
         <h1 className="text-[1.6em] font-bold tracking-tight font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
@@ -238,7 +238,7 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
           </Section>
         ) : null}
       </div>
-    </article>
+    </CvPage>
   );
 }
 

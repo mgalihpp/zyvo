@@ -9,6 +9,7 @@ import {
   PlusIcon,
   Trash2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -213,12 +214,14 @@ export function CvList({
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
   const duplicateMutation = trpc.cv.duplicate.useMutation({
     onSuccess: (cv) => {
       analytics.track("cv_duplicated", { cv_id: cv.id });
       utils.cv.list.invalidate();
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
   const deleteMutation = trpc.cv.delete.useMutation({
     onSuccess: (result) => {
@@ -266,6 +269,7 @@ export function CvList({
       toast.add({
         title: "Gagal mengunduh CV",
         description: err instanceof Error ? err.message : undefined,
+        type: "error",
       });
     } finally {
       setDownloading(null);
@@ -287,8 +291,12 @@ export function CvList({
         </span>
         CV Baru
       </button>
-      {/* spacer so grid rows align */}
-      <div className="h-9" />
+      <Link
+        href="/dashboard/ai"
+        className="mx-auto flex items-center gap-1.5 text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+      >
+        Atau buat dengan AI
+      </Link>
     </div>
   ) : null;
 

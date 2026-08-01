@@ -70,6 +70,9 @@ export async function renderCvDocument({
     await page.setExtraHTTPHeaders({ cookie });
     await page.goto(url, { waitUntil: "networkidle0" });
 
+    // Tunggu CvPaginator selesai mengukur & membelah halaman (client-side).
+    await page.waitForSelector('[data-paginated="true"]', { timeout: 15_000 });
+
     if (format === "png") {
       // A4 width at 96dpi ≈ 794px; full page height captures the whole CV.
       await page.setViewport({ width: 794, height: 1123 });
@@ -77,22 +80,15 @@ export async function renderCvDocument({
       return new Uint8Array(buf);
     }
 
-    // Single continuous page: A4 width, height = actual content height, so the
-    // whole CV lands on one long page instead of being split across A4 sheets.
-    // Measure at A4 pixel width (210mm ≈ 794px @96dpi) so wrapping matches the
-    // PDF layout and the height is accurate.
-    await page.setViewport({ width: 794, height: 1123 });
-    const heightPx = await page.evaluate(() => {
-      const el = document.querySelector<HTMLElement>("[data-print-root]");
-      return Math.ceil((el ?? document.body).getBoundingClientRect().height);
-    });
+    // Setiap halaman sudah berupa kotak 794x1123px dari CvPaginator dengan
+    // break-after page. Ukuran pdf pakai px yang sama persis (bukan mm) agar
+    // tidak ada selisih pembulatan 210mm≈794.6px yang menggeser break.
     const buf = await page.pdf({
-      width: "210mm",
-      // 96dpi: 1px = 1/96in; +2px guards against sub-pixel rounding overflow.
-      height: `${(heightPx + 2) / 96}in`,
+      width: "794px",
+      height: "1123px",
       printBackground: true,
       preferCSSPageSize: false,
-      pageRanges: "1",
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
     return new Uint8Array(buf);
   } finally {

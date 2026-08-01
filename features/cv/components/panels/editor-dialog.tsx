@@ -1,9 +1,15 @@
 "use client";
 
-import { CalendarIcon, CircleMinusIcon, PlusIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CircleMinusIcon,
+  PlusIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +25,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -26,6 +33,7 @@ import {
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { AiToolbar } from "@/features/ai/components/ai-toolbar";
 import {
   type CertificationInput,
   type CustomInput,
@@ -48,7 +56,7 @@ import {
 } from "@/features/cv/schemas/cv";
 import type { EditorSection } from "@/features/cv/stores/cv-store";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
-import { AiToolbar, InfoBanner, TipsBanner } from "./_ai-tools";
+import { InfoBanner, TipsBanner } from "./_ai-tools";
 
 const SECTION_TITLES: Record<EditorSection, string> = {
   summary: "Profil",
@@ -77,6 +85,28 @@ const LEVEL_LABELS = [
   "Lanjutan",
   "Mahir",
 ] as const;
+
+/** Character-counted textarea: enforces maxLength and shows a live counter. */
+function CharCountTextarea({
+  maxLength,
+  value,
+  onChange,
+  ...props
+}: React.ComponentProps<typeof Textarea> & { maxLength: number }) {
+  return (
+    <div>
+      <Textarea
+        maxLength={maxLength}
+        value={value}
+        onChange={onChange}
+        {...props}
+      />
+      <p className="mt-1 text-right text-xs text-muted-foreground">
+        {String(value ?? "").length}/{maxLength}
+      </p>
+    </div>
+  );
+}
 
 /** Dialog that edits the section referenced by the store's editorTarget. */
 export function EditorDialog() {
@@ -137,20 +167,12 @@ function EditorBody({
     <TipsBanner />
   ) : null;
 
-  const showAiToolbar = !isLevel && section !== "summary";
-
   if (section === "summary") {
     return <SummaryBody />;
   }
 
   return (
-    <SectionBody
-      section={section}
-      mode={mode}
-      index={index}
-      banner={banner}
-      showAiToolbar={showAiToolbar}
-    />
+    <SectionBody section={section} mode={mode} index={index} banner={banner} />
   );
 }
 
@@ -166,15 +188,20 @@ function SummaryBody() {
         <TipsBanner />
         <Field>
           <FieldLabel htmlFor="summary">Profil</FieldLabel>
-          <Textarea
+          <CharCountTextarea
             id="summary"
+            maxLength={3000}
             rows={8}
             value={summary ?? ""}
             onChange={(e) => setSummary(e.target.value)}
             placeholder="Paragraf singkat yang merangkum pengalaman, keunggulan, dan tujuan karier Anda."
           />
         </Field>
-        <AiToolbar />
+        <AiToolbar
+          fieldType="ringkasan"
+          value={summary ?? ""}
+          onChange={setSummary}
+        />
       </div>
       <DialogFooter className="sm:flex-col">
         <Button
@@ -276,13 +303,11 @@ function SectionBody({
   mode,
   index,
   banner,
-  showAiToolbar,
 }: {
   section: ListSection;
   mode: "add" | "edit";
   index: number | null;
   banner: React.ReactNode;
-  showAiToolbar: boolean;
 }) {
   const cfg = useSectionConfig(section);
   const closeEditor = useCvStore((s) => s.closeEditor);
@@ -316,7 +341,6 @@ function SectionBody({
             // biome-ignore lint/suspicious/noExplicitAny: patch matches item shape
             onChange={(patch: any) => cfg.update(index, patch)}
           />
-          {showAiToolbar && <AiToolbar />}
         </div>
 
         <DialogFooter className="sm:flex-col">
@@ -391,8 +415,6 @@ function SectionBody({
             </div>
           </div>
         ))}
-
-        {showAiToolbar && <AiToolbar />}
       </div>
 
       <DialogFooter className="flex-col sm:flex-col">
@@ -420,19 +442,37 @@ function SectionBody({
   );
 }
 
-/** Date input with a free-text field plus a calendar popover helper. */
+const MONTH_NAMES_ID = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+] as const;
+
+/** Date input with a free-text field plus a month-year picker popover. */
 function DateField({
   label,
   value,
   onChange,
   placeholder,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [pickerYear, setPickerYear] = useState(() => new Date().getFullYear());
 
   return (
     <Field>
@@ -442,6 +482,7 @@ function DateField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          disabled={disabled}
         />
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
@@ -450,28 +491,54 @@ function DateField({
                 <InputGroupButton
                   size="icon-xs"
                   variant="secondary"
-                  aria-label="Pilih tanggal"
+                  aria-label="Pilih bulan & tahun"
+                  disabled={disabled}
                 >
                   <CalendarIcon />
                 </InputGroupButton>
               }
             />
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="single"
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  if (date) {
-                    onChange(
-                      date.toLocaleDateString("id-ID", {
-                        month: "long",
-                        year: "numeric",
-                      }),
-                    );
-                  }
-                  setOpen(false);
-                }}
-              />
+            <PopoverContent className="w-auto p-3" align="end">
+              {/* Year navigation */}
+              <div className="mb-3 flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setPickerYear((y) => y - 1)}
+                  aria-label="Tahun sebelumnya"
+                >
+                  <ChevronLeftIcon className="size-4" />
+                </Button>
+                <span className="text-sm font-medium">{pickerYear}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => setPickerYear((y) => y + 1)}
+                  aria-label="Tahun berikutnya"
+                >
+                  <ChevronRightIcon className="size-4" />
+                </Button>
+              </div>
+              {/* Month grid */}
+              <div className="grid grid-cols-3 gap-1.5">
+                {MONTH_NAMES_ID.map((monthName, idx) => (
+                  <Button
+                    key={idx}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      onChange(`${monthName} ${pickerYear}`);
+                      setOpen(false);
+                    }}
+                  >
+                    {monthName.slice(0, 3)}
+                  </Button>
+                ))}
+              </div>
             </PopoverContent>
           </Popover>
         </InputGroupAddon>
@@ -508,10 +575,23 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
         />
         <DateField
           label="Selesai"
-          value={value.endDate ?? ""}
-          onChange={(v) => onChange({ endDate: v })}
+          value={value.current ? "Sekarang" : (value.endDate ?? "")}
+          onChange={(v) => onChange({ endDate: v, current: false })}
           placeholder="Sekarang"
+          disabled={!!value.current}
         />
+        <Label className="col-span-2 -mt-2 text-muted-foreground">
+          <Checkbox
+            checked={!!value.current}
+            onCheckedChange={(checked) =>
+              onChange({
+                current: !!checked,
+                endDate: checked ? "" : (value.endDate ?? ""),
+              })
+            }
+          />
+          Saya masih bekerja di posisi ini
+        </Label>
         <Field>
           <FieldLabel>Alamat</FieldLabel>
           <Input
@@ -523,11 +603,17 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={6}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan tanggung jawab dan pencapaian Anda. Gunakan poin-poin atau kalimat singkat."
+        />
+        <AiToolbar
+          fieldType="deskripsi pengalaman"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -692,11 +778,17 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian singkat mengenai sertifikasi ini."
+        />
+        <AiToolbar
+          fieldType="deskripsi sertifikasi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -732,11 +824,17 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
       </Field>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan peran dan kontribusi Anda."
+        />
+        <AiToolbar
+          fieldType="deskripsi organisasi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -780,11 +878,17 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Apa yang dilakukan proyek ini dan peran Anda di dalamnya."
+        />
+        <AiToolbar
+          fieldType="deskripsi proyek"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>
@@ -804,11 +908,17 @@ function CustomForm({ value, onChange }: FormProps<CustomInput>) {
       </Field>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian tambahan."
+        />
+        <AiToolbar
+          fieldType="deskripsi"
+          value={value.description ?? ""}
+          onChange={(v) => onChange({ description: v })}
         />
       </Field>
     </div>

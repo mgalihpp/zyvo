@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   BILLING_PLANS,
   FEATURES,
+  formatExpiryDate,
   formatPrice,
 } from "@/features/billing/lib/billing-constants";
 import type { PlanId as BillingPlanId } from "@/features/billing/lib/plans";
@@ -16,6 +17,7 @@ interface DesktopPlanTableProps {
   yearly: boolean;
   onUpgrade: (planId: BillingPlanId) => void;
   activePlan?: string | null;
+  expiresAt?: Date | string | null;
   loadingPlanId?: string | null;
 }
 
@@ -23,6 +25,7 @@ export function DesktopPlanTable({
   yearly,
   onUpgrade,
   activePlan,
+  expiresAt,
   loadingPlanId,
 }: DesktopPlanTableProps) {
   return (
@@ -204,6 +207,18 @@ export function DesktopPlanTable({
               >
                 {plan.ctaNote}
               </p>
+              {activePlan === plan.id && plan.id !== "free" && expiresAt && (
+                <p
+                  className={cn(
+                    "text-xs",
+                    isPro
+                      ? "text-primary-foreground/70"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  Berlaku hingga {formatExpiryDate(expiresAt)}
+                </p>
+              )}
             </div>
           );
         })}

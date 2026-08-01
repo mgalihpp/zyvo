@@ -15,21 +15,21 @@ export function constructMetadata(overrides: Partial<Metadata> = {}): Metadata {
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
-      default: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
-      template: `%s · ${siteConfig.name}`,
+      default: `${siteConfig.name} | Buat CV profesional dalam hitungan menit`,
+      template: `%s | ${siteConfig.name}`,
     },
     description: siteConfig.description,
     openGraph: {
       type: "website",
       siteName: siteConfig.name,
-      title: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
+      title: `${siteConfig.name} | Buat CV profesional dalam hitungan menit`,
       description: siteConfig.description,
       images: [
         {
           url: siteConfig.ogImage,
           width: 1200,
           height: 630,
-          alt: "Zyvo — Pembuat CV AI",
+          alt: "Zyvo | Pembuat CV AI",
         },
       ],
       url: siteConfig.url,
@@ -37,7 +37,7 @@ export function constructMetadata(overrides: Partial<Metadata> = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${siteConfig.name} — CV Impian, dalam Hitungan Menit`,
+      title: `${siteConfig.name} | Buat CV profesional dalam hitungan menit`,
       description: siteConfig.description,
       images: [siteConfig.ogImage],
       creator: siteConfig.twitterHandle,

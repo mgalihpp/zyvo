@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHasPassword } from "@/features/auth/components/settings/use-has-password";
 import { useSession } from "@/features/auth/lib/auth-client";
+import { useMounted } from "@/features/auth/lib/use-mounted";
+import { useSubscription } from "@/features/billing/hooks/use-billing";
+import { formatExpiryDate } from "@/features/billing/lib/billing-constants";
+import { PLANS } from "@/features/billing/lib/plans";
 
 const SetPasswordForm = lazy(
   () => import("@/features/auth/components/settings/set-password-form"),
@@ -18,6 +22,9 @@ const ChangePasswordForm = lazy(
 );
 const DeleteAccountForm = lazy(
   () => import("@/features/auth/components/settings/delete-account-form"),
+);
+const CancelSubscriptionDialog = lazy(
+  () => import("@/features/billing/components/cancel-subscription-dialog"),
 );
 const ActiveDevices = lazy(
   () => import("@/features/auth/components/settings/active-devices"),
@@ -35,16 +42,22 @@ function FormFallback() {
 }
 
 export default function SettingsPage() {
+  const mounted = useMounted();
   const { data: session } = useSession();
   const router = useRouter();
   const { hasPassword, refresh } = useHasPassword();
+  const {
+    data: sub,
+    isLoading: subLoading,
+    refetch: refetchSub,
+  } = useSubscription();
 
   const [open, setOpen] = useState<"set" | "change" | "delete" | null>(null);
   const toggle = (key: "set" | "change" | "delete") =>
     setOpen((cur) => (cur === key ? null : key));
 
   const user = session?.user;
-  const hasGoogle = !!user?.image;
+  const hasGoogle = mounted && !!user?.image;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
@@ -61,17 +74,46 @@ export default function SettingsPage() {
           <CardTitle className="text-lg font-bold">Paket Saya</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Anda menggunakan paket{" "}
-            <span className="font-semibold text-foreground">Gratis</span>.
-          </p>
-          <Button
-            nativeButton={false}
-            render={<Link href="/dashboard/billing" />}
-            className="relative overflow-hidden px-6 bg-foreground text-background hover:bg-foreground/90 billing-shine"
-          >
-            Tingkatkan
-          </Button>
+          {subLoading ? (
+            <Skeleton className="h-4 w-40" />
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Anda menggunakan paket{" "}
+                <span className="font-semibold text-foreground">
+                  {sub
+                    ? (PLANS[sub.plan as keyof typeof PLANS]?.label ?? sub.plan)
+                    : "Gratis"}
+                </span>
+                .
+              </p>
+              {sub && (
+                <p className="text-xs text-muted-foreground">
+                  Berlaku hingga{" "}
+                  <span className="font-semibold text-foreground">
+                    {formatExpiryDate(sub.expiresAt)}
+                  </span>
+                </p>
+              )}
+            </>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              nativeButton={false}
+              render={<Link href="/dashboard/billing" />}
+              className="relative overflow-hidden px-6 bg-foreground text-background hover:bg-foreground/90 billing-shine"
+            >
+              Tingkatkan
+            </Button>
+            {sub && (
+              <Suspense fallback={null}>
+                <CancelSubscriptionDialog
+                  plan={sub.plan as "basic" | "pro"}
+                  onCanceled={refetchSub}
+                />
+              </Suspense>
+            )}
+          </div>
         </CardContent>
       </Card>
 

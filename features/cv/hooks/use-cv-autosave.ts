@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { toast } from "@/components/ui/toast";
 import {
   useCvStore,
   useCvStoreApi,
@@ -8,6 +9,7 @@ import {
 import { trpc } from "@/lib/trpc/client";
 
 const DEBOUNCE_MS = 800;
+const SAVED_INDICATOR_MS = 3000;
 
 /**
  * Subscribes to CV store mutations and persists the draft to the server with a
@@ -21,6 +23,7 @@ export function useCvAutosave() {
   const mutateRef = useRef(updateMutation.mutate);
   mutateRef.current = updateMutation.mutate;
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipFirst = useRef(true);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: autosave should only fire on content revision / cv id changes; the mutate fn is read from a ref to avoid re-subscribing
@@ -40,14 +43,29 @@ export function useCvAutosave() {
       mutateRef.current(
         { id: cvId, data: store.getContent() },
         {
-          onSuccess: () => storeApi.getState().markSaved(),
-          onError: () => storeApi.getState().setSaveStatus("error"),
+          onSuccess: () => {
+            storeApi.getState().markSaved();
+            hideTimerRef.current = setTimeout(() => {
+              storeApi.getState().setSaveStatus("idle");
+            }, SAVED_INDICATOR_MS);
+          },
+          onError: (err) => {
+            storeApi.getState().setSaveStatus("error");
+            // Surface server-side rejections (e.g. premium template gate) —
+            // otherwise the user only sees a silent "error" save state.
+            toast.add({
+              title: "Gagal menyimpan",
+              description: err.message,
+              type: "error",
+            });
+          },
         },
       );
     }, DEBOUNCE_MS);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, [revision, cvId]);
 }

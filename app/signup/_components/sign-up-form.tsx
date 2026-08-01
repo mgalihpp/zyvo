@@ -65,7 +65,10 @@ export function SignUpForm() {
     const ok = await form.trigger("acceptTerms");
     if (!ok) return;
     startGoogleTransition(async () => {
-      await signIn.social({ provider: "google", callbackURL: DEFAULT_AUTH_REDIRECT });
+      await signIn.social({
+        provider: "google",
+        callbackURL: DEFAULT_AUTH_REDIRECT,
+      });
     });
   };
 
@@ -230,4 +233,3 @@ export function SignUpForm() {
     </main>
   );
 }
-

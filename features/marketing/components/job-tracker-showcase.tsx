@@ -1,0 +1,492 @@
+"use client";
+
+import {
+  ArrowRightIcon,
+  BarChart3Icon,
+  DownloadIcon,
+  HandIcon,
+  KanbanSquareIcon,
+  MailIcon,
+  SheetIcon,
+  SparklesIcon,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { buttonVariants } from "@/components/ui/button";
+import { COLUMN_COLORS } from "@/features/job-tracker/lib/column-colors";
+import type { ColumnColor } from "@/features/job-tracker/schemas/job-tracker";
+import { cn } from "@/lib/utils";
+import type { MockCard, MockColumn } from "../lib/board-mock";
+import { DRAG_SEQUENCE, moveCardForward, resetBoard } from "../lib/board-mock";
+import { Reveal } from "./reveal";
+import { SectionHeading } from "./section-heading";
+
+/**
+ * Marketing showcase for the Job Tracker feature. Fully self-contained and
+ * hardcoded — it does NOT touch the job-tracker store or tRPC, so it renders
+ * safely on the public landing page. Distinct from `BoardPreview`, which is
+ * intentionally blurred + locked for the in-app free-plan upsell.
+ */
+
+const MockCardBody = forwardRef<
+  HTMLDivElement,
+  { card: MockCard; ghost?: boolean; floating?: boolean }
+>(function MockCardBody({ card, ghost, floating }, ref) {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-lg border bg-background p-3 shadow-sm transition-all duration-300",
+        !floating && "hover:-translate-y-0.5 hover:shadow-md",
+        ghost && "border-dashed opacity-40",
+        floating
+          ? "border-primary shadow-xl ring-2 ring-primary/50"
+          : "border-border",
+      )}
+    >
+      <p className="text-sm font-semibold leading-tight text-foreground">
+        {card.position}
+      </p>
+      <p className="text-xs text-muted-foreground">{card.company}</p>
+      {card.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {card.tags.map((tag) => (
+            <span
+              key={tag.label}
+              className={cn(
+                "inline-flex items-center rounded-full border px-2 py-0.5 text-[0.65rem] font-medium",
+                tag.tone === "warn"
+                  ? "border-destructive/30 bg-destructive/10 text-destructive"
+                  : "border-border bg-muted text-muted-foreground",
+              )}
+            >
+              {tag.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+function BoardMock() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const listRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const [reduced, setReduced] = useState(false);
+  const [board, setBoard] = useState<MockColumn[]>(resetBoard);
+  const [step, setStep] = useState(0);
+  const [flight, setFlight] = useState<{
+    position: string;
+    card: MockCard;
+    left: number;
+    top: number;
+    width: number;
+    dx: number;
+    dy: number;
+  } | null>(null);
+  const [moving, setMoving] = useState(false);
+  // Locked card-list height (tallest initial column) so the board never grows
+  // or shrinks as cards move — keeps the page scroll position stable.
+  const [listHeight, setListHeight] = useState(0);
+
+  // Respect reduced motion.
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Measure the tallest initial card list once; columns keep this height.
+  useLayoutEffect(() => {
+    let max = 0;
+    listRefs.current.forEach((el) => {
+      max = Math.max(max, el.offsetHeight);
+    });
+    if (max > 0) setListHeight(max);
+  }, []);
+
+  // Advance the drag rotation; reset the board after the last card.
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => {
+      const next = step + 1;
+      if (next >= DRAG_SEQUENCE.length) {
+        setBoard(resetBoard());
+        setStep(0);
+      } else {
+        setStep(next);
+      }
+    }, 2600);
+    return () => clearInterval(id);
+  }, [reduced, step]);
+
+  // Measure + launch the current flight; commit the move when it lands.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `board` omitted — commit updates it and would retrigger a flight.
+  useLayoutEffect(() => {
+    if (reduced) return;
+    const position = DRAG_SEQUENCE[step];
+    const container = containerRef.current;
+    const source = cardRefs.current.get(position);
+    const srcCol = board.findIndex((col) =>
+      col.cards.some((card) => card.position === position),
+    );
+    const destCol = srcCol + 1;
+    const destList = listRefs.current.get(destCol);
+    if (
+      !container ||
+      !source ||
+      !destList ||
+      srcCol === -1 ||
+      destCol >= board.length
+    ) {
+      return;
+    }
+    const card = board[srcCol].cards.find((c) => c.position === position);
+    if (!card) return;
+
+    const cRect = container.getBoundingClientRect();
+    const sRect = source.getBoundingClientRect();
+    const dRect = destList.getBoundingClientRect();
+
+    // Land at the bottom of the last card already in the destination
+    // (else the list top), so the committed card appears at the list's end.
+    const destCards = board[destCol].cards;
+    const lastCard = destCards.length
+      ? cardRefs.current.get(destCards[destCards.length - 1].position)
+      : null;
+    const landingTop =
+      (lastCard?.getBoundingClientRect().bottom ?? dRect.top) + 8;
+
+    setFlight({
+      position,
+      card,
+      left: sRect.left - cRect.left,
+      top: sRect.top - cRect.top,
+      width: sRect.width,
+      dx: dRect.left - sRect.left,
+      dy: landingTop - sRect.top,
+    });
+    setMoving(false);
+
+    const raf = requestAnimationFrame(() => setMoving(true));
+    const commit = setTimeout(() => {
+      setBoard((b) => moveCardForward(b, position));
+      setFlight(null);
+      setMoving(false);
+    }, 900);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(commit);
+    };
+    // NOTE: `board` intentionally left out of deps — the commit must not
+    // retrigger a flight; the next flight only starts when `step` advances.
+  }, [step, reduced]);
+
+  const ghostPosition = flight?.position ?? null;
+
+  return (
+    <div className="overflow-hidden rounded-2xl border bg-gradient-to-b from-muted/40 to-background p-4 shadow-sm sm:p-6">
+      {/* Fake board toolbar. */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <KanbanSquareIcon className="size-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">
+            Lamaran Saya
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[0.65rem] font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+          Tersinkron
+        </span>
+      </div>
+
+      <div ref={containerRef} className="relative">
+        <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-2 sm:gap-4">
+          {board.map((column, colIndex) => (
+            <div key={column.name} className="w-52 shrink-0 space-y-3 sm:w-56">
+              <div className="flex items-center justify-between gap-1 px-1">
+                <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground">
+                  <span
+                    className={cn(
+                      "size-2 shrink-0 rounded-full",
+                      COLUMN_COLORS[column.color].dot,
+                    )}
+                  />
+                  <span className="truncate">{column.name}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {column.cards.length}
+                </span>
+              </div>
+              <div
+                ref={(el) => {
+                  if (el) listRefs.current.set(colIndex, el);
+                  else listRefs.current.delete(colIndex);
+                }}
+                className="space-y-2"
+                style={listHeight ? { height: listHeight } : undefined}
+              >
+                {column.cards.map((card) => {
+                  return (
+                    <MockCardBody
+                      key={card.position}
+                      card={card}
+                      ghost={!reduced && ghostPosition === card.position}
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(card.position, el);
+                        else cardRefs.current.delete(card.position);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Floating dragged card. */}
+        {!reduced && flight && (
+          <div
+            className="pointer-events-none absolute left-0 top-0 z-10"
+            style={{
+              width: flight.width,
+              transform: `translate(${flight.left + (moving ? flight.dx : 0)}px, ${flight.top + (moving ? flight.dy : 0)}px) rotate(${moving ? -2 : 0}deg) scale(${moving ? 1.05 : 1})`,
+              transition: moving
+                ? "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)"
+                : "none",
+            }}
+          >
+            <div className="relative">
+              <MockCardBody card={flight.card} floating />
+              <HandIcon className="mock-drag-cursor absolute -bottom-2 -right-2 size-5 text-primary drop-shadow-sm" />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type Highlight = {
+  icon: typeof KanbanSquareIcon;
+  title: string;
+  description: string;
+};
+
+const HIGHLIGHTS: Highlight[] = [
+  {
+    icon: KanbanSquareIcon,
+    title: "Pipeline Kanban",
+    description:
+      "Seret lamaran dari Dilamar ke Interview, Offer, hingga Diterima. Semua status dalam satu papan.",
+  },
+  {
+    icon: MailIcon,
+    title: "Email follow-up AI",
+    description:
+      "Hasilkan email tindak lanjut yang sopan dan profesional untuk setiap lamaran dalam sekali klik.",
+  },
+  {
+    icon: BarChart3Icon,
+    title: "Statistik & insight",
+    description:
+      "Pantau total lamaran, funnel konversi, dan mana yang perlu di-follow-up hari ini.",
+  },
+  {
+    icon: SheetIcon,
+    title: "Ekspor CSV",
+    description:
+      "Unduh seluruh data lamaran ke CSV untuk diolah di spreadsheet kapan saja.",
+  },
+];
+
+/** Mini funnel numbers echoing the in-app stats card. */
+const FUNNEL = [
+  { label: "Dilamar", count: 24 },
+  { label: "Interview", count: 9 },
+  { label: "Offer", count: 3 },
+  { label: "Diterima", count: 1 },
+] as const;
+
+export function JobTrackerShowcase() {
+  return (
+    <section
+      id="job-tracker"
+      className="relative mx-auto w-full max-w-6xl px-6 py-28"
+    >
+      <div
+        aria-hidden
+        className="glow-drift pointer-events-none absolute inset-x-0 top-24 -z-10 mx-auto h-64 max-w-3xl bg-[radial-gradient(50%_50%_at_50%_50%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent)] blur-2xl"
+      />
+
+      <Reveal>
+        <SectionHeading
+          eyebrow="Job Tracker"
+          title="Lacak setiap lamaran, dari kirim sampai diterima"
+          description="Bukan cuma bikin CV. Kelola seluruh proses melamar kerja di satu papan Kanban yang rapi, lengkap dengan bantuan AI dan statistik."
+        />
+      </Reveal>
+
+      <Reveal className="mt-16" delay={80}>
+        <BoardMock />
+      </Reveal>
+
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {HIGHLIGHTS.map((item, i) => (
+          <Reveal key={item.title} delay={(i % 4) * 80} className="group">
+            <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_8px_40px_-12px_color-mix(in_oklch,var(--primary)_35%,transparent)]">
+              <span className="flex size-10 items-center justify-center rounded-xl border bg-background text-primary shadow-sm ring-1 ring-primary/10">
+                <item.icon className="size-5" />
+              </span>
+              <h3 className="mt-4 text-base font-semibold tracking-tight text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                {item.description}
+              </p>
+
+              {item.title === "Ekspor CSV" && (
+                <div className="mt-4 space-y-2">
+                  <div className="overflow-hidden rounded-lg border bg-background font-mono text-[0.65rem]">
+                    <div className="grid grid-cols-3 gap-x-2 border-b bg-muted/60 px-2 py-1 font-medium text-muted-foreground">
+                      <span>Perusahaan</span>
+                      <span>Posisi</span>
+                      <span>Status</span>
+                    </div>
+                    {[
+                      ["Tokopedia", "Frontend", "Dilamar"],
+                      ["Traveloka", "Backend", "Interview"],
+                      ["Ruangguru", "Fullstack", "Offer"],
+                    ].map((row) => (
+                      <div
+                        key={row[0]}
+                        className="grid grid-cols-3 gap-x-2 border-b px-2 py-1 last:border-b-0"
+                      >
+                        {row.map((cell) => (
+                          <span key={cell} className="truncate text-foreground">
+                            {cell}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
+                    <DownloadIcon className="size-3" />
+                    lamaran-zyvo.csv
+                  </span>
+                </div>
+              )}
+
+              {item.title === "Email follow-up AI" && (
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-lg bg-muted p-2 font-sans text-[0.65rem] leading-5 text-foreground">
+                    <p className="text-muted-foreground">
+                      To: hr@traveloka.com
+                    </p>
+                    <p className="text-muted-foreground">
+                      Subject: Tindak lanjut lamaran
+                    </p>
+                    <p className="mt-1">
+                      Halo Tim Traveloka, saya ingin menindaklanjuti lamaran
+                      saya untuk posisi Backend Engineer...
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[0.65rem] font-medium text-violet-600 dark:text-violet-400">
+                    <SparklesIcon className="size-3" />
+                    Buat Email
+                  </span>
+                </div>
+              )}
+
+              {item.title === "Pipeline Kanban" && (
+                <div className="mt-4 space-y-2">
+                  {[
+                    { name: "Dilamar", color: "blue", count: 3 },
+                    { name: "Interview", color: "yellow", count: 2 },
+                    { name: "Offer", color: "purple", count: 1 },
+                  ].map((col) => (
+                    <div key={col.name} className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "size-2 shrink-0 rounded-full",
+                          COLUMN_COLORS[col.color as ColumnColor].dot,
+                        )}
+                      />
+                      <span className="w-16 shrink-0 text-[0.7rem] text-muted-foreground">
+                        {col.name}
+                      </span>
+                      <div className="flex flex-1 gap-1">
+                        {Array.from({ length: col.count }, (_, i) => (
+                          <span
+                            key={i}
+                            className="h-6 flex-1 rounded border bg-background shadow-sm"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {item.title === "Statistik & insight" && (
+                <div className="mt-4 space-y-1.5">
+                  {FUNNEL.map((stage, stageIndex) => {
+                    const pct = Math.round(
+                      (stage.count / FUNNEL[0].count) * 100,
+                    );
+                    return (
+                      <div key={stage.label} className="space-y-0.5">
+                        <div className="flex items-center justify-between text-[0.7rem]">
+                          <span className="text-muted-foreground">
+                            {stage.label}
+                          </span>
+                          <span className="font-medium tabular-nums text-foreground">
+                            {stage.count}
+                            {stageIndex > 0 && (
+                              <span className="ml-1 text-muted-foreground">
+                                ({pct}%)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary/70"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      <div className="mt-12 flex justify-center">
+        <Link
+          href="/signup"
+          className={cn(
+            buttonVariants({ size: "lg" }),
+            "h-10 gap-1.5 px-6 text-sm",
+          )}
+        >
+          Coba Job Tracker
+          <ArrowRightIcon className="size-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}

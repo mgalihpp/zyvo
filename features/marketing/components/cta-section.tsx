@@ -3,13 +3,17 @@
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/lib/auth-client";
+import { useMounted } from "@/features/auth/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { ShaderHero } from "./shader-hero";
 
 export function CtaSection() {
-  const { data: session } = useSession();
+  const mounted = useMounted();
+  const { data: session, isPending } = useSession();
+  const authed = mounted && !isPending && !!session;
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-28">
@@ -28,26 +32,35 @@ export function CtaSection() {
           bersama Zyvo — gratis, cepat, dan ramah ATS.
         </p>
         <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href={session ? "/dashboard" : "/signup"}
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "group h-11 gap-2 bg-white px-6 text-sm text-zinc-900 hover:bg-white/90",
-            )}
-          >
-            {session ? "Ke Dashboard" : "Mulai Sekarang — Gratis"}
-            <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
-          {!session && (
-            <Link
-              href="/signin"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
+          {!mounted || isPending ? (
+            <>
+              <Skeleton className="h-11 w-52 rounded-md" />
+              <Skeleton className="h-11 w-24 rounded-md" />
+            </>
+          ) : (
+            <>
+              <Link
+                href={authed ? "/dashboard" : "/signup"}
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "group h-11 gap-2 bg-white px-6 text-sm text-zinc-900 hover:bg-white/90",
+                )}
+              >
+                {authed ? "Ke Dashboard" : "Mulai Sekarang — Gratis"}
+                <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              {!authed && (
+                <Link
+                  href="/signin"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "lg" }),
+                    "h-11 border-white/20 bg-white/5 px-6 text-sm text-white backdrop-blur hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  Masuk
+                </Link>
               )}
-            >
-              Masuk
-            </Link>
+            </>
           )}
         </div>
       </Reveal>

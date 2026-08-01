@@ -1,11 +1,13 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { CheckIcon, X } from "lucide-react";
+import { CheckIcon, Crown, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/toast";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import {
   TEMPLATE_CATEGORIES,
@@ -181,6 +183,15 @@ function TemplateCard({
       {/* Portrait A4 thumbnail */}
       <div className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-primary/30">
         <CvThumbnail cv={cv} className="w-full" aspectRatio="1 / 1.414" />
+        {template.premium ? (
+          <Badge className="absolute left-2 top-2 h-4 px-1.5 text-[0.5625rem] [&>svg]:!size-2 border-amber-200/60 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-amber-50 shadow-[0_0_12px_rgba(251,191,36,0.55)]">
+            <Crown
+              aria-hidden="true"
+              className="fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+            />
+            Premium
+          </Badge>
+        ) : null}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 p-6 text-center opacity-0 transition-all duration-200 group-hover/thumb:bg-black/60 group-hover/thumb:opacity-100">
           <span className="text-lg font-bold text-white">
             PRATINJAU &nbsp;&rarr;
@@ -219,6 +230,7 @@ export function TemplateGallery({
       utils.cv.list.invalidate();
       router.push(`/builder/${cv.id}`);
     },
+    onError: (err) => toast.add({ title: err.message, type: "error" }),
   });
 
   const filtered =

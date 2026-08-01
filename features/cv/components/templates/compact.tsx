@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Compact two-column template. Dense layout maximizing content per page, with
@@ -10,7 +10,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm print:min-h-[297mm] print:[print-color-adjust:exact]">
+    <CvPage>
       <header className="border-b-4 border-[var(--cv-color-accent)] px-8 py-5 print:[print-color-adjust:exact]">
         <div className="flex items-start gap-4">
           {p.photo ? (
@@ -138,7 +138,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
             <MainSection title="Pengalaman">
               <div className="space-y-3">
                 {cv.experience.map((exp, i) => (
-                  <div key={i}>
+                  <div key={i} data-entry>
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                         {exp.role || "Posisi"}
@@ -169,7 +169,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
             <MainSection title="Pendidikan">
               <div className="space-y-2">
                 {cv.education.map((edu, i) => (
-                  <div key={i}>
+                  <div key={i} data-entry>
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                         {edu.school || "Institusi"}
@@ -192,7 +192,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
             <MainSection title="Proyek">
               <div className="space-y-2">
                 {cv.projects.map((proj, i) => (
-                  <div key={i}>
+                  <div key={i} data-entry>
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                         {proj.name}
@@ -224,7 +224,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
             <MainSection title="Tambahan">
               <div className="space-y-2">
                 {cv.custom.map((item, i) => (
-                  <div key={i}>
+                  <div key={i} data-entry>
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {item.title}
                     </h3>
@@ -240,7 +240,7 @@ export function CompactTemplate({ cv }: TemplateProps) {
           ) : null}
         </div>
       </div>
-    </article>
+    </CvPage>
   );
 }
 

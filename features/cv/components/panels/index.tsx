@@ -24,6 +24,14 @@ const ColorsPanel = lazy(() =>
 const ExportPanel = lazy(() =>
   import("./export-panel").then((m) => ({ default: m.ExportPanel })),
 );
+const AiPanel = lazy(() =>
+  import("@/features/ai/components/ai-panel").then((m) => ({
+    default: m.AiPanel,
+  })),
+);
+const HistoryPanel = lazy(() =>
+  import("./history-panel").then((m) => ({ default: m.HistoryPanel })),
+);
 
 function PanelHeader({ title, note }: { title: string; note?: string }) {
   return (
@@ -160,12 +168,18 @@ function ExportSkeleton() {
   );
 }
 
-function Placeholder({ title, note }: { title: string; note: string }) {
+/** Fallback for the lazy history panel: header + a stack of version rows. */
+function HistorySkeleton() {
   return (
     <div>
-      <PanelHeader title={title} />
-      <div className="flex items-center justify-center p-6 text-center text-sm text-muted-foreground">
-        {note}
+      <div className="space-y-2 border-b p-4">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-3 w-64" />
+      </div>
+      <div className="space-y-3 p-4">
+        {["a", "b", "c"].map((id) => (
+          <Skeleton key={id} className="h-14 w-full rounded-lg" />
+        ))}
       </div>
     </div>
   );
@@ -217,7 +231,25 @@ function ActivePanel() {
       );
     case "ai":
       return (
-        <Placeholder title="Asisten AI" note="Fitur AI akan hadir di sini." />
+        <div>
+          <PanelHeader
+            title="Asisten AI"
+            note="Analisis, skor, dan perbaikan CV dengan AI."
+          />
+          <Suspense
+            fallback={
+              <div className="p-4 text-sm text-muted-foreground">Memuat...</div>
+            }
+          >
+            <AiPanel />
+          </Suspense>
+        </div>
+      );
+    case "history":
+      return (
+        <Suspense fallback={<HistorySkeleton />}>
+          <HistoryPanel />
+        </Suspense>
       );
     case "export":
       return (

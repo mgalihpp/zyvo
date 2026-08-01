@@ -1,4 +1,5 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CREATIVE_PAGE_BACKGROUND } from "./page-backgrounds";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Creative two-column template. A wide accent sidebar (40%) holds the photo,
@@ -9,8 +10,11 @@ export function CreativeTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
 
   return (
-    <article className="mx-auto grid min-h-[1123px] w-full max-w-[794px] grid-cols-1 bg-[var(--cv-color-bg)] text-[var(--cv-color-text)] shadow-sm sm:grid-cols-[40%_1fr] sm:grid-rows-[1fr] print:min-h-[297mm] print:grid-cols-[40%_1fr] print:grid-rows-[1fr] print:[print-color-adjust:exact]">
-      <aside className="bg-[var(--cv-color-accent)] p-7 text-[var(--cv-color-on-accent)] print:[print-color-adjust:exact]">
+    <CvPage
+      className="grid grid-cols-1 sm:grid-cols-[40%_1fr] sm:grid-rows-[1fr] print:grid-cols-[40%_1fr] print:grid-rows-[1fr]"
+      style={{ background: CREATIVE_PAGE_BACKGROUND }}
+    >
+      <aside className="p-7 text-[var(--cv-color-on-accent)]">
         {p.photo ? (
           // biome-ignore lint/performance/noImgElement: Puppeteer PDF export needs a plain img
           <img
@@ -52,8 +56,8 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     >
                       <span
                         className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
-                        // level 1 (expert) = 100%, 5 (beginner) = 20%
-                        style={{ width: `${((6 - s.level) / 5) * 100}%` }}
+                        // level 5 (expert) = 100%, 1 (beginner) = 20%
+                        style={{ width: `${(s.level / 5) * 100}%` }}
                       />
                     </span>
                   </li>
@@ -117,7 +121,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           <MainSection title="Pengalaman">
             <div className="space-y-4">
               {cv.experience.map((exp, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Posisi"}
@@ -144,7 +148,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           <MainSection title="Proyek">
             <div className="space-y-3">
               {cv.projects.map((proj, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {proj.name}
@@ -176,7 +180,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           <MainSection title="Pendidikan">
             <div className="space-y-3">
               {cv.education.map((edu, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {edu.school || "Institusi"}
@@ -199,7 +203,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           <MainSection title="Organisasi">
             <div className="space-y-3">
               {cv.organizations.map((org, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                       {org.role || "Posisi"}
@@ -231,7 +235,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           <MainSection title="Tambahan">
             <div className="space-y-2">
               {cv.custom.map((item, i) => (
-                <div key={i}>
+                <div key={i} data-entry>
                   <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
                     {item.title}
                   </h3>
@@ -246,7 +250,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           </MainSection>
         ) : null}
       </div>
-    </article>
+    </CvPage>
   );
 }
 

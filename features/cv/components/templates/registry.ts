@@ -32,11 +32,27 @@ export const TEMPLATE_CATEGORIES: TemplateCategoryMeta[] = [
   { id: "new", label: "Baru" },
 ];
 
+/**
+ * Metadata pagination per-template untuk CvPaginator. Semua field opsional;
+ * default: continuationTop 40, bottom 40, pageBackground kosong (kotak putih
+ * pakai --cv-color-bg).
+ */
+export interface TemplatePagination {
+  /** Inset atas konten (px) di halaman 2+. */
+  continuationTop?: number;
+  /** Ruang bawah (px) yang direservasi algoritma break di tiap halaman. */
+  bottom?: number;
+  /** Background full-bleed yang dilukis di SETIAP kotak halaman. */
+  pageBackground?: string;
+}
+
 export interface TemplateMeta {
   id: string;
   name: string;
   description: string;
   categories: TemplateCategory[];
+  /** Gated behind Basic/Pro. Source of truth: features/cv/lib/premium-templates.ts */
+  premium?: boolean;
   /**
    * Lazy renderer for the single active template in the live preview. Only the
    * selected template's chunk is fetched, keeping the preview bundle small.
@@ -46,6 +62,8 @@ export interface TemplateMeta {
    * the builder's initial chunk.
    */
   lazyComponent: LazyExoticComponent<ComponentType<TemplateProps>>;
+  /** Metadata pagination (lihat TemplatePagination). */
+  pagination?: TemplatePagination;
 }
 
 // Registry is populated in `index.ts` to keep this file free of component

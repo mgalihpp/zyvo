@@ -41,14 +41,16 @@ export default async function DashboardLayout({
         userEmail={session.user.email ?? ""}
         userImage={session.user.image}
       />
-      <SidebarInset>
+      <SidebarInset className="h-svh overflow-hidden">
         {/* Mobile: sidebar is a sheet, so surface a trigger. */}
         <header className="flex items-center gap-3 border-b px-4 py-3 md:hidden">
           <SidebarTrigger />
           <BrandLogo />
         </header>
 
-        <div className="flex-1 p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

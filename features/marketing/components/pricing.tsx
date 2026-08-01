@@ -3,7 +3,9 @@
 import { CheckIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/lib/auth-client";
+import { useMounted } from "@/features/auth/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
@@ -74,7 +76,9 @@ const PLANS: Plan[] = [
 ];
 
 export function Pricing() {
-  const { data: session } = useSession();
+  const mounted = useMounted();
+  const { data: session, isPending } = useSession();
+  const authed = mounted && !isPending && !!session;
 
   return (
     <section id="harga" className="relative border-y bg-muted/30 py-28">
@@ -168,25 +172,29 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Link
-                href={session ? plan.hrefAuth : plan.href}
-                className={cn(
-                  buttonVariants({
-                    variant: plan.featured
-                      ? "default"
-                      : plan.name === "Gratis" && !session
-                        ? "outline"
-                        : "default",
-                    size: "lg",
-                  }),
-                  "mt-8 h-11 text-sm",
-                  plan.featured
-                    ? "bg-white text-primary hover:bg-white/90"
-                    : "",
-                )}
-              >
-                {session ? plan.ctaAuth : plan.cta}
-              </Link>
+              {!mounted || isPending ? (
+                <Skeleton className="mt-8 h-11 w-full rounded-md" />
+              ) : (
+                <Link
+                  href={authed ? plan.hrefAuth : plan.href}
+                  className={cn(
+                    buttonVariants({
+                      variant: plan.featured
+                        ? "default"
+                        : plan.name === "Gratis" && authed
+                          ? "outline"
+                          : "default",
+                      size: "lg",
+                    }),
+                    "mt-8 h-11 text-sm",
+                    plan.featured
+                      ? "bg-white text-primary hover:bg-white/90"
+                      : "",
+                  )}
+                >
+                  {authed ? plan.ctaAuth : plan.cta}
+                </Link>
+              )}
             </Reveal>
           ))}
         </div>

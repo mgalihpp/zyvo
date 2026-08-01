@@ -131,6 +131,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Animated decorative glows (`.glow-drift`) overshoot the viewport with their
+   * transform, which widens the document and creates a horizontal scrollbar on
+   * mobile. Clip instead of hidden: never becomes a scroll container. */
+  html,
+  body {
+    overflow-x: clip;
+  }
   html {
     @apply font-sans;
   }
@@ -154,6 +161,37 @@
   }
   &::-webkit-scrollbar-thumb:hover {
     background-color: var(--muted-foreground);
+  }
+}
+
+/* Thanos-snap dissolve: card blurs, drifts up, and crumbles to dust via a
+ * sweeping mask. Played on a positioned ghost after a trash-zone drop. */
+@keyframes thanos-snap {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+    mask-image: linear-gradient(to top, black 0%, black 80%, black 100%);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-24px) scale(1.06) rotate(3deg);
+    mask-image: linear-gradient(
+      to top,
+      transparent 0%,
+      transparent 80%,
+      black 100%
+    );
+  }
+}
+.thanos-snap {
+  animation: thanos-snap 0.6s ease-out forwards;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .thanos-snap {
+    animation-duration: 0.01s;
   }
 }
 
@@ -269,6 +307,58 @@
   }
 }
 
+/* Subtle grab bob for the drag-mock's hand cursor. */
+@keyframes mock-drag-cursor {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-1px, -2px) scale(0.94);
+  }
+}
+.mock-drag-cursor {
+  animation: mock-drag-cursor 1.4s ease-in-out infinite;
+}
+
+@keyframes cinematic-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes cinematic-stage-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.cinematic-float {
+  animation: cinematic-float 4s ease-in-out infinite;
+}
+
+.cinematic-stage-glow {
+  animation: cinematic-stage-glow 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mock-drag-cursor,
+  .cinematic-float,
+  .cinematic-stage-glow {
+    animation: none;
+  }
+}
+
 /* Shine sweep for the featured pricing card. */
 @keyframes billing-shine {
   0% {
@@ -305,31 +395,11 @@
   animation: badge-orbit 3s linear infinite;
 }
 
-/* Keep CV entries and headings intact across PDF/print page breaks. Scoped to
- * the print route wrapper so the editor UI is unaffected. Templates own their
- * own inner padding, so @page has no margin (full-bleed sidebars reach the
- * paper edge). */
-@page {
-  margin: 0;
-}
-[data-print-root] section {
-  break-inside: auto;
-}
-[data-print-root] h1,
-[data-print-root] h2,
-[data-print-root] h3 {
-  break-after: avoid;
-}
-[data-print-root] [data-entry] {
-  break-inside: avoid;
-}
-/* A section heading orphaned at the bottom of a page (entries flow to the next)
- * reads as a torn section. Chromium's print engine honors break-after:avoid on
- * the heading weakly when siblings intervene, so also forbid a break right
- * before any section — keeps the heading glued to its first entry. */
-[data-print-root] section {
-  break-before: avoid;
-}
-[data-print-root] section:first-child {
-  break-before: auto;
+/* Halaman sudah dipra-paginasi jadi kotak 794x1123 oleh CvPaginator; template
+ * mengatur padding-nya sendiri, jadi @page tanpa margin (sidebar full-bleed
+ * menyentuh tepi kertas). */
+@media print {
+  @page {
+    margin: 0;
+  }
 }

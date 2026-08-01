@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/features/auth/lib/auth-client";
+import { useMounted } from "@/features/auth/lib/use-mounted";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "#fitur", label: "Fitur" },
   { href: "#cara-kerja", label: "Cara Kerja" },
+  { href: "#job-tracker", label: "Job Tracker" },
   { href: "#template", label: "Template" },
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },
@@ -17,7 +20,9 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const { data: session } = useSession();
+  const mounted = useMounted();
+  const { data: session, isPending } = useSession();
+  const authed = mounted && !isPending && !!session;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -58,7 +63,9 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          {session ? (
+          {!mounted || isPending ? (
+            <Skeleton className="h-9 w-24 rounded-md" />
+          ) : authed ? (
             <Link
               href="/dashboard"
               className={cn(

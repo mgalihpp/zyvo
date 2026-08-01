@@ -3,6 +3,7 @@
 import {
   ArrowLeftIcon,
   DownloadIcon,
+  HistoryIcon,
   LayoutTemplateIcon,
   ListIcon,
   type LucideIcon,
@@ -35,6 +36,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: "typography", label: "Tipografi", icon: TypeIcon },
   { id: "colors", label: "Warna", icon: PaletteIcon },
   { id: "ai", label: "Asisten AI", icon: SparklesIcon },
+  { id: "history", label: "Riwayat", icon: HistoryIcon },
   { id: "export", label: "Unduh", icon: DownloadIcon },
 ];
 

@@ -131,7 +131,7 @@ export function SaveIndicatorMock() {
   const step = useCycle(SAVE_STATES.length, 1500);
   const state = SAVE_STATES[step];
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center justify-center gap-3">
       <span
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-1 text-xs shadow-sm transition-colors",
@@ -471,28 +471,32 @@ const ATS_CHECKS = [
 export function AtsBadgeMock() {
   const step = useCycle(ATS_CHECKS.length + 1, 700);
   return (
-    <div className="flex flex-col items-start gap-3">
+    <div className="mx-auto flex w-fit flex-col items-start gap-3">
       <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
         <ShieldCheckIcon className="size-3.5" />
         Lolos pemindaian ATS
       </span>
-      <div className="w-full space-y-1.5">
+      <div className="space-y-1.5">
         {ATS_CHECKS.map((item, i) => (
           <div
             key={item}
             className={cn(
               "flex items-center gap-2 text-xs transition-all duration-500",
-              i < step
+              i <= step
                 ? "text-muted-foreground opacity-100"
                 : "translate-x-1 opacity-40",
             )}
           >
-            <CheckIcon
-              className={cn(
-                "size-3.5 transition-colors",
-                i < step ? "text-emerald-500" : "text-muted-foreground/40",
-              )}
-            />
+            {i === step ? (
+              <LoaderIcon className="size-3.5 animate-spin text-muted-foreground" />
+            ) : (
+              <CheckIcon
+                className={cn(
+                  "size-3.5 transition-colors",
+                  i < step ? "text-emerald-500" : "text-muted-foreground/40",
+                )}
+              />
+            )}
             {item}
           </div>
         ))}

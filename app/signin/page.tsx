@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { constructMetadata } from "@/lib/seo";
 import { SignInForm } from "./_components/sign-in-form";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "Masuk",
   description: "Masuk ke akun Zyvo Anda.",
   robots: { index: false, follow: false },
-};
+});
 
 export default function SignInPage() {
   return (

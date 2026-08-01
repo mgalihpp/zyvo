@@ -1,4 +1,4 @@
-import { formatDateRange, join, type TemplateProps } from "./shared";
+import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
  * Minimal single-column template. Centered header, generous whitespace, thin
@@ -12,7 +12,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
   const linkLine = join([p.linkedin, p.github]);
 
   return (
-    <article className="mx-auto min-h-[1123px] w-full max-w-[794px] bg-[var(--cv-color-bg)] p-12 font-light text-[var(--cv-color-text)] shadow-sm print:[print-color-adjust:exact]">
+    <CvPage className="p-12 font-light">
       <header className="text-center">
         <h1 className="text-[2em] font-normal tracking-[0.1em] text-[var(--cv-color-heading)] uppercase font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
@@ -155,7 +155,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
         <Section title="Sertifikasi">
           <div className="space-y-1">
             {cv.certifications.map((c, i) => (
-              <p key={i}>
+              <p key={i} data-entry>
                 <span className="font-medium text-[var(--cv-color-heading)]">
                   {c.name}
                 </span>
@@ -212,7 +212,7 @@ export function MinimalTemplate({ cv }: TemplateProps) {
           </div>
         </Section>
       ) : null}
-    </article>
+    </CvPage>
   );
 }
 

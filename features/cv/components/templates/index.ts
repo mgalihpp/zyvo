@@ -1,4 +1,8 @@
 import { lazy } from "react";
+import {
+  CREATIVE_PAGE_BACKGROUND,
+  MODERN_PAGE_BACKGROUND,
+} from "./page-backgrounds";
 import type { TemplateMeta, TemplateRegistry } from "./registry";
 
 // Lazy renderers used by the live preview (one active template at a time).
@@ -46,6 +50,7 @@ export const TEMPLATES: TemplateMeta[] = [
     description: "Dua kolom dengan sidebar gelap untuk kontak & keahlian.",
     categories: ["professional", "two-column", "new"],
     lazyComponent: ModernLazy,
+    pagination: { pageBackground: MODERN_PAGE_BACKGROUND },
   },
   {
     id: "professional",
@@ -73,6 +78,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Executive",
     description: "Header band elegan dengan foto, formal untuk level senior.",
     categories: ["professional", "one-column", "new"],
+    premium: true,
     lazyComponent: ExecutiveLazy,
   },
   {
@@ -80,13 +86,16 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Creative",
     description: "Sidebar bold dengan foto, cocok untuk desainer & kreator.",
     categories: ["creative", "two-column", "new"],
+    premium: true,
     lazyComponent: CreativeLazy,
+    pagination: { pageBackground: CREATIVE_PAGE_BACKGROUND },
   },
   {
     id: "elegant",
     name: "Elegant",
     description: "Header terpusat dengan foto bulat, serif premium.",
     categories: ["professional", "one-column", "new"],
+    premium: true,
     lazyComponent: ElegantLazy,
   },
   {
@@ -94,6 +103,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Compact",
     description: "Tata letak padat dua kolom, cocok untuk CV panjang.",
     categories: ["professional", "two-column", "ats"],
+    premium: true,
     lazyComponent: CompactLazy,
   },
 ];
@@ -119,5 +129,6 @@ export function getTemplate(id: string | undefined): TemplateMeta {
 export type {
   TemplateCategory,
   TemplateMeta,
+  TemplatePagination,
 } from "./registry";
 export { TEMPLATE_CATEGORIES } from "./registry";
