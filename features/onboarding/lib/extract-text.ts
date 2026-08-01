@@ -46,7 +46,9 @@ export async function extractTextFromFile(file: File): Promise<string> {
   const isPdf = file.type === PDF_TYPE || file.name.endsWith(".pdf");
   const isDocx = file.type === DOCX_TYPE || file.name.endsWith(".docx");
   if (!isPdf && !isDocx) {
-    throw new ExtractError("Format tidak didukung. Gunakan file PDF atau DOCX.");
+    throw new ExtractError(
+      "Format tidak didukung. Gunakan file PDF atau DOCX.",
+    );
   }
 
   const buffer = await file.arrayBuffer();

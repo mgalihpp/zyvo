@@ -140,7 +140,9 @@ export function StepImportCv({
         <div className="space-y-3">
           <Textarea
             value={pasted}
-            onChange={(e) => setPasted(e.target.value.slice(0, MAX_IMPORT_CHARS))}
+            onChange={(e) =>
+              setPasted(e.target.value.slice(0, MAX_IMPORT_CHARS))
+            }
             placeholder="Paste seluruh isi CV kamu di sini…"
             className="min-h-[220px] text-xs"
           />
