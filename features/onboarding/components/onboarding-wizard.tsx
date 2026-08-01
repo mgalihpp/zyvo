@@ -102,8 +102,8 @@ function getStepTitle(
   }
   return {
     title: "Import CV kamu",
-      subtitle:
-        "Upload CV lama kamu dengan format (PDF/DOCX) atau paste teksnya.",
+    subtitle:
+      "Upload CV lama kamu dengan format (PDF/DOCX) atau paste teksnya.",
   };
 }
 
