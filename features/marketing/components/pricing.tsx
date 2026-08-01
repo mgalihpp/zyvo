@@ -181,7 +181,7 @@ export function Pricing() {
                     buttonVariants({
                       variant: plan.featured
                         ? "default"
-                        : plan.name === "Gratis" && authed
+                        : plan.name === "Gratis"
                           ? "outline"
                           : "default",
                       size: "lg",
