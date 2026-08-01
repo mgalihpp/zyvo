@@ -364,7 +364,12 @@ export const cvRouter = createTRPCRouter({
           experience: input?.experience ?? [],
           education: input?.education ?? [],
           skills: input?.skills ?? [],
+          interpersonal: input?.interpersonal ?? [],
+          languages: input?.languages ?? [],
+          certifications: input?.certifications ?? [],
+          organizations: input?.organizations ?? [],
           projects: input?.projects ?? [],
+          custom: input?.custom ?? [],
         },
         select: { id: true },
       });
