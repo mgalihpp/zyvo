@@ -20,6 +20,10 @@ export const HELP_FAQS = [
     a: "Coba ulangi pembayaran dari halaman Paket & Harga. Jika masih gagal, hubungi kami lewat Telegram atau email — sertakan kode error bila ada.",
   },
   {
+    q: "Bagaimana kebijakan refund?",
+    a: "Tersedia pengajuan refund dalam 7 hari sejak pembelian. Untuk mengajukan refund, hubungi admin lewat Telegram atau email.",
+  },
+  {
     q: "Apakah pekerjaan saya tersimpan otomatis?",
     a: "Ya. Setiap perubahan disimpan otomatis. Anda bisa menutup tab kapan saja dan melanjutkan nanti tanpa kehilangan progres.",
   },
