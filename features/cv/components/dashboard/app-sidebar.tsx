@@ -3,6 +3,7 @@
 import {
   ChevronsUpDownIcon,
   CreditCardIcon,
+  HelpCircleIcon,
   LogOutIcon,
   SettingsIcon,
   UserCircleIcon,
@@ -107,6 +108,19 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter className="mt-8 px-6 pb-4">
+        <SidebarMenu className="gap-0.5">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname.startsWith("/dashboard/help")}
+              tooltip="Butuh bantuan?"
+              render={<Link href="/dashboard/help" />}
+              className="h-10 rounded-xl text-base font-normal text-sidebar-foreground/60 transition-all hover:!bg-primary/10 hover:!text-primary data-active:!bg-primary/10 data-active:!text-primary"
+            >
+              <HelpCircleIcon className="size-4" />
+              <span>Butuh bantuan?</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         {/* User row */}
         <SidebarMenu>
           <SidebarMenuItem>
