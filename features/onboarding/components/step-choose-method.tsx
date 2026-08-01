@@ -1,6 +1,7 @@
 "use client";
 
-import { FileUp, PenLine, SparklesIcon } from "lucide-react";
+import { FileUp, PenLine } from "lucide-react";
+import { Highlighter } from "@/components/ui/highlighter";
 
 export type OnboardingMethod = "manual" | "import" | "ai";
 
@@ -50,10 +51,11 @@ export function StepChooseMethod({
       <button
         type="button"
         onClick={() => onSelect("ai")}
-        className="mx-auto flex items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+        className="mx-auto flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
-        <SparklesIcon className="size-4" />
-        Atau buat dengan AI
+        <Highlighter action="underline" color="#7c3aed" strokeWidth={2}>
+          Atau buat dengan AI
+        </Highlighter>
       </button>
     </div>
   );

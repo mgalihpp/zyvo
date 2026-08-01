@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { AiGeneratorPage } from "@/features/ai/components/ai-generator-page";
 import { auth } from "@/features/auth/lib/auth";
 import { SIGN_IN_PATH } from "@/features/auth/lib/auth-routes";
+import { OnboardingWizard } from "@/features/onboarding/components/onboarding-wizard";
 import { constructMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = constructMetadata({
-  title: "Buat dengan AI",
-});
+export const metadata: Metadata = constructMetadata({ title: "Buat CV" });
 
-/** Full-page AI CV generator — the dashboard "Atau buat dengan AI" link lands here. */
-export default async function AiGeneratorRoute() {
+/** Full-page "buat CV baru" wizard — Manual / Import / AI. */
+export default async function BuilderNewPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect(SIGN_IN_PATH);
 
-  return <AiGeneratorPage />;
+  return <OnboardingWizard mode="create" />;
 }

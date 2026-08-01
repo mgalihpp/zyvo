@@ -210,17 +210,6 @@ export function CvList({
   }, [cvs, analytics]);
 
   const upsell = usePlanUpsell();
-  const createMutation = trpc.cv.create.useMutation({
-    onSuccess: (cv) => {
-      analytics.track("cv_created", { cv_id: cv.id });
-      utils.cv.list.invalidate();
-      router.push(`/builder/${cv.id}`);
-    },
-    onError: (err) => {
-      if (!upsell.handleError(err))
-        toast.add({ title: err.message, type: "error" });
-    },
-  });
   const duplicateMutation = trpc.cv.duplicate.useMutation({
     onSuccess: (cv) => {
       analytics.track("cv_duplicated", { cv_id: cv.id });
@@ -284,28 +273,18 @@ export function CvList({
     }
   }
 
-  // "New resume" card — dashed border, centered + icon
+  // "New resume" card — dashed border, centered + icon.
   const newCard = showNewButton ? (
-    <div className="flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={() => createMutation.mutate(undefined)}
-        disabled={createMutation.isPending}
-        style={{ aspectRatio: "1 / 1.414" }}
-        className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
-      >
-        <span className="flex size-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
-          <PlusIcon className="size-5" />
-        </span>
-        CV Baru
-      </button>
-      <Link
-        href="/dashboard/ai"
-        className="mx-auto flex items-center gap-1.5 text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
-      >
-        Atau buat dengan AI
-      </Link>
-    </div>
+    <Link
+      href="/builder/new"
+      style={{ aspectRatio: "1 / 1.414" }}
+      className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+    >
+      <span className="flex size-10 items-center justify-center rounded-full bg-muted/60 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary">
+        <PlusIcon className="size-5" />
+      </span>
+      CV Baru
+    </Link>
   ) : null;
 
   if (isLoading) {
