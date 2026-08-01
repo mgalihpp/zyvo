@@ -162,6 +162,17 @@ export const cvContentSchema = z.object({
 
 export const cvUpdateSchema = cvContentSchema.partial();
 
+// Create inputs must distinguish omitted template styling from an explicit
+// palette/font choice. Reusing cvContentSchema.partial() would inject the
+// schema's neutral defaults before the router can apply template defaults.
+export const cvCreateSchema = cvContentSchema
+  .omit({ colors: true, typography: true })
+  .extend({
+    colors: colorsSchema.optional(),
+    typography: typographySchema.optional(),
+  })
+  .partial();
+
 export type PersonalInput = z.infer<typeof personalSchema>;
 export type ExperienceInput = z.infer<typeof experienceSchema>;
 export type EducationInput = z.infer<typeof educationSchema>;

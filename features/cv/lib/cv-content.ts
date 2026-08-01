@@ -1,3 +1,7 @@
+import {
+  templateDefaultColors,
+  templateDefaultTypography,
+} from "@/features/cv/components/templates/template-colors";
 import type { CvContent } from "@/features/cv/schemas/cv";
 import { colorsSchema, typographySchema } from "@/features/cv/schemas/cv";
 import type { prisma } from "@/lib/db";
@@ -14,13 +18,21 @@ function toLevel(value: unknown): number {
 
 /** Map a Prisma CV document to the builder/preview `CvContent` shape. */
 export function toCvContent(cv: CvDoc): CvContent {
+  // Fall back to the template's own palette/fonts when a document predates
+  // storing colors/typography (e.g. created before the wizard persisted them).
+  // Without this a modern-template CV with null colors renders a neutral black
+  // sidebar instead of its intended blue.
+  const defaultColors = templateDefaultColors(cv.templateId);
+  const defaultTypography = templateDefaultTypography(cv.templateId);
   return {
     title: cv.title,
     templateId: cv.templateId,
     typography: typographySchema
       .catch(typographySchema.parse({}))
-      .parse(cv.typography ?? {}),
-    colors: colorsSchema.catch(colorsSchema.parse({})).parse(cv.colors ?? {}),
+      .parse(cv.typography ?? defaultTypography),
+    colors: colorsSchema
+      .catch(colorsSchema.parse({}))
+      .parse(cv.colors ?? defaultColors),
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",

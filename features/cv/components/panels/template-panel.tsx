@@ -5,29 +5,29 @@ import { memo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { PremiumTemplateUpsellDialog } from "@/features/billing/components/premium-template-upsell-dialog";
 import { useSubscription } from "@/features/billing/hooks/use-billing";
+import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import {
   TEMPLATE_CATEGORIES,
   TEMPLATES,
   type TemplateCategory,
   type TemplateMeta,
 } from "@/features/cv/components/templates";
-import { getEagerTemplate } from "@/features/cv/components/templates/eager";
 import { SAMPLE_CV } from "@/features/cv/components/templates/sample";
 import {
   templateDefaultColors,
   templateDefaultTypography,
 } from "@/features/cv/components/templates/template-colors";
 import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
-import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
 type Filter = TemplateCategory | "all";
 
 /**
- * Scaled, non-interactive preview of a template rendered with sample data.
- * The 794px-wide template is transform-scaled down to the thumbnail width so
- * the real renderer is reused (no separate thumbnail art to maintain).
+ * Non-interactive preview of a template rendered with sample data. Reuses
+ * `CvThumbnail`, which fits the 794px-wide render into the card via a
+ * ResizeObserver, so it stays crisp and never overflows as the resizable
+ * editor panel is widened or narrowed.
  *
  * Memoized on the template id: sample data never changes, so a thumbnail only
  * needs to render once even as the panel re-renders on selection changes.
@@ -37,34 +37,15 @@ const TemplateThumb = memo(function TemplateThumb({
 }: {
   template: TemplateMeta;
 }) {
-  const Template = getEagerTemplate(template.id);
   // Render the thumbnail with the template's own default palette so the picker
   // shows each template's intended colors (not one shared neutral look).
   const sample = {
     ...SAMPLE_CV,
+    templateId: template.id,
     colors: templateDefaultColors(template.id),
     typography: templateDefaultTypography(template.id),
   };
-  // 794px design width scaled into a ~248px-wide card interior.
-  const scale = 0.3;
-  return (
-    <div
-      className="pointer-events-none relative w-full overflow-hidden bg-white"
-      style={{ aspectRatio: "1 / 1.414" }}
-      aria-hidden
-    >
-      <div
-        className="absolute left-0 top-0 origin-top-left"
-        style={{
-          width: 794,
-          transform: `scale(${scale})`,
-          ...cvRootStyle(sample),
-        }}
-      >
-        <Template cv={sample} />
-      </div>
-    </div>
-  );
+  return <CvThumbnail cv={sample} className="w-full" aspectRatio="1 / 1.414" />;
 });
 
 function TemplateCard({

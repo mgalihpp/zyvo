@@ -5,10 +5,14 @@ import {
   assertCvSlot,
   assertFeature,
 } from "@/features/billing/server/entitlements";
+import {
+  templateDefaultColors,
+  templateDefaultTypography,
+} from "@/features/cv/components/templates/template-colors";
 import { toCvContent } from "@/features/cv/lib/cv-content";
 import { isPremiumTemplate } from "@/features/cv/lib/premium-templates";
 import {
-  cvContentSchema,
+  cvCreateSchema,
   cvUpdateSchema,
   emptyPersonal,
 } from "@/features/cv/schemas/cv";
@@ -327,12 +331,16 @@ export const cvRouter = createTRPCRouter({
         custom: true,
       },
     });
-    // Normalize legacy documents where `personal` was not yet stored (null).
-    // React Compiler trusts TypeScript types and removes optional chaining in
-    // template renders, so a null personal crashes at runtime.
-    return rows.map((cv) =>
-      cv.personal ? cv : { ...cv, personal: { ...emptyPersonal } },
-    );
+    // Normalize legacy documents where `personal` was not yet stored (null)
+    // or `colors`/`typography` predate the wizard persisting them. React
+    // Compiler trusts TypeScript types and removes optional chaining in
+    // template renders, so nulls crash or render wrong defaults at runtime.
+    return rows.map((cv) => ({
+      ...cv,
+      personal: cv.personal ?? { ...emptyPersonal },
+      colors: cv.colors ?? templateDefaultColors(cv.templateId),
+      typography: cv.typography ?? templateDefaultTypography(cv.templateId),
+    }));
   }),
 
   getById: protectedProcedure
@@ -348,17 +356,25 @@ export const cvRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(cvContentSchema.partial().optional())
+    .input(cvCreateSchema.optional())
     .mutation(async ({ ctx, input }) => {
       await assertCvSlot(ctx);
       if (isPremiumTemplate(input?.templateId)) {
         await assertFeature(ctx, "premiumTemplates");
       }
+      const templateId = input?.templateId ?? "classic";
       const cv = await ctx.prisma.cV.create({
         data: {
           userId: ctx.session.user.id,
           title: input?.title ?? "CV Tanpa Judul",
-          templateId: input?.templateId ?? "classic",
+          templateId,
+          // Persist the template's default palette/fonts at creation so the
+          // builder preview matches the template picker thumbnail. Without
+          // this, a fresh CV stores null colors and falls back to the neutral
+          // black default in the editor. Explicit input (e.g. AI/import) wins.
+          colors: input?.colors ?? templateDefaultColors(templateId),
+          typography:
+            input?.typography ?? templateDefaultTypography(templateId),
           personal: input?.personal,
           summary: input?.summary,
           experience: input?.experience ?? [],
