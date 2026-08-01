@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
+import { assertFeature } from "@/features/billing/server/entitlements";
 
 /**
  * Job tracker is a Basic/Pro feature. Called at the top of every jobTracker
@@ -9,14 +9,5 @@ export async function assertPaidPlan(ctx: {
   prisma: PrismaClient;
   session: { user: { id: string } };
 }): Promise<void> {
-  const sub = await ctx.prisma.subscription.findUnique({
-    where: { userId: ctx.session.user.id },
-  });
-  const isActive = sub?.status === "active" && sub.expiresAt > new Date();
-  if (!isActive) {
-    throw new TRPCError({
-      code: "FORBIDDEN",
-      message: "Fitur ini khusus paket Basic/Pro",
-    });
-  }
+  await assertFeature(ctx, "jobTracker");
 }
