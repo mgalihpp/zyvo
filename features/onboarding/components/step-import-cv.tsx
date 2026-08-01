@@ -1,8 +1,9 @@
 "use client";
 
-import { FileUp, Loader2 } from "lucide-react";
+import { FileUp } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ExtractError,
@@ -87,9 +88,21 @@ export function StepImportCv({
       </div>
 
       {busy ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-10 text-center">
-          <Loader2 className="size-6 animate-spin text-primary" />
-          <p className="text-sm font-medium">{PHASE_LABEL[phase]}</p>
+        <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-10">
+          <div className="text-center">
+            <p className="text-sm font-medium">{PHASE_LABEL[phase]}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {phase === "creating"
+                ? "Pindah ke builder…"
+                : "Ini bisa memakan waktu beberapa detik."}
+            </p>
+          </div>
+          <div className="mx-auto mt-6 max-w-sm space-y-3">
+            {Array.from({ length: 4 }, (_, i) => (
+              <Skeleton key={i} className="h-4 w-full" />
+            ))}
+            <Skeleton className="h-4 w-2/3" />
+          </div>
         </div>
       ) : tab === "upload" ? (
         <button

@@ -1,19 +1,69 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { StepAiGenerator } from "@/features/onboarding/components/step-ai-generator";
 import {
   type OnboardingMethod,
   StepChooseMethod,
 } from "@/features/onboarding/components/step-choose-method";
-import { StepChooseTemplate } from "@/features/onboarding/components/step-choose-template";
-import { StepImportCv } from "@/features/onboarding/components/step-import-cv";
 import { ONBOARDING_SKIP_COOKIE } from "@/features/onboarding/lib/constants";
 import { trpc } from "@/lib/trpc/client";
+
+const StepChooseTemplate = dynamic(
+  () =>
+    import("@/features/onboarding/components/step-choose-template").then(
+      (m) => m.StepChooseTemplate,
+    ),
+  { loading: () => <TemplateGridSkeleton /> },
+);
+const StepImportCv = dynamic(
+  () =>
+    import("@/features/onboarding/components/step-import-cv").then(
+      (m) => m.StepImportCv,
+    ),
+  { loading: () => <FormSkeleton /> },
+);
+const StepAiGenerator = dynamic(
+  () =>
+    import("@/features/onboarding/components/step-ai-generator").then(
+      (m) => m.StepAiGenerator,
+    ),
+  { loading: () => <FormSkeleton /> },
+);
+
+function TemplateGridSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap justify-center gap-2">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="h-7 w-20 rounded-full" />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="aspect-[1/1.414] w-full rounded-lg" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FormSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-xl space-y-4">
+      <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-10 w-full rounded-lg" />
+    </div>
+  );
+}
 
 type Step = 1 | 2 | 3;
 type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
