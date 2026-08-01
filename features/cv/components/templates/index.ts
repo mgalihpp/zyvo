@@ -78,6 +78,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Executive",
     description: "Header band elegan dengan foto, formal untuk level senior.",
     categories: ["professional", "one-column", "new"],
+    premium: true,
     lazyComponent: ExecutiveLazy,
   },
   {
@@ -85,6 +86,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Creative",
     description: "Sidebar bold dengan foto, cocok untuk desainer & kreator.",
     categories: ["creative", "two-column", "new"],
+    premium: true,
     lazyComponent: CreativeLazy,
     pagination: { pageBackground: CREATIVE_PAGE_BACKGROUND },
   },
@@ -93,6 +95,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Elegant",
     description: "Header terpusat dengan foto bulat, serif premium.",
     categories: ["professional", "one-column", "new"],
+    premium: true,
     lazyComponent: ElegantLazy,
   },
   {
@@ -100,6 +103,7 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Compact",
     description: "Tata letak padat dua kolom, cocok untuk CV panjang.",
     categories: ["professional", "two-column", "ats"],
+    premium: true,
     lazyComponent: CompactLazy,
   },
 ];

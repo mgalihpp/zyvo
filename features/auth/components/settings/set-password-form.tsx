@@ -37,7 +37,7 @@ export default function SetPasswordForm({
     setError(null);
     try {
       await mutation.mutateAsync({ newPassword: data.newPassword });
-      toast.add({ title: "Kata sandi berhasil diatur" });
+      toast.add({ title: "Kata sandi berhasil diatur", type: "success" });
       onDone();
       onClose();
     } catch (err) {

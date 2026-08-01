@@ -2,6 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { coreGet, corePost, snapPost } from "@/features/billing/lib/midtrans";
 import { getAmount } from "@/features/billing/lib/plans";
+import {
+  applyPayment,
+  TERMINAL_FAILED,
+} from "@/features/billing/server/apply-payment";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 export const billingRouter = createTRPCRouter({
@@ -68,7 +72,17 @@ export const billingRouter = createTRPCRouter({
 
   getStatus: protectedProcedure
     .input(z.object({ orderId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+        select: { userId: true },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
       const res = await coreGet(`/${input.orderId}/status`);
       return {
         transactionStatus: (res.transaction_status as string) ?? "not_found",
@@ -84,9 +98,69 @@ export const billingRouter = createTRPCRouter({
     return isActive ? sub : null;
   }),
 
+  cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+    const sub = await ctx.prisma.subscription.findUnique({
+      where: { userId: ctx.session.user.id },
+    });
+    if (!sub || sub.status === "canceled") {
+      return { alreadyFree: true as const };
+    }
+    await ctx.prisma.subscription.update({
+      where: { id: sub.id },
+      data: { status: "canceled" },
+    });
+    return { canceled: true as const };
+  }),
+
+  confirmPayment: protectedProcedure
+    .input(z.object({ orderId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
+
+      if (tx.status === "settlement") return { paid: true };
+      if (TERMINAL_FAILED.has(tx.status)) return { paid: false };
+
+      let res: Record<string, unknown>;
+      try {
+        res = await coreGet(`/${input.orderId}/status`);
+      } catch {
+        return { paid: false };
+      }
+
+      const isPaid =
+        res.transaction_status === "settlement" ||
+        (res.transaction_status === "capture" && res.fraud_status === "accept");
+
+      if (!isPaid) return { paid: false };
+
+      await applyPayment(ctx.prisma, input.orderId, {
+        transaction_status: res.transaction_status as string,
+        fraud_status: res.fraud_status as string | undefined,
+      });
+
+      return { paid: true };
+    }),
+
   cancelTransaction: protectedProcedure
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const tx = await ctx.prisma.transaction.findUnique({
+        where: { orderId: input.orderId },
+      });
+      if (!tx || tx.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Transaksi tidak ditemukan",
+        });
+      }
       await corePost(`/${input.orderId}/cancel`);
       await ctx.prisma.transaction.update({
         where: { orderId: input.orderId },

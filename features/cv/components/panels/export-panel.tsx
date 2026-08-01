@@ -35,6 +35,7 @@ export function ExportPanel() {
       toast.add({
         title: "Gagal mengunduh CV",
         description: err instanceof Error ? err.message : undefined,
+        type: "error",
       });
     } finally {
       setBusy(null);

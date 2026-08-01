@@ -2,7 +2,6 @@
 
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { AiToolbar } from "@/features/ai/components/ai-toolbar";
 import { PhotoField } from "@/features/cv/components/panels/photo-field";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 
@@ -34,11 +33,6 @@ export function PersonalForm() {
             value={personal.headline ?? ""}
             onChange={(e) => setPersonal({ headline: e.target.value })}
             placeholder="Senior Frontend Engineer"
-          />
-          <AiToolbar
-            fieldType="headline"
-            value={personal.headline ?? ""}
-            onChange={(v) => setPersonal({ headline: v })}
           />
         </Field>
         <Field>

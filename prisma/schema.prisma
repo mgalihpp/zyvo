@@ -234,3 +234,59 @@ model Transaction {
   @@index([userId])
   @@map("transaction")
 }
+
+// ── Job tracker ─────────────────────────────────────────────────────────────
+// One board per user. Columns are embedded; applications are separate docs so
+// the board doc stays small and applications remain queryable.
+
+model JobBoard {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @unique
+  columns   JobBoardColumn[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("job_board")
+}
+
+type JobBoardColumn {
+  id    String // client-generated id
+  name  String // user-renamable label
+  kind  String // "applied" | "interview" | "offer" | "accepted" | "rejected" | "custom"
+  order Int
+  color String? // preset color name; null = fallback by kind
+}
+
+model JobApplication {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String
+  columnId     String // JobBoardColumn.id
+  order        Int // position within column
+  company      String
+  position     String
+  jobUrl       String?
+  location     String?
+  workType     String? // "remote" | "hybrid" | "onsite"
+  salaryMin    Int?
+  salaryMax    Int?
+  cvId         String? // optional ref to owned CV
+  followUpDate DateTime?
+  notes        String?
+  jobDescription String? // pasted JD text, used by AI assistant modal
+  timeline     JobTimelineEvent[]
+  appliedAt    DateTime           @default(now())
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([userId])
+  @@map("job_application")
+}
+
+type JobTimelineEvent {
+  id        String
+  type      String // "status_change" | "note"
+  fromKind  String?
+  toKind    String?
+  note      String?
+  createdAt DateTime
+}

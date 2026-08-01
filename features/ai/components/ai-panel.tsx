@@ -1,44 +1,31 @@
 "use client";
 
-import { FileTextIcon, MessageSquareIcon } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { GaugeIcon, MessageSquareIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AiChat } from "./ai-chat";
-import { AiCoverLetterModal } from "./ai-cover-letter-modal";
-import { AiInterviewModal } from "./ai-interview-modal";
-import { AiJdAnalyzer } from "./ai-jd-analyzer";
+import { AiQuotaLine } from "./ai-quota-line";
 import { AiScoreCard } from "./ai-score-card";
 
 export function AiPanel() {
-  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
-  const [interviewOpen, setInterviewOpen] = useState(false);
-
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" onClick={() => setCoverLetterOpen(true)}>
-          <FileTextIcon />
-          Surat Lamaran
-        </Button>
-        <Button variant="outline" onClick={() => setInterviewOpen(true)}>
-          <MessageSquareIcon />
-          Interview Prep
-        </Button>
-      </div>
-      <AiScoreCard />
-      <div className="border-t" />
-      <AiJdAnalyzer />
-      <div className="border-t" />
-      <AiChat />
-
-      <AiCoverLetterModal
-        open={coverLetterOpen}
-        onClose={() => setCoverLetterOpen(false)}
-      />
-      <AiInterviewModal
-        open={interviewOpen}
-        onClose={() => setInterviewOpen(false)}
-      />
-    </div>
+    <Tabs defaultValue="score" className="h-full gap-0">
+      <TabsList className="m-4 mb-0 w-[calc(100%-2rem)]">
+        <TabsTrigger value="score">
+          <GaugeIcon aria-hidden="true" />
+          Skor CV
+        </TabsTrigger>
+        <TabsTrigger value="chat">
+          <MessageSquareIcon aria-hidden="true" />
+          AI Chat
+        </TabsTrigger>
+      </TabsList>
+      <AiQuotaLine className="px-4 pt-2 text-xs text-muted-foreground" />
+      <TabsContent value="score" className="min-h-0 overflow-y-auto p-4">
+        <AiScoreCard />
+      </TabsContent>
+      <TabsContent value="chat" className="min-h-0 overflow-y-auto p-4">
+        <AiChat />
+      </TabsContent>
+    </Tabs>
   );
 }

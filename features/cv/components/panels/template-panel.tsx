@@ -1,7 +1,8 @@
 "use client";
 
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, Crown } from "lucide-react";
 import { memo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   TEMPLATE_CATEGORIES,
   TEMPLATES,
@@ -91,6 +92,15 @@ function TemplateCard({
       <div className="border-b">
         <TemplateThumb template={template} />
       </div>
+      {template.premium ? (
+        <Badge className="absolute left-2 top-2 h-4 px-1.5 text-[0.5625rem] [&>svg]:!size-2 border-amber-200/60 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-amber-50 shadow-[0_0_12px_rgba(251,191,36,0.55)]">
+          <Crown
+            aria-hidden="true"
+            className="fill-white text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]"
+          />
+          Premium
+        </Badge>
+      ) : null}
       {selected ? (
         <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
           <CheckIcon className="size-3.5" />

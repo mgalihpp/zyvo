@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { href: "#fitur", label: "Fitur" },
   { href: "#cara-kerja", label: "Cara Kerja" },
+  { href: "#job-tracker", label: "Job Tracker" },
   { href: "#template", label: "Template" },
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },

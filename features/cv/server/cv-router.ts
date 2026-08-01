@@ -2,6 +2,12 @@ import type { CV, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
+  assertCvSlot,
+  assertFeature,
+} from "@/features/billing/server/entitlements";
+import { toCvContent } from "@/features/cv/lib/cv-content";
+import { isPremiumTemplate } from "@/features/cv/lib/premium-templates";
+import {
   cvContentSchema,
   cvUpdateSchema,
   emptyPersonal,
@@ -344,6 +350,10 @@ export const cvRouter = createTRPCRouter({
   create: protectedProcedure
     .input(cvContentSchema.partial().optional())
     .mutation(async ({ ctx, input }) => {
+      await assertCvSlot(ctx);
+      if (isPremiumTemplate(input?.templateId)) {
+        await assertFeature(ctx, "premiumTemplates");
+      }
       const cv = await ctx.prisma.cV.create({
         data: {
           userId: ctx.session.user.id,
@@ -354,7 +364,12 @@ export const cvRouter = createTRPCRouter({
           experience: input?.experience ?? [],
           education: input?.education ?? [],
           skills: input?.skills ?? [],
+          interpersonal: input?.interpersonal ?? [],
+          languages: input?.languages ?? [],
+          certifications: input?.certifications ?? [],
+          organizations: input?.organizations ?? [],
           projects: input?.projects ?? [],
+          custom: input?.custom ?? [],
         },
         select: { id: true },
       });
@@ -373,6 +388,16 @@ export const cvRouter = createTRPCRouter({
 
       if (!existing || existing.userId !== ctx.session.user.id) {
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
+      }
+
+      // Only *changing to* a premium template is gated — a downgraded user
+      // whose CV already uses one can keep saving content edits.
+      if (
+        input.data.templateId &&
+        input.data.templateId !== existing.templateId &&
+        isPremiumTemplate(input.data.templateId)
+      ) {
+        await assertFeature(ctx, "premiumTemplates");
       }
 
       // Best-effort snapshot of the pre-update state, at most once per
@@ -409,6 +434,7 @@ export const cvRouter = createTRPCRouter({
   duplicate: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      await assertCvSlot(ctx);
       const src = await ctx.prisma.cV.findUnique({ where: { id: input.id } });
 
       if (!src || src.userId !== ctx.session.user.id) {
@@ -505,7 +531,12 @@ export const cvRouter = createTRPCRouter({
         });
       }
 
-      return { id: version.id, content: version.content };
+      // Normalize the raw stored blob (versions can predate `personal` being
+      // non-null) into CvContent so the preview cast in history-panel is safe.
+      return {
+        id: version.id,
+        content: toCvContent(version.content as unknown as CV),
+      };
     }),
 
   restoreVersion: protectedProcedure
@@ -530,7 +561,11 @@ export const cvRouter = createTRPCRouter({
       // first (unconditionally — bypasses the 10-minute window on purpose).
       await snapshotCv(ctx.prisma, cv);
 
-      const content = version.content as Prisma.CVUpdateInput;
+      // Normalize before writing so a null-personal version can't reintroduce
+      // the null crash in the editor preview.
+      const content = toCvContent(
+        version.content as unknown as CV,
+      ) as unknown as Prisma.CVUpdateInput;
       return ctx.prisma.cV.update({
         where: { id: input.cvId },
         data: content,

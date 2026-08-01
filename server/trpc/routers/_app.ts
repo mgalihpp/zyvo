@@ -2,6 +2,7 @@ import { aiRouter } from "@/features/ai/server/ai-router";
 import { authRouter } from "@/features/auth/server/auth-router";
 import { billingRouter } from "@/features/billing/server/billing-router";
 import { cvRouter } from "@/features/cv/server/cv-router";
+import { jobTrackerRouter } from "@/features/job-tracker/server/job-tracker-router";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   account: authRouter,
   billing: billingRouter,
   ai: aiRouter,
+  jobTracker: jobTrackerRouter,
 });
 
 export type AppRouter = typeof appRouter;

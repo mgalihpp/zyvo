@@ -13,8 +13,10 @@ export function useAiImprove(fieldType: string) {
   const [previousValue, setPreviousValue] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const utils = trpc.useUtils();
   const mutation = trpc.ai.improve.useMutation({
     onError: (err) => setError(err.message),
+    onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
 
   async function improve(

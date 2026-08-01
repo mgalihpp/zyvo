@@ -86,6 +86,28 @@ const LEVEL_LABELS = [
   "Mahir",
 ] as const;
 
+/** Character-counted textarea: enforces maxLength and shows a live counter. */
+function CharCountTextarea({
+  maxLength,
+  value,
+  onChange,
+  ...props
+}: React.ComponentProps<typeof Textarea> & { maxLength: number }) {
+  return (
+    <div>
+      <Textarea
+        maxLength={maxLength}
+        value={value}
+        onChange={onChange}
+        {...props}
+      />
+      <p className="mt-1 text-right text-xs text-muted-foreground">
+        {String(value ?? "").length}/{maxLength}
+      </p>
+    </div>
+  );
+}
+
 /** Dialog that edits the section referenced by the store's editorTarget. */
 export function EditorDialog() {
   const target = useCvStore((s) => s.editorTarget);
@@ -166,8 +188,9 @@ function SummaryBody() {
         <TipsBanner />
         <Field>
           <FieldLabel htmlFor="summary">Profil</FieldLabel>
-          <Textarea
+          <CharCountTextarea
             id="summary"
+            maxLength={3000}
             rows={8}
             value={summary ?? ""}
             onChange={(e) => setSummary(e.target.value)}
@@ -580,8 +603,9 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={6}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan tanggung jawab dan pencapaian Anda. Gunakan poin-poin atau kalimat singkat."
@@ -754,8 +778,9 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian singkat mengenai sertifikasi ini."
@@ -799,8 +824,9 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
       </Field>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Jelaskan peran dan kontribusi Anda."
@@ -852,8 +878,9 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
       </div>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Apa yang dilakukan proyek ini dan peran Anda di dalamnya."
@@ -881,8 +908,9 @@ function CustomForm({ value, onChange }: FormProps<CustomInput>) {
       </Field>
       <Field>
         <FieldLabel>Deskripsi</FieldLabel>
-        <Textarea
+        <CharCountTextarea
           rows={5}
+          maxLength={2000}
           value={value.description ?? ""}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Rincian tambahan."

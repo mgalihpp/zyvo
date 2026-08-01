@@ -2,16 +2,22 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { openrouter } from "@/features/ai/lib/openrouter";
 import { checkRateLimit } from "@/features/ai/lib/rate-limit";
+import { parseImportedCv } from "@/features/ai/server/import-cv";
 import { analyzerSystemPrompt } from "@/features/ai/server/prompts/analyzer";
 import { chatSystemPrompt } from "@/features/ai/server/prompts/chat";
 import { coverLetterSystemPrompt } from "@/features/ai/server/prompts/cover-letter";
 import { generatorSystemPrompt } from "@/features/ai/server/prompts/generator";
+import { importerSystemPrompt } from "@/features/ai/server/prompts/importer";
 import {
   improveActions,
   improverSystemPrompt,
 } from "@/features/ai/server/prompts/improver";
 import { interviewPrepSystemPrompt } from "@/features/ai/server/prompts/interview-prep";
 import { scoreSystemPrompt } from "@/features/ai/server/prompts/score";
+import {
+  consumeAiQuota,
+  getAiQuotaStatus,
+} from "@/features/billing/server/entitlements";
 import { cvContentSchema } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
@@ -32,6 +38,10 @@ async function collectStream(
 }
 
 export const aiRouter = createTRPCRouter({
+  quotaStatus: protectedProcedure.query(async ({ ctx }) => {
+    return getAiQuotaStatus(ctx);
+  }),
+
   improve: protectedProcedure
     .input(
       z.object({
@@ -42,6 +52,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:improve", 20);
+      await consumeAiQuota(ctx);
 
       const stream = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL_MINI,
@@ -64,6 +75,7 @@ export const aiRouter = createTRPCRouter({
     .input(z.object({ cvSnapshot: cvSnapshotInput }))
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:score", 20);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL_MINI,
@@ -116,6 +128,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:chat", 5);
+      await consumeAiQuota(ctx);
 
       const stream = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -140,6 +153,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:analyzeJD", 20);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -191,6 +205,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:coverLetter", 20);
+      await consumeAiQuota(ctx);
 
       const userContent = input.jdText
         ? `CV:\n${input.cvSnapshot}\n\nJob Description:\n${input.jdText}`
@@ -220,6 +235,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:generate", 5);
+      await consumeAiQuota(ctx);
 
       const response = await openrouter.chat.completions.create({
         model: DEFAULT_MODEL,
@@ -255,6 +271,34 @@ export const aiRouter = createTRPCRouter({
       }
     }),
 
+  importCv: protectedProcedure
+    .input(z.object({ text: z.string().min(50).max(15000) }))
+    .mutation(async ({ ctx, input }) => {
+      await checkRateLimit(ctx.session.user.id, "ai:importCv", 5);
+      await consumeAiQuota(ctx);
+
+      const response = await openrouter.chat.completions.create({
+        model: DEFAULT_MODEL,
+        stream: false,
+        messages: [
+          { role: "system", content: importerSystemPrompt },
+          { role: "user", content: input.text },
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 4000,
+      });
+
+      const raw = response.choices[0]?.message?.content ?? "{}";
+      try {
+        return parseImportedCv(raw);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal membaca isi CV. Coba lagi.",
+        });
+      }
+    }),
+
   interviewPrep: protectedProcedure
     .input(
       z.object({
@@ -264,6 +308,7 @@ export const aiRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await checkRateLimit(ctx.session.user.id, "ai:interviewPrep", 20);
+      await consumeAiQuota(ctx);
 
       const userContent = input.jdText
         ? `CV:\n${input.cvSnapshot}\n\nJob Description:\n${input.jdText}`

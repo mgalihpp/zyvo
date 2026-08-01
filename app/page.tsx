@@ -24,6 +24,11 @@ const HowItWorks = dynamic(() =>
     (m) => m.HowItWorks,
   ),
 );
+const JobTrackerShowcase = dynamic(() =>
+  import("@/features/marketing/components/job-tracker-showcase").then(
+    (m) => m.JobTrackerShowcase,
+  ),
+);
 const Pricing = dynamic(() =>
   import("@/features/marketing/components/pricing").then((m) => m.Pricing),
 );
@@ -91,6 +96,7 @@ export default function Home() {
           <FeaturesGrid />
           <HowItWorks />
           <TemplatesShowcase />
+          <JobTrackerShowcase />
           <Pricing />
           <Faq />
           <CtaSection />
