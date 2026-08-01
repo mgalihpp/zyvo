@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AiUsageIndicator } from "@/features/ai/components/ai-usage-indicator";
 
 export function StepAiGenerator({
   onGenerate,
@@ -64,15 +65,18 @@ export function StepAiGenerator({
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <Button
-        className="w-full"
-        onClick={() => onGenerate({ name, field, summary })}
-        loading={pending}
-        loadingText="Membuat CV…"
-        disabled={!canSubmit}
-      >
-        Buat dengan AI
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          className="flex-1"
+          onClick={() => onGenerate({ name, field, summary })}
+          loading={pending}
+          loadingText="Membuat CV…"
+          disabled={!canSubmit}
+        >
+          Buat dengan AI
+        </Button>
+        <AiUsageIndicator align="end" side="top" />
+      </div>
     </div>
   );
 }

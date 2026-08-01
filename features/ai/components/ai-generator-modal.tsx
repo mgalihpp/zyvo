@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { trpc } from "@/lib/trpc/client";
+import { AiUsageIndicator } from "./ai-usage-indicator";
 
 interface Props {
   open: boolean;
@@ -133,6 +134,7 @@ export function AiGeneratorModal({ open, onClose }: Props) {
               >
                 Buat dengan AI
               </Button>
+              <AiUsageIndicator align="end" side="top" />
             </div>
           </div>
         </DialogContent>
