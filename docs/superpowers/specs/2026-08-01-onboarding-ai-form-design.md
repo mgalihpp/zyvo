@@ -40,7 +40,9 @@ agar konsisten.
 
 ### 2. AI tulis teks saja, anti-halu
 
-Mutation baru `trpc.ai.enrich` menggantikan `ai.generate`.
+Mutation baru `trpc.ai.enrich` ditambahkan. `ai.generate` DI-PERTAHANKAN — masih
+dipakai `AiGeneratorModal` (F5 smart generator di builder) dan `generator.ts`
+tetap hidup.
 
 - **Input**: fakta lengkap — validasi dengan `cvContentSchema.partial()` (tanpa
   templateId/typography/colors).
@@ -78,8 +80,8 @@ AI adalah penyempurna opsional, bukan prasyarat:
 - `features/onboarding/components/step-ai-generator.tsx` — diganti `StepAiForm` (form
   multi-langkah).
 - `features/onboarding/components/onboarding-wizard.tsx` — alur generate pakai enrich.
-- `features/ai/server/ai-router.ts` — `generate` diganti `enrich`.
-- `features/ai/server/prompts/generator.ts` — diganti `enricher.ts`.
+- `features/ai/server/ai-router.ts` — tambah `enrich` (jangan hapus `generate`).
+- `features/ai/server/prompts/enricher.ts` — prompt baru (baru, bukan pengganti `generator.ts`).
 - `features/ai/lib/rate-limit.ts` — reuse key `ai:generate` untuk `ai.enrich` (batas 5/jam).
 
 ## Non-goals
