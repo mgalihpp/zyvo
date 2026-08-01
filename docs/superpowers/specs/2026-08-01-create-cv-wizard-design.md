@@ -8,8 +8,9 @@
 Tombol "CV Baru" di dashboard saat ini langsung membuat CV kosong (`trpc.cv.create`) dan
 redirect ke builder. Perubahan: tombol tersebut membuka wizard full-page (gaya
 `AiGeneratorPage` / onboarding) di route baru `/builder/new`, di mana user memilih cara
-membuat CV: **Manual**, **Import CV**, atau **AI**. AI naik jadi pilihan utama — link
-"Atau buat dengan AI" dihapus. Route `/dashboard/ai` dihapus (digantikan wizard).
+membuat CV: **Manual**, **Import CV**, atau **AI**. AI tetap muncul sebagai link
+"Atau buat dengan AI" di bawah dua kartu (bukan kartu sendiri, bukan lagi di dashboard).
+Route `/dashboard/ai` dihapus (digantikan wizard).
 
 ## Perubahan
 
@@ -38,13 +39,13 @@ File: `features/onboarding/components/onboarding-wizard.tsx`
   `createMutation.onSuccess` (dipindah dari dashboard, lihat #4).
 - Nama komponen/file dipertahankan (bukan refactor besar).
 
-### 3. `StepChooseMethod` — AI jadi kartu
+### 3. `StepChooseMethod` — AI tetap jadi link
 
 File: `features/onboarding/components/step-choose-method.tsx`
 
-- Tambah kartu ketiga `method: "ai"` dengan `SparklesIcon`, judul "Buat dengan AI",
-  deskripsi singkat (mis. "AI menyusun draf CV lengkap dari info singkat tentang kamu.").
-- Hapus tombol link bawah "Atau buat dengan AI".
+- Layout tidak berubah: dua kartu (Buat Manual, Import CV) + link "Atau buat dengan AI"
+  di bawah.
+- Link AI dibersihkan dari icon (tanpa `SparklesIcon`), teks polos saja.
 
 ### 4. Dashboard `CvList` — "CV Baru" jadi Link
 
