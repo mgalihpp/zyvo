@@ -3,6 +3,7 @@
 import {
   ArrowRightIcon,
   BarChart3Icon,
+  DownloadIcon,
   HandIcon,
   KanbanSquareIcon,
   MailIcon,
@@ -391,6 +392,38 @@ export function JobTrackerShowcase() {
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                 {item.description}
               </p>
+
+              {item.title === "Ekspor CSV" && (
+                <div className="mt-4 space-y-2">
+                  <div className="overflow-hidden rounded-lg border bg-background font-mono text-[0.65rem]">
+                    <div className="grid grid-cols-3 gap-x-2 border-b bg-muted/60 px-2 py-1 font-medium text-muted-foreground">
+                      <span>Perusahaan</span>
+                      <span>Posisi</span>
+                      <span>Status</span>
+                    </div>
+                    {[
+                      ["Tokopedia", "Frontend", "Dilamar"],
+                      ["Traveloka", "Backend", "Interview"],
+                      ["Ruangguru", "Fullstack", "Offer"],
+                    ].map((row) => (
+                      <div
+                        key={row[0]}
+                        className="grid grid-cols-3 gap-x-2 border-b px-2 py-1 last:border-b-0"
+                      >
+                        {row.map((cell) => (
+                          <span key={cell} className="truncate text-foreground">
+                            {cell}
+                          </span>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
+                    <DownloadIcon className="size-3" />
+                    lamaran-zyvo.csv
+                  </span>
+                </div>
+              )}
 
               {item.title === "Email follow-up AI" && (
                 <div className="mt-4 space-y-2">
