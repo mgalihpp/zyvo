@@ -3,10 +3,11 @@
 import { ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
+import { PlanUpsellDialog } from "@/features/billing/components/premium-template-upsell-dialog";
 import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
 import {
@@ -115,6 +116,20 @@ export function OnboardingWizard({
   const [aiError, setAiError] = useState<string | null>(null);
   const upsell = usePlanUpsell();
 
+  // Block creating another CV when the user is already at their plan's slot
+  // limit (free = 1, basic = 3, pro = unlimited).
+  const { data: cvs } = trpc.cv.list.useQuery();
+  const { data: subscription } = trpc.billing.getSubscription.useQuery();
+  const [slotDialogOpen, setSlotDialogOpen] = useState(false);
+  const plan = subscription ? subscription.plan : "free";
+  const cvLimit = plan === "free" ? 1 : plan === "basic" ? 3 : null;
+  const slotBlocked =
+    cvLimit !== null && cvs !== undefined && cvs.length >= cvLimit;
+
+  useEffect(() => {
+    if (slotBlocked) setSlotDialogOpen(true);
+  }, [slotBlocked]);
+
   const generateMutation = trpc.ai.generate.useMutation({
     onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
@@ -205,6 +220,19 @@ export function OnboardingWizard({
 
   const { title, subtitle } = getStepTitle(step, method);
   const busy = createMutation.isPending || importPhase !== "idle" || aiPending;
+
+  if (slotBlocked) {
+    return (
+      <PlanUpsellDialog
+        open={slotDialogOpen}
+        onOpenChange={(open) => {
+          setSlotDialogOpen(open);
+          if (!open) router.push("/dashboard");
+        }}
+        description={`Batas ${cvLimit} CV untuk paketmu tercapai. Tingkatkan paket untuk membuat CV lagi.`}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col px-4 py-8">
