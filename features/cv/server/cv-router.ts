@@ -1,6 +1,7 @@
 import type { CV, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assertCvSlot } from "@/features/billing/server/entitlements";
 import { toCvContent } from "@/features/cv/lib/cv-content";
 import {
   cvContentSchema,
@@ -345,6 +346,7 @@ export const cvRouter = createTRPCRouter({
   create: protectedProcedure
     .input(cvContentSchema.partial().optional())
     .mutation(async ({ ctx, input }) => {
+      await assertCvSlot(ctx);
       const cv = await ctx.prisma.cV.create({
         data: {
           userId: ctx.session.user.id,
@@ -410,6 +412,7 @@ export const cvRouter = createTRPCRouter({
   duplicate: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      await assertCvSlot(ctx);
       const src = await ctx.prisma.cV.findUnique({ where: { id: input.id } });
 
       if (!src || src.userId !== ctx.session.user.id) {
