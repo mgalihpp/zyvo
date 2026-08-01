@@ -52,7 +52,7 @@ export function HelpPage() {
           <CardTitle className="text-lg font-bold">Pertanyaan umum</CardTitle>
         </CardHeader>
         <CardContent>
-          <Accordion>
+          <Accordion className="rounded-none border-0">
             {HELP_FAQS.map((faq, i) => (
               <AccordionItem key={faq.q} value={`item-${i}`}>
                 <AccordionTrigger className="text-sm font-medium hover:no-underline">
