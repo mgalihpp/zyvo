@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { trpc } from "@/lib/trpc/client";
 
 const StepChooseTemplate = dynamic(
@@ -69,10 +70,13 @@ export function AiGeneratorPage() {
   const router = useRouter();
   const utils = trpc.useUtils();
   const [templateId, setTemplateId] = useState<string | null>(null);
+  const upsell = usePlanUpsell();
   const generateMutation = trpc.ai.generate.useMutation({
+    onError: upsell.handleError,
     onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
   const createMutation = trpc.cv.create.useMutation({
+    onError: upsell.handleError,
     onSuccess: (cv) => router.push(`/builder/${cv.id}`),
   });
 
@@ -89,8 +93,7 @@ export function AiGeneratorPage() {
   }
 
   const pending = generateMutation.isPending || createMutation.isPending;
-  const error =
-    generateMutation.error?.message ?? createMutation.error?.message ?? null;
+  const error = generateMutation.error ?? createMutation.error;
   const step = templateId ? 2 : 1;
 
   return (
@@ -139,12 +142,15 @@ export function AiGeneratorPage() {
           <StepAiGenerator
             onGenerate={handleGenerate}
             pending={pending}
-            error={error}
+            error={
+              error && error.data?.code !== "FORBIDDEN" ? error.message : null
+            }
           />
         ) : (
           <StepChooseTemplate onSelect={setTemplateId} />
         )}
       </div>
+      {upsell.dialog}
     </div>
   );
 }

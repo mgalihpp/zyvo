@@ -13,6 +13,7 @@ import {
   type ImproveAction,
   useAiImprove,
 } from "@/features/ai/hooks/use-ai-stream";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 
 interface AiToolbarProps {
   fieldType: string;
@@ -54,7 +55,11 @@ const ACTIONS: {
 
 /** Inline AI action toolbar wired to the ai.improve tRPC procedure. */
 export function AiToolbar({ fieldType, value, onChange }: AiToolbarProps) {
-  const { improve, undo, canUndo, isPending, error } = useAiImprove(fieldType);
+  const upsell = usePlanUpsell();
+  const { improve, undo, canUndo, isPending, error, forbidden } = useAiImprove(
+    fieldType,
+    upsell.handleError,
+  );
   const [pendingAction, setPendingAction] = useState<ImproveAction | null>(
     null,
   );
@@ -97,7 +102,10 @@ export function AiToolbar({ fieldType, value, onChange }: AiToolbarProps) {
           </Button>
         ))}
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && !forbidden && (
+        <p className="text-xs text-destructive">{error}</p>
+      )}
+      {upsell.dialog}
     </div>
   );
 }

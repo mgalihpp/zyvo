@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { signOut, useSession } from "@/features/auth/lib/auth-client";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { EditableTitle } from "@/features/cv/components/editable-title";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
@@ -173,7 +174,9 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
   const renameMutation = trpc.cv.update.useMutation({
     onSuccess: () => utils.cv.list.invalidate(),
   });
+  const upsell = usePlanUpsell();
   const createMutation = trpc.cv.create.useMutation({
+    onError: upsell.handleError,
     onSuccess: async (cv) => {
       // Refresh the CV list so the switcher and dashboard reflect the new CV
       // immediately, then navigate into the freshly created editor.
@@ -203,112 +206,115 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <DialogContent className="sm:max-w-md" scrollable>
-      <DialogHeader>
-        <DialogTitle>Pilih CV</DialogTitle>
-      </DialogHeader>
+    <>
+      <DialogContent className="sm:max-w-md" scrollable>
+        <DialogHeader>
+          <DialogTitle>Pilih CV</DialogTitle>
+        </DialogHeader>
 
-      {isLoading ? (
-        <div className="flex justify-center py-10">
-          <Spinner />
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {cvs?.map((cv) => {
-            const isActive = cv.id === activeCvId;
-            // The active CV reflects the live (possibly-unsaved) store title.
-            const label = isActive ? storeTitle || cv.title : cv.title;
-            const isEditing = editingId === cv.id;
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {cvs?.map((cv) => {
+              const isActive = cv.id === activeCvId;
+              // The active CV reflects the live (possibly-unsaved) store title.
+              const label = isActive ? storeTitle || cv.title : cv.title;
+              const isEditing = editingId === cv.id;
 
-            return (
-              <div
-                key={cv.id}
-                className={cn(
-                  "group/item flex items-center gap-3 rounded-lg border p-3 transition-all",
-                  isActive
-                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                    : "border-border hover:border-primary/40 hover:bg-muted/50",
-                )}
-              >
-                <span
+              return (
+                <div
+                  key={cv.id}
                   className={cn(
-                    "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                    "group/item flex items-center gap-3 rounded-lg border p-3 transition-all",
                     isActive
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-input",
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                      : "border-border hover:border-primary/40 hover:bg-muted/50",
                   )}
                 >
-                  {isActive ? <CheckIcon className="size-3" /> : null}
-                </span>
-
-                {isEditing ? (
-                  // Rendered as a sibling of the switch button (never nested
-                  // inside it): an <input> inside a <button> is invalid HTML and
-                  // caused typing/clicks to activate the button → switchTo →
-                  // onClose, closing the dialog mid-edit.
-                  <Input
-                    autoFocus
-                    value={draftName}
-                    onChange={(e) => setDraftName(e.target.value)}
-                    onBlur={() => commitRename(cv.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") commitRename(cv.id);
-                      if (e.key === "Escape") setEditingId(null);
-                    }}
-                    className="h-7 min-w-0 flex-1 text-sm"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => switchTo(cv.id)}
-                    className="min-w-0 flex-1 text-left"
+                  <span
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input",
+                    )}
                   >
-                    <span
-                      className={cn(
-                        "block truncate text-sm font-semibold",
-                        isActive ? "text-primary" : "text-foreground",
-                      )}
+                    {isActive ? <CheckIcon className="size-3" /> : null}
+                  </span>
+
+                  {isEditing ? (
+                    // Rendered as a sibling of the switch button (never nested
+                    // inside it): an <input> inside a <button> is invalid HTML and
+                    // caused typing/clicks to activate the button → switchTo →
+                    // onClose, closing the dialog mid-edit.
+                    <Input
+                      autoFocus
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      onBlur={() => commitRename(cv.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") commitRename(cv.id);
+                        if (e.key === "Escape") setEditingId(null);
+                      }}
+                      className="h-7 min-w-0 flex-1 text-sm"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => switchTo(cv.id)}
+                      className="min-w-0 flex-1 text-left"
                     >
-                      {label || "CV Tanpa Judul"}
-                    </span>
-                    <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                      {isActive ? "Sedang dibuka · " : ""}
-                      Diperbarui{" "}
-                      {new Date(cv.updatedAt).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </button>
-                )}
+                      <span
+                        className={cn(
+                          "block truncate text-sm font-semibold",
+                          isActive ? "text-primary" : "text-foreground",
+                        )}
+                      >
+                        {label || "CV Tanpa Judul"}
+                      </span>
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {isActive ? "Sedang dibuka · " : ""}
+                        Diperbarui{" "}
+                        {new Date(cv.updatedAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </button>
+                  )}
 
-                {!isEditing ? (
-                  <button
-                    type="button"
-                    onClick={() => startRename(cv.id, label)}
-                    aria-label="Ubah nama"
-                    className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover/item:opacity-100"
-                  >
-                    <PencilIcon className="size-3.5" />
-                  </button>
-                ) : null}
-              </div>
-            );
-          })}
+                  {!isEditing ? (
+                    <button
+                      type="button"
+                      onClick={() => startRename(cv.id, label)}
+                      aria-label="Ubah nama"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all hover:bg-muted hover:text-foreground group-hover/item:opacity-100"
+                    >
+                      <PencilIcon className="size-3.5" />
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
 
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-dashed"
-            onClick={() => createMutation.mutate(undefined)}
-            loading={createMutation.isPending}
-          >
-            <PlusIcon data-icon="inline-start" />
-            Buat CV Baru
-          </Button>
-        </div>
-      )}
-    </DialogContent>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-dashed"
+              onClick={() => createMutation.mutate(undefined)}
+              loading={createMutation.isPending}
+            >
+              <PlusIcon data-icon="inline-start" />
+              Buat CV Baru
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+      {upsell.dialog}
+    </>
   );
 }

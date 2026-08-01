@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { buildSnapshot } from "@/features/ai/lib/cv-snapshot";
+import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { trpc } from "@/lib/trpc/client";
 
@@ -70,7 +71,9 @@ export function AiScoreCard() {
   const getContent = useCvStore((s) => s.getContent);
   const [score, setScore] = useState<ScoreResult | null>(null);
   const utils = trpc.useUtils();
+  const upsell = usePlanUpsell();
   const mutation = trpc.ai.score.useMutation({
+    onError: upsell.handleError,
     onSuccess: (data) => setScore(data),
     onSettled: () => utils.ai.quotaStatus.invalidate(),
   });
@@ -122,9 +125,10 @@ export function AiScoreCard() {
         </p>
       )}
 
-      {mutation.error && (
+      {mutation.error && mutation.error.data?.code !== "FORBIDDEN" && (
         <p className="text-xs text-destructive">{mutation.error.message}</p>
       )}
+      {upsell.dialog}
     </div>
   );
 }
