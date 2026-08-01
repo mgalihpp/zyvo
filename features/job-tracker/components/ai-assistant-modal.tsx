@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { AiUsageIndicator } from "@/features/ai/components/ai-usage-indicator";
 import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
 import { useCvSnapshot } from "@/features/job-tracker/hooks/use-cv-snapshot";
 import { trpc } from "@/lib/trpc/client";
@@ -343,6 +344,7 @@ export function AiAssistantModal({
                 <DialogTitle className="flex items-center gap-2 text-sm">
                   <SparklesIcon className="size-4.5 text-violet-500" />
                   Asisten AI Lamaran
+                  <AiUsageIndicator align="start" side="right" />
                 </DialogTitle>
               </DialogHeader>
               <TabsList variant="line" className="w-full gap-1 p-0">

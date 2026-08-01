@@ -14,6 +14,7 @@ import {
   useAiImprove,
 } from "@/features/ai/hooks/use-ai-stream";
 import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
+import { AiUsageIndicator } from "./ai-usage-indicator";
 
 interface AiToolbarProps {
   fieldType: string;
@@ -101,6 +102,7 @@ export function AiToolbar({ fieldType, value, onChange }: AiToolbarProps) {
             {label}
           </Button>
         ))}
+        <AiUsageIndicator />
       </div>
       {error && !forbidden && (
         <p className="text-xs text-destructive">{error}</p>
