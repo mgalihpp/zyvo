@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleAlertIcon } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -9,6 +10,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
@@ -39,29 +41,40 @@ export default function CancelSubscriptionDialog({
         render={
           <Button
             variant="outline"
-            className="text-destructive hover:text-destructive"
+            className="border-destructive/40 text-destructive hover:bg-destructive hover:border-destructive hover:text-white"
           >
             Batalkan Langganan
           </Button>
         }
       />
-      <AlertDialogContent size="sm">
+      <AlertDialogContent size="default">
         <AlertDialogHeader>
+          <AlertDialogMedia className="bg-destructive/10 text-destructive">
+            <CircleAlertIcon />
+          </AlertDialogMedia>
           <AlertDialogTitle>Batalkan Langganan?</AlertDialogTitle>
           <AlertDialogDescription>
-            Paket {PLAN_LABELS[plan]} kamu akan langsung berakhir. Akses fitur
-            premium hilang seketika dan kamu turun ke paket Gratis.
-            {plan === "pro" &&
-              " Kamu berhak garansi uang kembali 7 hari — hubungi tim support kami untuk proses refund."}
+            <span className="block">
+              Paket {PLAN_LABELS[plan]} kamu akan langsung berakhir. Akses fitur
+              premium hilang seketika dan kamu turun ke paket Gratis.
+            </span>
+            {plan === "pro" && (
+              <span className="mt-2 block">
+                Kamu berhak garansi uang kembali 7 hari — hubungi tim support
+                kami untuk proses refund.
+              </span>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Kembali</AlertDialogCancel>
+          <AlertDialogCancel className="w-full sm:w-auto">
+            Kembali
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             loading={cancel.isPending}
             loadingText="Membatalkan…"
-            className="rounded-full bg-destructive px-6 text-white hover:bg-destructive/80"
+            className="w-full bg-destructive px-6 text-white hover:bg-destructive/80 sm:w-auto"
           >
             Batalkan Langganan
           </AlertDialogAction>
