@@ -174,7 +174,7 @@ function BoardMock() {
         </span>
       </div>
 
-      <div className="flex items-start gap-3 overflow-x-auto pb-1 sm:gap-4">
+      <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-2 sm:gap-4">
         {COLUMNS.map((column, colIndex) => (
           <div key={column.name} className="w-52 shrink-0 space-y-3 sm:w-56">
             <div className="flex items-center justify-between gap-1 px-1">
