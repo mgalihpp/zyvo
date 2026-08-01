@@ -1,9 +1,8 @@
 "use client";
 
-import { FileUp } from "lucide-react";
-import { useRef, useState } from "react";
+import { Check, FileText, FileUp, Info, LoaderCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ExtractError,
@@ -12,23 +11,48 @@ import {
 } from "@/features/onboarding/lib/extract-text";
 import { cn } from "@/lib/utils";
 
-type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
+export type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
+type BusyImportPhase = Exclude<ImportPhase, "idle">;
 
-const PHASE_LABEL: Record<Exclude<ImportPhase, "idle">, string> = {
-  reading: "Membaca file…",
-  analyzing: "Menganalisis CV dengan AI…",
-  creating: "Menyiapkan builder…",
-};
+const IMPORT_STAGES: ReadonlyArray<{
+  id: BusyImportPhase;
+  label: string;
+}> = [
+  { id: "reading", label: "Membaca file" },
+  { id: "analyzing", label: "Menganalisis CV dengan AI" },
+  { id: "creating", label: "Menyiapkan builder" },
+];
+
+export function getImportStageState(
+  phase: BusyImportPhase,
+  stage: BusyImportPhase,
+): "complete" | "active" | "upcoming" {
+  const phaseIndex = IMPORT_STAGES.findIndex((item) => item.id === phase);
+  const stageIndex = IMPORT_STAGES.findIndex((item) => item.id === stage);
+  if (stageIndex < phaseIndex) return "complete";
+  if (stageIndex === phaseIndex) return "active";
+  return "upcoming";
+}
+
+export function shouldWarnBeforeUnload(phase: ImportPhase) {
+  return phase !== "idle";
+}
+
+function formatFileSize(bytes: number) {
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
 
 export function StepImportCv({
   onImport,
   phase,
+  onPhaseChange,
   error,
   onClearError,
 }: {
   /** Called with extracted/pasted text; parent runs AI + create. */
   onImport: (text: string) => void;
   phase: ImportPhase;
+  onPhaseChange: (phase: ImportPhase) => void;
   error: string | null;
   onClearError: () => void;
 }) {
@@ -36,16 +60,40 @@ export function StepImportCv({
   const [pasted, setPasted] = useState("");
   const [extractError, setExtractError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<{
+    name: string;
+    size: number;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const busy = phase !== "idle";
+
+  useEffect(() => {
+    if (phase === "idle" && error) setSelectedFile(null);
+  }, [phase, error]);
+
+  useEffect(() => {
+    if (!shouldWarnBeforeUnload(phase)) return;
+
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = true;
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [phase]);
 
   async function handleFile(file: File) {
     setExtractError(null);
     onClearError();
+    setSelectedFile({ name: file.name, size: file.size });
+    onPhaseChange("reading");
     try {
       const text = await extractTextFromFile(file);
       onImport(text);
     } catch (err) {
+      onPhaseChange("idle");
+      setSelectedFile(null);
       if (err instanceof ExtractError) {
         setExtractError(err.message);
         // Scanned PDFs land here — nudge toward the paste tab.
@@ -87,23 +135,74 @@ export function StepImportCv({
         ))}
       </div>
 
-      {busy ? (
-        <div className="rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 p-10">
-          <div className="text-center">
-            <p className="text-sm font-medium">{PHASE_LABEL[phase]}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {phase === "creating"
-                ? "Pindah ke builder…"
-                : "Ini bisa memakan waktu beberapa detik."}
-            </p>
+      {phase !== "idle" ? (
+        <output
+          className="block w-full rounded-xl border border-primary/30 bg-primary/5 p-5 sm:p-6"
+          aria-live="polite"
+        >
+          {selectedFile && (
+            <div className="flex min-w-0 items-center gap-3 rounded-lg border bg-background/80 p-3 text-left">
+              <FileText
+                className="size-5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">
+                  {selectedFile.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatFileSize(selectedFile.size)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className={cn("space-y-1", selectedFile && "mt-5")}>
+            {IMPORT_STAGES.map((stage) => {
+              const state = getImportStageState(phase, stage.id);
+              return (
+                <div key={stage.id} className="flex items-center gap-3 py-2">
+                  <span
+                    className={cn(
+                      "flex size-7 shrink-0 items-center justify-center rounded-full border",
+                      state === "complete" &&
+                        "border-primary bg-primary text-primary-foreground",
+                      state === "active" &&
+                        "border-primary bg-background text-primary",
+                      state === "upcoming" &&
+                        "border-muted-foreground/25 bg-background text-muted-foreground",
+                    )}
+                    aria-hidden="true"
+                  >
+                    {state === "complete" ? (
+                      <Check className="size-4" />
+                    ) : state === "active" ? (
+                      <LoaderCircle className="size-4 animate-spin" />
+                    ) : (
+                      <span className="size-1.5 rounded-full bg-current" />
+                    )}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      state === "upcoming" && "text-muted-foreground",
+                    )}
+                  >
+                    {stage.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-          <div className="mx-auto mt-6 max-w-sm space-y-3">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-4 w-full" />
-            ))}
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </div>
+
+          <p className="mt-4 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+            <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              Jangan tutup halaman ini. Proses AI dapat memakan waktu beberapa
+              detik.
+            </span>
+          </p>
+        </output>
       ) : tab === "upload" ? (
         <button
           type="button"

@@ -21,6 +21,7 @@ import {
   type OnboardingMethod,
   StepChooseMethod,
 } from "@/features/onboarding/components/step-choose-method";
+import type { ImportPhase } from "@/features/onboarding/components/step-import-cv";
 import { ONBOARDING_SKIP_COOKIE } from "@/features/onboarding/lib/constants";
 import { trpc } from "@/lib/trpc/client";
 
@@ -76,7 +77,6 @@ function FormSkeleton() {
 }
 
 type Step = 1 | 2 | 3;
-type ImportPhase = "idle" | "reading" | "analyzing" | "creating";
 
 function getStepTitle(
   step: Step,
@@ -102,7 +102,8 @@ function getStepTitle(
   }
   return {
     title: "Import CV kamu",
-    subtitle: "AI akan mengisi semua bagian CV secara otomatis.",
+      subtitle:
+        "Upload CV lama kamu dengan format (PDF/DOCX) atau paste teksnya.",
   };
 }
 
@@ -352,6 +353,7 @@ function OnboardingWizardInner({
           <StepImportCv
             onImport={handleImport}
             phase={importPhase}
+            onPhaseChange={setImportPhase}
             error={importError}
             onClearError={() => setImportError(null)}
           />
