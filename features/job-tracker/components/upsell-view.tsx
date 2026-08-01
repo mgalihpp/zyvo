@@ -109,15 +109,8 @@ export function UpsellView() {
         </div>
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <Link href="/dashboard/billing" className={primaryCtaClass}>
-            Upgrade Sekarang
-            <ArrowRightIcon
-              className="size-4 transition-transform group-hover/cta:translate-x-0.5"
-              aria-hidden="true"
-            />
-          </Link>
           <Link
-            href="/dashboard/billing"
+            href="/dashboard/billing#"
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
               "h-12 rounded-xl px-8 text-base",
@@ -146,7 +139,7 @@ export function UpsellView() {
       </div>
 
       {/* Closing CTA */}
-      <Link href="/dashboard/billing" className={primaryCtaClass}>
+      <Link href="/dashboard/billing#" className={primaryCtaClass}>
         Upgrade Sekarang
         <ArrowRightIcon
           className="size-4 transition-transform group-hover/cta:translate-x-0.5"

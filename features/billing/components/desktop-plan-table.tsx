@@ -185,7 +185,11 @@ export function DesktopPlanTable({
                 }
                 loading={loadingPlanId === plan.id}
                 loadingText="Memuat..."
-                disabled={activePlan === plan.id || !!loadingPlanId}
+                disabled={
+                  activePlan === plan.id ||
+                  (activePlan === "pro" && plan.id !== "pro") ||
+                  !!loadingPlanId
+                }
                 className={cn(
                   "w-full text-sm font-semibold",
                   isPro
