@@ -98,6 +98,20 @@ export const billingRouter = createTRPCRouter({
     return isActive ? sub : null;
   }),
 
+  cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+    const sub = await ctx.prisma.subscription.findUnique({
+      where: { userId: ctx.session.user.id },
+    });
+    if (!sub || sub.status === "canceled") {
+      return { alreadyFree: true as const };
+    }
+    await ctx.prisma.subscription.update({
+      where: { id: sub.id },
+      data: { status: "canceled" },
+    });
+    return { canceled: true as const };
+  }),
+
   confirmPayment: protectedProcedure
     .input(z.object({ orderId: z.string() }))
     .mutation(async ({ ctx, input }) => {
