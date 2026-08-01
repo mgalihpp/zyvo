@@ -175,16 +175,6 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
     onSuccess: () => utils.cv.list.invalidate(),
   });
   const upsell = usePlanUpsell();
-  const createMutation = trpc.cv.create.useMutation({
-    onError: upsell.handleError,
-    onSuccess: async (cv) => {
-      // Refresh the CV list so the switcher and dashboard reflect the new CV
-      // immediately, then navigate into the freshly created editor.
-      await utils.cv.list.invalidate();
-      onClose();
-      router.push(`/builder/${cv.id}`);
-    },
-  });
 
   function startRename(id: string, current: string) {
     setEditingId(id);
@@ -301,16 +291,15 @@ function CvSwitcherDialog({ onClose }: { onClose: () => void }) {
               );
             })}
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full border-dashed"
-              onClick={() => createMutation.mutate(undefined)}
-              loading={createMutation.isPending}
-            >
-              <PlusIcon data-icon="inline-start" />
-              Buat CV Baru
-            </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-dashed"
+            onClick={() => router.push("/builder/new")}
+          >
+            <PlusIcon data-icon="inline-start" />
+            Buat CV Baru
+          </Button>
           </div>
         )}
       </DialogContent>
