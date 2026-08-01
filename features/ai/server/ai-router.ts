@@ -18,7 +18,7 @@ import {
   consumeAiQuota,
   getAiQuotaStatus,
 } from "@/features/billing/server/entitlements";
-import { cvContentSchema } from "@/features/cv/schemas/cv";
+import { cvCreateSchema } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
 
 const DEFAULT_MODEL = process.env.DEFAULT_MODEL ?? "openai/gpt-4o";
@@ -255,7 +255,7 @@ export const aiRouter = createTRPCRouter({
       try {
         const parsed = JSON.parse(raw);
         // Partial parse — only validate the sections we populate
-        const partial = cvContentSchema.partial().safeParse({
+        const partial = cvCreateSchema.safeParse({
           title: `CV ${input.name}`,
           ...parsed,
         });

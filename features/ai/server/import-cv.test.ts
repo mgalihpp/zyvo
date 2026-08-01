@@ -44,6 +44,13 @@ describe("parseImportedCv", () => {
     expect(parseImportedCv(raw).title).toBe("CV Hasil Import");
   });
 
+  it("does not add neutral styling when the imported CV has none", () => {
+    const result = parseImportedCv(JSON.stringify({ summary: "Engineer." }));
+
+    expect(result.colors).toBeUndefined();
+    expect(result.typography).toBeUndefined();
+  });
+
   it("throws on invalid JSON", () => {
     expect(() => parseImportedCv("not json")).toThrow();
   });

@@ -3,7 +3,7 @@ import {
   type CvContent,
   certificationSchema,
   customSchema,
-  cvContentSchema,
+  cvCreateSchema,
   educationSchema,
   experienceSchema,
   interpersonalSchema,
@@ -105,7 +105,7 @@ export function parseImportedCv(raw: string): Partial<CvContent> {
   const parsed = JSON.parse(raw) as Record<string, unknown>;
   const cleaned = keepValidItems(sanitize(parsed) as Record<string, unknown>);
   // Zod strips unknown keys by default, so hallucinated sections are dropped.
-  const result = cvContentSchema.partial().safeParse(cleaned);
+  const result = cvCreateSchema.safeParse(cleaned);
   if (!result.success) {
     throw new Error("Schema mismatch");
   }
