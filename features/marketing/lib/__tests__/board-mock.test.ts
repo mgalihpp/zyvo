@@ -42,6 +42,19 @@ test("every DRAG_SEQUENCE card moves exactly once across a cycle", () => {
   }
 });
 
+test("no column ever exceeds the initial max during a full cycle", () => {
+  let board = resetBoard();
+  const initialMax = Math.max(...board.map((col) => col.cards.length));
+  for (const pos of DRAG_SEQUENCE) {
+    board = moveCardForward(board, pos);
+    const max = Math.max(...board.map((col) => col.cards.length));
+    assert.ok(
+      max <= initialMax,
+      `max ${max} exceeded initial ${initialMax} after moving ${pos}`,
+    );
+  }
+});
+
 test("resetBoard returns a fresh deep copy", () => {
   const a = resetBoard();
   const b = resetBoard();

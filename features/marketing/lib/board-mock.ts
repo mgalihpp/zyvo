@@ -75,14 +75,16 @@ export const COLUMNS: MockColumn[] = [
   },
 ];
 
-/** Ordered rotation of "drags": each card hops to the next column forward. */
+/** Ordered rotation of "drags": each card hops to the next column forward.
+ *  Ordered so no column ever exceeds the initial max (3 cards) — the showcase
+ *  locks column height, so a 4th card would clip. */
 export const DRAG_SEQUENCE = [
   "Data Analyst", // Bukalapak → Interview
   "UX Researcher", // Blibli → Offer
   "Frontend Engineer", // Tokopedia → Interview
   "Senior Fullstack", // Ruangguru → Diterima
-  "Product Designer", // Gojek → Interview
   "Backend Engineer", // Traveloka → Offer
+  "Product Designer", // Gojek → Interview
 ];
 
 export function resetBoard(): MockColumn[] {
@@ -98,10 +100,14 @@ export function moveCardForward(
     col.cards.some((card) => card.position === position),
   );
   if (src === -1 || src >= board.length - 1) return board;
-  const card = board[src].cards.find((c) => c.position === position)!;
+  const card = board[src].cards.find((c) => c.position === position);
+  if (!card) return board;
   return board.map((col, i) => {
     if (i === src) {
-      return { ...col, cards: col.cards.filter((c) => c.position !== position) };
+      return {
+        ...col,
+        cards: col.cards.filter((c) => c.position !== position),
+      };
     }
     if (i === src + 1) return { ...col, cards: [...col.cards, card] };
     return col;

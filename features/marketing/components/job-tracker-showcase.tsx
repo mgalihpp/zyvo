@@ -22,6 +22,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { COLUMN_COLORS } from "@/features/job-tracker/lib/column-colors";
 import type { ColumnColor } from "@/features/job-tracker/schemas/job-tracker";
 import { cn } from "@/lib/utils";
+import type { MockCard, MockColumn } from "../lib/board-mock";
+import { DRAG_SEQUENCE, moveCardForward, resetBoard } from "../lib/board-mock";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 
@@ -31,81 +33,6 @@ import { SectionHeading } from "./section-heading";
  * safely on the public landing page. Distinct from `BoardPreview`, which is
  * intentionally blurred + locked for the in-app free-plan upsell.
  */
-
-type MockCard = {
-  position: string;
-  company: string;
-  tags: { label: string; tone?: "muted" | "warn" }[];
-};
-
-type MockColumn = {
-  name: string;
-  color: ColumnColor;
-  cards: MockCard[];
-};
-
-/** Hand-authored board that looks like a real, in-use pipeline. */
-const COLUMNS: MockColumn[] = [
-  {
-    name: "Dilamar",
-    color: "blue",
-    cards: [
-      {
-        position: "Frontend Engineer",
-        company: "Tokopedia",
-        tags: [{ label: "Jakarta" }, { label: "Hybrid" }],
-      },
-      {
-        position: "Product Designer",
-        company: "Gojek",
-        tags: [{ label: "Remote" }],
-      },
-      {
-        position: "Data Analyst",
-        company: "Bukalapak",
-        tags: [{ label: "Perlu follow-up", tone: "warn" }],
-      },
-    ],
-  },
-  {
-    name: "Interview",
-    color: "yellow",
-    cards: [
-      {
-        position: "Backend Engineer",
-        company: "Traveloka",
-        tags: [{ label: "Bandung" }, { label: "Onsite" }],
-      },
-      {
-        position: "UX Researcher",
-        company: "Blibli",
-        tags: [{ label: "Remote" }],
-      },
-    ],
-  },
-  {
-    name: "Offer",
-    color: "purple",
-    cards: [
-      {
-        position: "Senior Fullstack",
-        company: "Ruangguru",
-        tags: [{ label: "Hybrid" }],
-      },
-    ],
-  },
-  {
-    name: "Diterima",
-    color: "green",
-    cards: [
-      {
-        position: "Mobile Engineer",
-        company: "Dana",
-        tags: [{ label: "Jakarta" }],
-      },
-    ],
-  },
-];
 
 const MockCardBody = forwardRef<
   HTMLDivElement,
@@ -148,26 +75,16 @@ const MockCardBody = forwardRef<
   );
 });
 
-/** Ordered rotation of "drags": each card hops to the next column forward.
- *  `col` must be < COLUMNS.length - 1 (needs a forward neighbor). */
-const DRAG_SEQUENCE: { col: number; card: number }[] = [
-  { col: 0, card: 2 }, // Data Analyst · Bukalapak → Interview
-  { col: 1, card: 1 }, // UX Researcher · Blibli → Offer
-  { col: 0, card: 0 }, // Frontend Engineer · Tokopedia → Interview
-  { col: 2, card: 0 }, // Senior Fullstack · Ruangguru → Diterima
-  { col: 0, card: 1 }, // Product Designer · Gojek → Interview
-  { col: 1, card: 0 }, // Backend Engineer · Traveloka → Offer
-];
-
 function BoardMock() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const listRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const [reduced, setReduced] = useState(false);
+  const [board, setBoard] = useState<MockColumn[]>(resetBoard);
   const [step, setStep] = useState(0);
   const [flight, setFlight] = useState<{
-    key: string;
+    position: string;
     card: MockCard;
     left: number;
     top: number;
@@ -176,6 +93,9 @@ function BoardMock() {
     dy: number;
   } | null>(null);
   const [moving, setMoving] = useState(false);
+  // Locked card-list height (tallest initial column) so the board never grows
+  // or shrinks as cards move — keeps the page scroll position stable.
+  const [listHeight, setListHeight] = useState(0);
 
   // Respect reduced motion.
   useEffect(() => {
@@ -186,51 +106,93 @@ function BoardMock() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Advance the drag rotation.
+  // Measure the tallest initial card list once; columns keep this height.
+  useLayoutEffect(() => {
+    let max = 0;
+    listRefs.current.forEach((el) => {
+      max = Math.max(max, el.offsetHeight);
+    });
+    if (max > 0) setListHeight(max);
+  }, []);
+
+  // Advance the drag rotation; reset the board after the last card.
   useEffect(() => {
     if (reduced) return;
-    const id = setInterval(
-      () => setStep((s) => (s + 1) % DRAG_SEQUENCE.length),
-      2600,
-    );
+    const id = setInterval(() => {
+      const next = step + 1;
+      if (next >= DRAG_SEQUENCE.length) {
+        setBoard(resetBoard());
+        setStep(0);
+      } else {
+        setStep(next);
+      }
+    }, 2600);
     return () => clearInterval(id);
-  }, [reduced]);
+  }, [reduced, step]);
 
-  // Measure + launch the current flight.
+  // Measure + launch the current flight; commit the move when it lands.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `board` omitted — commit updates it and would retrigger a flight.
   useLayoutEffect(() => {
     if (reduced) return;
-    const seq = DRAG_SEQUENCE[step];
+    const position = DRAG_SEQUENCE[step];
     const container = containerRef.current;
-    const source = cardRefs.current.get(`${seq.col}-${seq.card}`);
-    const destList = listRefs.current.get(seq.col + 1);
-    if (!container || !source || !destList) return;
+    const source = cardRefs.current.get(position);
+    const srcCol = board.findIndex((col) =>
+      col.cards.some((card) => card.position === position),
+    );
+    const destCol = srcCol + 1;
+    const destList = listRefs.current.get(destCol);
+    if (
+      !container ||
+      !source ||
+      !destList ||
+      srcCol === -1 ||
+      destCol >= board.length
+    ) {
+      return;
+    }
+    const card = board[srcCol].cards.find((c) => c.position === position);
+    if (!card) return;
 
     const cRect = container.getBoundingClientRect();
     const sRect = source.getBoundingClientRect();
     const dRect = destList.getBoundingClientRect();
 
-    const left = sRect.left - cRect.left;
-    const top = sRect.top - cRect.top;
-    const dx = dRect.left - sRect.left;
-    // Land just below the destination column's existing first card.
-    const dy = dRect.top - sRect.top;
+    // Land at the bottom of the last card already in the destination
+    // (else the list top), so the committed card appears at the list's end.
+    const destCards = board[destCol].cards;
+    const lastCard = destCards.length
+      ? cardRefs.current.get(destCards[destCards.length - 1].position)
+      : null;
+    const landingTop =
+      (lastCard?.getBoundingClientRect().bottom ?? dRect.top) + 8;
 
     setFlight({
-      key: `${seq.col}-${seq.card}`,
-      card: COLUMNS[seq.col].cards[seq.card],
-      left,
-      top,
+      position,
+      card,
+      left: sRect.left - cRect.left,
+      top: sRect.top - cRect.top,
       width: sRect.width,
-      dx,
-      dy,
+      dx: dRect.left - sRect.left,
+      dy: landingTop - sRect.top,
     });
     setMoving(false);
 
     const raf = requestAnimationFrame(() => setMoving(true));
-    return () => cancelAnimationFrame(raf);
+    const commit = setTimeout(() => {
+      setBoard((b) => moveCardForward(b, position));
+      setFlight(null);
+      setMoving(false);
+    }, 900);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(commit);
+    };
+    // NOTE: `board` intentionally left out of deps — the commit must not
+    // retrigger a flight; the next flight only starts when `step` advances.
   }, [step, reduced]);
 
-  const ghostKey = flight?.key ?? null;
+  const ghostPosition = flight?.position ?? null;
 
   return (
     <div className="overflow-hidden rounded-2xl border bg-gradient-to-b from-muted/40 to-background p-4 shadow-sm sm:p-6">
@@ -250,7 +212,7 @@ function BoardMock() {
 
       <div ref={containerRef} className="relative">
         <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-2 sm:gap-4">
-          {COLUMNS.map((column, colIndex) => (
+          {board.map((column, colIndex) => (
             <div key={column.name} className="w-52 shrink-0 space-y-3 sm:w-56">
               <div className="flex items-center justify-between gap-1 px-1">
                 <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground">
@@ -272,17 +234,17 @@ function BoardMock() {
                   else listRefs.current.delete(colIndex);
                 }}
                 className="space-y-2"
+                style={listHeight ? { height: listHeight } : undefined}
               >
-                {column.cards.map((card, cardIndex) => {
-                  const key = `${colIndex}-${cardIndex}`;
+                {column.cards.map((card) => {
                   return (
                     <MockCardBody
                       key={card.position}
                       card={card}
-                      ghost={!reduced && ghostKey === key}
+                      ghost={!reduced && ghostPosition === card.position}
                       ref={(el) => {
-                        if (el) cardRefs.current.set(key, el);
-                        else cardRefs.current.delete(key);
+                        if (el) cardRefs.current.set(card.position, el);
+                        else cardRefs.current.delete(card.position);
                       }}
                     />
                   );
