@@ -2,13 +2,20 @@
 
 import { ArrowLeft } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { PlanUpsellDialog } from "@/features/billing/components/premium-template-upsell-dialog";
+import {
+  PlanUpsellDialog,
+  PremiumTemplateUpsellDialog,
+} from "@/features/billing/components/premium-template-upsell-dialog";
 import { usePlanUpsell } from "@/features/billing/hooks/use-plan-upsell";
+import {
+  TEMPLATES,
+  type TemplateMeta,
+} from "@/features/cv/components/templates";
 import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
 import {
   type OnboardingMethod,
@@ -99,7 +106,27 @@ function getStepTitle(
   };
 }
 
-export function OnboardingWizard({
+/** Minimal read-only query-param reader (avoids importing the next type). */
+type ParamReader = { get: (key: string) => string | null };
+
+function readStep(params: ParamReader): Step {
+  const n = Number(params.get("step"));
+  const m = params.get("method");
+  // Step 3 is only meaningful with an import/ai method; fall back otherwise.
+  if (n === 3 && (m === "import" || m === "ai")) return 3;
+  return n === 2 ? 2 : 1;
+}
+
+function readMethod(params: ParamReader): OnboardingMethod | null {
+  const m = params.get("method");
+  return m === "manual" || m === "import" || m === "ai" ? m : null;
+}
+
+function readTemplate(params: ParamReader): string | null {
+  return params.get("template");
+}
+
+function OnboardingWizardInner({
   mode = "onboarding",
 }: {
   mode?: "onboarding" | "create";
@@ -107,14 +134,23 @@ export function OnboardingWizard({
   const router = useRouter();
   const utils = trpc.useUtils();
   const analytics = useCVAnalytics();
-  const [step, setStep] = useState<Step>(1);
-  const [method, setMethod] = useState<OnboardingMethod | null>(null);
-  const [templateId, setTemplateId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const [step, setStep] = useState<Step>(() => readStep(searchParams));
+  const [method, setMethod] = useState<OnboardingMethod | null>(() =>
+    readMethod(searchParams),
+  );
+  const [templateId, setTemplateId] = useState<string | null>(() =>
+    readTemplate(searchParams),
+  );
   const [importPhase, setImportPhase] = useState<ImportPhase>("idle");
   const [importError, setImportError] = useState<string | null>(null);
   const [aiPending, setAiPending] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const upsell = usePlanUpsell();
+  const [upsellTemplate, setUpsellTemplate] = useState<TemplateMeta | null>(
+    null,
+  );
 
   // Block creating another CV when the user is already at their plan's slot
   // limit (free = 1, basic = 3, pro = unlimited).
@@ -129,6 +165,17 @@ export function OnboardingWizard({
   useEffect(() => {
     if (slotBlocked) setSlotDialogOpen(true);
   }, [slotBlocked]);
+
+  // Mirror wizard state into the URL so refresh / deep-link / back-button
+  // restore the exact step instead of resetting to the start.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (step > 1) params.set("step", String(step));
+    if (method) params.set("method", method);
+    if (templateId) params.set("template", templateId);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [step, method, templateId, pathname, router]);
 
   const generateMutation = trpc.ai.generate.useMutation({
     onSettled: () => utils.ai.quotaStatus.invalidate(),
@@ -145,6 +192,13 @@ export function OnboardingWizard({
   });
 
   function handleSelectTemplate(id: string) {
+    // Free plan (subscription loaded as null) can't pick a premium template —
+    // show the billing upsell up front instead of failing later at cv.create.
+    const template = TEMPLATES.find((t) => t.id === id);
+    if (template?.premium && subscription === null) {
+      setUpsellTemplate(template);
+      return;
+    }
     setTemplateId(id);
     if (method === "import" || method === "ai") {
       setStep(3);
@@ -318,6 +372,39 @@ export function OnboardingWizard({
         </p>
       )}
       {upsell.dialog}
+      <PremiumTemplateUpsellDialog
+        open={!!upsellTemplate}
+        onOpenChange={(open) => {
+          if (!open) setUpsellTemplate(null);
+        }}
+        templateName={upsellTemplate?.name}
+      />
     </div>
+  );
+}
+
+function WizardFallback() {
+  return (
+    <div className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col items-center justify-center px-4 py-8">
+      <Skeleton className="h-6 w-48 rounded-lg" />
+      <Skeleton className="mt-3 h-4 w-64 rounded-md" />
+      <div className="mt-8 w-full max-w-xl space-y-3">
+        <Skeleton className="h-28 w-full rounded-xl" />
+        <Skeleton className="h-10 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * useSearchParams suspends during prerendering, so the hook-using body must sit
+ * behind a Suspense boundary or static builds fail. Consumers just render
+ * <OnboardingWizard/> — the boundary lives here.
+ */
+export function OnboardingWizard(props: { mode?: "onboarding" | "create" }) {
+  return (
+    <Suspense fallback={<WizardFallback />}>
+      <OnboardingWizardInner {...props} />
+    </Suspense>
   );
 }

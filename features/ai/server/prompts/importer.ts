@@ -18,6 +18,9 @@ Balas HANYA dengan JSON yang sesuai struktur ini:
 
 Aturan:
 - JANGAN mengarang informasi yang tidak ada di teks. Kosongkan field yang tidak ditemukan; array kosong jika section tidak ada.
+- JANGAN gunakan null untuk field kosong — gunakan string kosong "". Hapus key field yang tidak ada (jangan null).
+- skill.level WAJIB angka integer 1-5 (bukan teks, bukan string angka).
+- experience[].current WAJIB boolean true/false (bukan string).
 - Pertahankan bahasa asli teks CV (jangan menerjemahkan).
 - Tanggal tulis apa adanya dari teks (mis. "Jan 2020", "2019 - 2022").
 - skill.level default 3 jika tidak ada indikasi tingkat keahlian.
