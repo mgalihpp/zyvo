@@ -137,7 +137,7 @@ export function AppSidebar({
                 </div>
                 <ChevronsUpDownIcon className="size-4 shrink-0 text-sidebar-foreground/40 group-data-[collapsible=icon]:hidden" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" side="right" className="w-56">
+              <DropdownMenuContent align="start" side="bottom" className="w-56">
                 <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
                   <SettingsIcon />
                   Pengaturan
