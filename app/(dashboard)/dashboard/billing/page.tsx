@@ -180,6 +180,7 @@ export default function PlanPage() {
           yearly={yearly}
           onUpgrade={handleUpgrade}
           activePlan={subscription?.plan ?? "free"}
+          expiresAt={subscription?.expiresAt}
           loadingPlanId={loadingPlanId}
         />
         <FaqSection />

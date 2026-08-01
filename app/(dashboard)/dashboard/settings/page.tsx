@@ -11,6 +11,7 @@ import { useHasPassword } from "@/features/auth/components/settings/use-has-pass
 import { useSession } from "@/features/auth/lib/auth-client";
 import { useMounted } from "@/features/auth/lib/use-mounted";
 import { useSubscription } from "@/features/billing/hooks/use-billing";
+import { formatExpiryDate } from "@/features/billing/lib/billing-constants";
 import { PLANS } from "@/features/billing/lib/plans";
 
 const SetPasswordForm = lazy(
@@ -69,15 +70,25 @@ export default function SettingsPage() {
           {subLoading ? (
             <Skeleton className="h-4 w-40" />
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Anda menggunakan paket{" "}
-              <span className="font-semibold text-foreground">
-                {sub
-                  ? (PLANS[sub.plan as keyof typeof PLANS]?.label ?? sub.plan)
-                  : "Gratis"}
-              </span>
-              .
-            </p>
+            <>
+              <p className="text-sm text-muted-foreground">
+                Anda menggunakan paket{" "}
+                <span className="font-semibold text-foreground">
+                  {sub
+                    ? (PLANS[sub.plan as keyof typeof PLANS]?.label ?? sub.plan)
+                    : "Gratis"}
+                </span>
+                .
+              </p>
+              {sub && (
+                <p className="text-xs text-muted-foreground">
+                  Berlaku hingga{" "}
+                  <span className="font-semibold text-foreground">
+                    {formatExpiryDate(sub.expiresAt)}
+                  </span>
+                </p>
+              )}
+            </>
           )}
           <Button
             nativeButton={false}

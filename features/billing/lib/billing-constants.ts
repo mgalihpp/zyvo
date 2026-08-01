@@ -104,3 +104,13 @@ export function formatPrice(amount: number) {
   if (amount === 0) return "Rp0";
   return IDR.format(amount);
 }
+
+const EXPIRY_DATE = new Intl.DateTimeFormat("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
+export function formatExpiryDate(value: Date | string) {
+  return EXPIRY_DATE.format(new Date(value));
+}
