@@ -7,9 +7,9 @@ import {
   MoreVerticalIcon,
   PencilIcon,
   PlusIcon,
-  SparklesIcon,
   Trash2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
-import { AiGeneratorModal } from "@/features/ai/components/ai-generator-modal";
 import { CvThumbnail } from "@/features/cv/components/dashboard/cv-thumbnail";
 import { EditableTitle } from "@/features/cv/components/editable-title";
 import { useCVAnalytics } from "@/features/cv/hooks/use-cv-analytics";
@@ -200,7 +199,6 @@ export function CvList({
 
   const [pendingDelete, setPendingDelete] = useState<Cv | null>(null);
   const [downloading, setDownloading] = useState<Cv | null>(null);
-  const [generatorOpen, setGeneratorOpen] = useState(false);
 
   const analytics = useCVAnalytics();
 
@@ -293,15 +291,12 @@ export function CvList({
         </span>
         CV Baru
       </button>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        onClick={() => setGeneratorOpen(true)}
+      <Link
+        href="/dashboard/ai"
+        className="mx-auto flex items-center gap-1.5 text-xs font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
       >
-        <SparklesIcon data-icon="inline-start" />
-        Buat dengan AI
-      </Button>
+        Atau buat dengan AI
+      </Link>
     </div>
   ) : null;
 
@@ -329,10 +324,6 @@ export function CvList({
     return (
       <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {newCard}
-        <AiGeneratorModal
-          open={generatorOpen}
-          onClose={() => setGeneratorOpen(false)}
-        />
       </div>
     );
   }
@@ -408,11 +399,6 @@ export function CvList({
           </div>
         </AlertDialogContent>
       </AlertDialog>
-
-      <AiGeneratorModal
-        open={generatorOpen}
-        onClose={() => setGeneratorOpen(false)}
-      />
     </div>
   );
 }
