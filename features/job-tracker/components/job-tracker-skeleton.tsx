@@ -19,7 +19,7 @@ export function JobTrackerSkeleton() {
           <Skeleton key={i} className="h-32 w-full" />
         ))}
       </div>
-      <div className="flex items-start gap-4 overflow-x-auto pb-2">
+      <div className="flex flex-wrap items-start gap-4">
         {Array.from({ length: 5 }, (_, i) => (
           <div
             key={i}
