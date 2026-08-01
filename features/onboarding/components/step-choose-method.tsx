@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUp, PenLine, SparklesIcon } from "lucide-react";
+import { FileUp, PenLine } from "lucide-react";
 
 export type OnboardingMethod = "manual" | "import" | "ai";
 
@@ -52,7 +52,6 @@ export function StepChooseMethod({
         onClick={() => onSelect("ai")}
         className="mx-auto flex items-center gap-1.5 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
       >
-        <SparklesIcon className="size-4" />
         Atau buat dengan AI
       </button>
     </div>
