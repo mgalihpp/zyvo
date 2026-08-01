@@ -3,12 +3,19 @@
 import {
   ArrowRightIcon,
   BarChart3Icon,
+  HandIcon,
   KanbanSquareIcon,
   MailIcon,
   SheetIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { COLUMN_COLORS } from "@/features/job-tracker/lib/column-colors";
 import type { ColumnColor } from "@/features/job-tracker/schemas/job-tracker";
@@ -22,20 +29,6 @@ import { SectionHeading } from "./section-heading";
  * safely on the public landing page. Distinct from `BoardPreview`, which is
  * intentionally blurred + locked for the in-app free-plan upsell.
  */
-
-/** Advances an index on an interval; pauses under reduced-motion. */
-function useCycle(length: number, ms: number) {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduce || length <= 1) return;
-    const id = setInterval(() => setI((v) => (v + 1) % length), ms);
-    return () => clearInterval(id);
-  }, [length, ms]);
-  return i;
-}
 
 type MockCard = {
   position: string;
@@ -112,19 +105,19 @@ const COLUMNS: MockColumn[] = [
   },
 ];
 
-/** Flat list of every card with its column index, for the spotlight cycle. */
-const FLAT_CARDS = COLUMNS.flatMap((col, colIndex) =>
-  col.cards.map((card, cardIndex) => ({ card, colIndex, cardIndex })),
-);
-
-function MockCardBody({ card, active }: { card: MockCard; active: boolean }) {
+const MockCardBody = forwardRef<
+  HTMLDivElement,
+  { card: MockCard; ghost?: boolean; floating?: boolean }
+>(function MockCardBody({ card, ghost, floating }, ref) {
   return (
     <div
+      ref={ref}
       className={cn(
         "rounded-lg border bg-background p-3 shadow-sm transition-all duration-300",
-        "hover:-translate-y-0.5 hover:shadow-md",
-        active
-          ? "border-primary ring-2 ring-primary/60 [animation:mock-pulse_1.4s_ease-out]"
+        !floating && "hover:-translate-y-0.5 hover:shadow-md",
+        ghost && "border-dashed opacity-40",
+        floating
+          ? "border-primary shadow-xl ring-2 ring-primary/50"
           : "border-border",
       )}
     >
@@ -151,12 +144,91 @@ function MockCardBody({ card, active }: { card: MockCard; active: boolean }) {
       )}
     </div>
   );
-}
+});
 
-/** Colorful, lightly-animated Kanban mock. A spotlight travels card-to-card. */
+/** Ordered rotation of "drags": each card hops to the next column forward.
+ *  `col` must be < COLUMNS.length - 1 (needs a forward neighbor). */
+const DRAG_SEQUENCE: { col: number; card: number }[] = [
+  { col: 0, card: 2 }, // Data Analyst · Bukalapak → Interview
+  { col: 1, card: 1 }, // UX Researcher · Blibli → Offer
+  { col: 0, card: 0 }, // Frontend Engineer · Tokopedia → Interview
+  { col: 2, card: 0 }, // Senior Fullstack · Ruangguru → Diterima
+  { col: 0, card: 1 }, // Product Designer · Gojek → Interview
+  { col: 1, card: 0 }, // Backend Engineer · Traveloka → Offer
+];
+
 function BoardMock() {
-  const spot = useCycle(FLAT_CARDS.length, 1900);
-  const activeCard = FLAT_CARDS[spot];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const listRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const [reduced, setReduced] = useState(false);
+  const [step, setStep] = useState(0);
+  const [flight, setFlight] = useState<{
+    key: string;
+    card: MockCard;
+    left: number;
+    top: number;
+    width: number;
+    dx: number;
+    dy: number;
+  } | null>(null);
+  const [moving, setMoving] = useState(false);
+
+  // Respect reduced motion.
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  // Advance the drag rotation.
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(
+      () => setStep((s) => (s + 1) % DRAG_SEQUENCE.length),
+      2600,
+    );
+    return () => clearInterval(id);
+  }, [reduced]);
+
+  // Measure + launch the current flight.
+  useLayoutEffect(() => {
+    if (reduced) return;
+    const seq = DRAG_SEQUENCE[step];
+    const container = containerRef.current;
+    const source = cardRefs.current.get(`${seq.col}-${seq.card}`);
+    const destList = listRefs.current.get(seq.col + 1);
+    if (!container || !source || !destList) return;
+
+    const cRect = container.getBoundingClientRect();
+    const sRect = source.getBoundingClientRect();
+    const dRect = destList.getBoundingClientRect();
+
+    const left = sRect.left - cRect.left;
+    const top = sRect.top - cRect.top;
+    const dx = dRect.left - sRect.left;
+    // Land just below the destination column's existing first card.
+    const dy = dRect.top - sRect.top;
+
+    setFlight({
+      key: `${seq.col}-${seq.card}`,
+      card: COLUMNS[seq.col].cards[seq.card],
+      left,
+      top,
+      width: sRect.width,
+      dx,
+      dy,
+    });
+    setMoving(false);
+
+    const raf = requestAnimationFrame(() => setMoving(true));
+    return () => cancelAnimationFrame(raf);
+  }, [step, reduced]);
+
+  const ghostKey = flight?.key ?? null;
 
   return (
     <div className="overflow-hidden rounded-2xl border bg-gradient-to-b from-muted/40 to-background p-4 shadow-sm sm:p-6">
@@ -174,37 +246,68 @@ function BoardMock() {
         </span>
       </div>
 
-      <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-2 sm:gap-4">
-        {COLUMNS.map((column, colIndex) => (
-          <div key={column.name} className="w-52 shrink-0 space-y-3 sm:w-56">
-            <div className="flex items-center justify-between gap-1 px-1">
-              <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground">
-                <span
-                  className={cn(
-                    "size-2 shrink-0 rounded-full",
-                    COLUMN_COLORS[column.color].dot,
-                  )}
-                />
-                <span className="truncate">{column.name}</span>
+      <div ref={containerRef} className="relative">
+        <div className="-mx-1 flex items-start gap-3 overflow-x-auto px-1 pb-2 sm:gap-4">
+          {COLUMNS.map((column, colIndex) => (
+            <div key={column.name} className="w-52 shrink-0 space-y-3 sm:w-56">
+              <div className="flex items-center justify-between gap-1 px-1">
+                <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-foreground">
+                  <span
+                    className={cn(
+                      "size-2 shrink-0 rounded-full",
+                      COLUMN_COLORS[column.color].dot,
+                    )}
+                  />
+                  <span className="truncate">{column.name}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {column.cards.length}
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground">
-                {column.cards.length}
-              </span>
+              <div
+                ref={(el) => {
+                  if (el) listRefs.current.set(colIndex, el);
+                  else listRefs.current.delete(colIndex);
+                }}
+                className="space-y-2"
+              >
+                {column.cards.map((card, cardIndex) => {
+                  const key = `${colIndex}-${cardIndex}`;
+                  return (
+                    <MockCardBody
+                      key={card.position}
+                      card={card}
+                      ghost={!reduced && ghostKey === key}
+                      ref={(el) => {
+                        if (el) cardRefs.current.set(key, el);
+                        else cardRefs.current.delete(key);
+                      }}
+                    />
+                  );
+                })}
+              </div>
             </div>
-            <div className="space-y-2">
-              {column.cards.map((card, cardIndex) => (
-                <MockCardBody
-                  key={card.position}
-                  card={card}
-                  active={
-                    activeCard.colIndex === colIndex &&
-                    activeCard.cardIndex === cardIndex
-                  }
-                />
-              ))}
+          ))}
+        </div>
+
+        {/* Floating dragged card. */}
+        {!reduced && flight && (
+          <div
+            className="pointer-events-none absolute left-0 top-0 z-10"
+            style={{
+              width: flight.width,
+              transform: `translate(${flight.left + (moving ? flight.dx : 0)}px, ${flight.top + (moving ? flight.dy : 0)}px) rotate(${moving ? -2 : 0}deg) scale(${moving ? 1.05 : 1})`,
+              transition: moving
+                ? "transform 900ms cubic-bezier(0.16, 1, 0.3, 1)"
+                : "none",
+            }}
+          >
+            <div className="relative">
+              <MockCardBody card={flight.card} floating />
+              <HandIcon className="mock-drag-cursor absolute -bottom-2 -right-2 size-5 text-primary drop-shadow-sm" />
             </div>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
