@@ -57,7 +57,7 @@ export function BillingHeader({
                 yearly ? "text-background/70" : "text-primary",
               )}
             >
-              Hemat 2 bulan
+              Hemat 6 bulan
             </span>
           </button>
         </div>

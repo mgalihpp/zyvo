@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
   },
   {
     name: "Basic",
-    price: "Rp15rb",
+    price: "Rp5rb",
     period: "/bulan",
     description: "Untuk pencari kerja aktif yang butuh lebih.",
     features: [
@@ -57,7 +57,7 @@ const PLANS: Plan[] = [
   },
   {
     name: "Pro",
-    price: "Rp75rb",
+    price: "Rp20rb",
     period: "/bulan",
     description: "Untuk pencari kerja serius — buka semua fitur.",
     features: [
