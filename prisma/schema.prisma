@@ -279,6 +279,7 @@ model JobApplication {
   updatedAt    DateTime           @updatedAt
 
   @@index([userId])
+  @@index([userId, columnId, order])
   @@map("job_application")
 }
 

@@ -36,21 +36,21 @@ function TrashDropZone() {
     <div
       ref={setNodeRef}
       className={cn(
-        // Above the board content. The x-scrollbar is hidden while dragging
-        // (autoScroll still works), so the aura owns the bottom edge cleanly.
-        "pointer-events-none absolute inset-x-0 bottom-0 z-40 flex h-24 items-end justify-center rounded-b-xl pb-4",
+        // Thin strip pinned to the bottom edge so dropping a card onto the
+        // last row of a column stays easy — the strip only owns the very edge.
+        "pointer-events-none absolute inset-x-0 bottom-0 z-40 flex h-6 items-end justify-center",
         // Pure fade-in — no movement, nothing to clip or jump.
         "fade-in animate-in duration-400 ease-out",
         "transition-all duration-300 ease-out",
         // Soft red aura bleeding up from the bottom edge.
-        "bg-gradient-to-t from-destructive/10 to-transparent",
-        isOver && "h-32 from-destructive/20",
+        "bg-gradient-to-t from-destructive/10 via-destructive/5 to-transparent",
+        isOver && "h-12 from-destructive/15 via-destructive/5 to-transparent",
       )}
     >
       {/* Thin glow line hugging the bottom edge — the "landing strip". */}
       <div
         className={cn(
-          "absolute inset-x-6 bottom-0 h-px rounded-full bg-destructive/40 shadow-[0_0_12px_2px_var(--destructive)] transition-opacity duration-300",
+          "absolute inset-x-0 bottom-0 h-px bg-destructive/25 shadow-[0_0_12px_2px_var(--destructive)] transition-opacity duration-300",
           isOver ? "opacity-80" : "opacity-40",
         )}
         aria-hidden="true"
@@ -58,8 +58,8 @@ function TrashDropZone() {
       {/* Just the icon — no chrome. */}
       <TrashIcon
         className={cn(
-          "size-8 text-destructive/60 transition-all duration-300 ease-out",
-          isOver && "-translate-y-1 scale-125 -rotate-12 text-destructive",
+          "size-4 -translate-y-1 text-destructive/60 transition-all duration-300 ease-out",
+          isOver && "-translate-y-1.5 scale-125 -rotate-12 text-destructive",
         )}
         aria-hidden="true"
       />
@@ -87,6 +87,7 @@ export function KanbanBoard({
 }) {
   const utils = trpc.useUtils();
   const [activeApp, setActiveApp] = useState<JobApplication | null>(null);
+  const pendingMoves = useRef(0);
   // Ghost card that plays the dissolve animation after a trash drop.
   const [snapGhost, setSnapGhost] = useState<{
     app: JobApplication;
@@ -116,29 +117,51 @@ export function KanbanBoard({
   }, [sortedColumns, applications]);
 
   const moveMutation = trpc.jobTracker.moveApplication.useMutation({
+    // Order updates touch overlapping ranges; serialize them so rapid drops
+    // cannot run concurrent MongoDB transactions against the same board.
+    scope: { id: "job-tracker-move-application" },
     onMutate: async (input) => {
+      pendingMoves.current += 1;
       await utils.jobTracker.getBoard.cancel();
       const prev = utils.jobTracker.getBoard.getData();
       utils.jobTracker.getBoard.setData(undefined, (old) => {
         if (!old) return old;
+        const moving = old.applications.find((a) => a.id === input.id);
+        if (!moving) return old;
+
+        const remaining = old.applications.filter((a) => a.id !== input.id);
+        const targetApps = remaining
+          .filter((a) => a.columnId === input.columnId)
+          .sort((a, b) => a.order - b.order);
+        const insertAt = Math.min(input.order, targetApps.length);
+        targetApps.splice(insertAt, 0, {
+          ...moving,
+          columnId: input.columnId,
+          order: insertAt,
+        });
+
+        const reordered = new Map(
+          targetApps.map((app, order) => [app.id, { ...app, order }]),
+        );
+
         return {
           ...old,
-          applications: old.applications.map((a) =>
-            a.id === input.id
-              ? { ...a, columnId: input.columnId, order: input.order }
-              : a,
+          applications: old.applications.map(
+            (app) => reordered.get(app.id) ?? app,
           ),
         };
       });
       return { prev };
     },
-    onError: (_err, _input, ctx) => {
-      if (ctx?.prev) utils.jobTracker.getBoard.setData(undefined, ctx.prev);
+    onError: () => {
       toast.add({ title: "Gagal memindahkan lamaran", type: "error" });
     },
     onSettled: () => {
-      utils.jobTracker.getBoard.invalidate();
-      utils.jobTracker.getStats.invalidate();
+      pendingMoves.current -= 1;
+      if (pendingMoves.current === 0) {
+        utils.jobTracker.getBoard.invalidate();
+        utils.jobTracker.getStats.invalidate();
+      }
     },
   });
 
@@ -257,8 +280,16 @@ export function KanbanBoard({
     if (activeId === overId) return;
     const ids = sortedColumns.map((c) => c.id);
     const from = ids.indexOf(activeId);
-    const to = ids.indexOf(overId);
+    let to = ids.indexOf(overId);
+    if (to === -1) {
+      const overColumn = sortedColumns.find((column) =>
+        appsByColumn.get(column.id)?.some((app) => app.id === overId),
+      );
+      if (!overColumn) return;
+      to = ids.indexOf(overColumn.id);
+    }
     if (from === -1 || to === -1) return;
+    if (from === to) return;
     const reordered = [...sortedColumns];
     const [moved] = reordered.splice(from, 1);
     reordered.splice(to, 0, moved);
@@ -302,13 +333,52 @@ export function KanbanBoard({
       return;
     }
 
-    // `over` is a column (droppable) — drop appends at the end of that column.
-    const columnId = String(over.id);
-    if (!sortedColumns.some((c) => c.id === columnId)) return;
-    if (columnId === app.columnId) return;
+    const overId = String(over.id);
+    if (overId === appId) return;
 
-    const targetApps = appsByColumn.get(columnId) ?? [];
-    moveMutation.mutate({ id: appId, columnId, order: targetApps.length });
+    // Dropping on a column appends the card to that column.
+    const overColumn = sortedColumns.find((column) => column.id === overId);
+    if (overColumn) {
+      const targetApps = appsByColumn.get(overColumn.id) ?? [];
+      const sourceIndex = targetApps.findIndex(
+        (candidate) => candidate.id === appId,
+      );
+      if (
+        overColumn.id === app.columnId &&
+        sourceIndex === targetApps.length - 1
+      ) {
+        return;
+      }
+      moveMutation.mutate({
+        id: appId,
+        columnId: overColumn.id,
+        order: targetApps.length,
+      });
+      return;
+    }
+
+    // Dropping on another card inserts at that card's position.
+    const targetColumn = sortedColumns.find((column) =>
+      appsByColumn.get(column.id)?.some((candidate) => candidate.id === overId),
+    );
+    if (!targetColumn) return;
+    const targetApps = appsByColumn.get(targetColumn.id) ?? [];
+    const targetIndex = targetApps.findIndex(
+      (candidate) => candidate.id === overId,
+    );
+    if (targetIndex === -1) return;
+
+    const sourceIndex =
+      targetColumn.id === app.columnId
+        ? targetApps.findIndex((candidate) => candidate.id === appId)
+        : -1;
+    if (targetColumn.id === app.columnId && sourceIndex === targetIndex) return;
+
+    moveMutation.mutate({
+      id: appId,
+      columnId: targetColumn.id,
+      order: targetIndex,
+    });
   }
 
   return (

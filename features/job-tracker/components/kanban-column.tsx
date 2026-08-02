@@ -1,6 +1,11 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
+import { useDndContext } from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { JobApplication } from "@prisma/client";
 import { ApplicationCard } from "@/features/job-tracker/components/application-card";
@@ -40,9 +45,14 @@ export function KanbanColumn({
     isOver,
     active,
   } = useSortable({ id: column.id, data: { type: "column" } });
+  const { over: activeDropTarget } = useDndContext();
 
   // Only highlight when a *card* hovers the column, not another column.
-  const isCardOver = isOver && active?.data.current?.type !== "column";
+  const isCardDrag = active?.data.current?.type !== "column";
+  const isCardOver =
+    isCardDrag &&
+    (isOver ||
+      applications.some((app) => app.id === String(activeDropTarget?.id)));
 
   const color = COLUMN_COLORS[getColumnColor(column)];
 
@@ -76,18 +86,23 @@ export function KanbanColumn({
         )}
       </div>
       {/* -m-1 + p-1 keeps the cards' outer 1px ring visible inside the
-          overflow-y-auto scroll container instead of being clipped. */}
+           overflow-y-auto scroll container instead of being clipped. */}
       <div className="-m-1 flex min-h-24 flex-col gap-2 overflow-y-auto p-1">
-        {applications.map((app) => (
-          <ApplicationCard
-            key={app.id}
-            app={app}
-            onClick={() => onCardClick(app)}
-            onEdit={onCardEdit}
-            onDelete={onCardDelete}
-            onCopy={onCardCopy}
-          />
-        ))}
+        <SortableContext
+          items={applications.map((app) => app.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {applications.map((app) => (
+            <ApplicationCard
+              key={app.id}
+              app={app}
+              onClick={() => onCardClick(app)}
+              onEdit={onCardEdit}
+              onDelete={onCardDelete}
+              onCopy={onCardCopy}
+            />
+          ))}
+        </SortableContext>
       </div>
     </div>
   );

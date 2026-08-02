@@ -49,7 +49,7 @@ export async function getPlan(
   userId: string,
 ): Promise<PlanId> {
   const sub = await prisma.subscription.findUnique({ where: { userId } });
-  if (!sub || sub.status !== "active" || sub.expiresAt <= new Date()) {
+  if (!sub || sub.status !== "active" || sub.expiresAt < new Date()) {
     return "free";
   }
   return sub.plan === "basic" || sub.plan === "pro" ? sub.plan : "free";

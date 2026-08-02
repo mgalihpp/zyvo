@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { openrouter } from "@/features/ai/lib/openrouter";
 import { checkRateLimit } from "@/features/ai/lib/rate-limit";
+import { calculateOrderShifts } from "@/features/job-tracker/lib/application-order";
 import {
   resolveOrphanTarget,
   validateColumnUpdate,
@@ -226,33 +227,53 @@ export const jobTrackerRouter = createTRPCRouter({
             }
           : null;
 
-      // Rewrite target column order: fetch siblings, splice, persist.
-      const siblings = await ctx.prisma.jobApplication.findMany({
+      const targetCount = await ctx.prisma.jobApplication.count({
         where: { userId, columnId: input.columnId, id: { not: input.id } },
-        orderBy: { order: "asc" },
-        select: { id: true },
       });
-      const ids = siblings.map((s) => s.id);
-      const insertAt = Math.min(input.order, ids.length);
-      ids.splice(insertAt, 0, input.id);
+      const targetOrder = Math.min(input.order, targetCount);
+      const shifts = calculateOrderShifts({
+        sourceColumnId: app.columnId,
+        targetColumnId: input.columnId,
+        sourceOrder: app.order,
+        targetOrder,
+      });
+
+      // Shift affected ranges in bulk instead of updating every application.
+      // MongoDB transactions have a short lifetime, so one update per card can
+      // time out on busy columns.
+      const shift = (operation: NonNullable<typeof shifts.source>) =>
+        ctx.prisma.jobApplication.updateMany({
+          where: {
+            userId,
+            columnId: operation.columnId,
+            order: operation.order,
+          },
+          data: {
+            order:
+              operation.direction === "increment"
+                ? { increment: 1 }
+                : { decrement: 1 },
+          },
+        });
 
       await ctx.prisma.$transaction([
-        ...ids.map((id, order) =>
-          ctx.prisma.jobApplication.update({
-            where: { id },
-            data:
-              id === input.id
-                ? {
-                    columnId: input.columnId,
-                    order,
-                    ...(timelineEvent
-                      ? { timeline: { push: timelineEvent } }
-                      : {}),
-                  }
-                : { order },
-          }),
-        ),
+        ...(shifts.source ? [shift(shifts.source)] : []),
+        ...(shifts.target ? [shift(shifts.target)] : []),
+        ctx.prisma.jobApplication.update({
+          where: { id: input.id },
+          data: {
+            columnId: input.columnId,
+            order: targetOrder,
+            ...(timelineEvent ? { timeline: { push: timelineEvent } } : {}),
+          },
+        }),
       ]);
+
+      /*
+       * The operation above intentionally uses a constant number of writes:
+       * one or two range shifts plus the moved card. Do not expand this back
+       * into per-card updates; MongoDB transactions time out at scale.
+       */
 
       return { id: input.id, columnId: input.columnId };
     }),

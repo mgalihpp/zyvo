@@ -1,6 +1,7 @@
 "use client";
 
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { JobApplication } from "@prisma/client";
 import {
   CopyIcon,
@@ -76,16 +77,27 @@ export function ApplicationCard({
   onDelete?: (app: JobApplication) => void;
   onCopy?: (app: JobApplication) => void;
 }) {
-  // No transform here — the moving card is rendered by DragOverlay in the
-  // board, so it can't be clipped by the column/board overflow containers.
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  // The overlay renders the moving card outside the board overflow while
+  // sortable transforms shift the other cards into their potential positions.
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging,
+    transform,
+    transition,
+  } = useSortable({
     id: app.id,
+    data: { type: "card" },
   });
 
   return (
-    <div className="group/card relative">
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className="group/card relative"
+    >
       <button
-        ref={setNodeRef}
         type="button"
         {...listeners}
         {...attributes}
