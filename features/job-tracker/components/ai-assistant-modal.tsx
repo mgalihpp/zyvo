@@ -332,11 +332,11 @@ export function AiAssistantModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange} modal="trap-focus">
-        <DialogContent className="overflow-hidden p-0 sm:max-w-6xl" scrollable>
+        <DialogContent className="p-0 sm:max-w-6xl" scrollable>
           <Tabs
             defaultValue="cover-letter"
             orientation="vertical"
-            className="min-h-[620px] gap-0"
+            className="min-h-[620px] gap-0 overflow-hidden rounded-xl"
           >
             {/* Sidebar */}
             <div className="flex w-60 shrink-0 flex-col border-r bg-muted/30 p-4">
