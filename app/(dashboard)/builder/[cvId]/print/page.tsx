@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/features/auth/lib/auth";
@@ -9,7 +10,23 @@ import { toCvContent } from "@/features/cv/lib/cv-content";
 import { cvRootStyle } from "@/features/cv/lib/cv-style";
 import { prisma } from "@/lib/db";
 
-export const metadata = { robots: { index: false } };
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ cvId: string }>;
+}): Promise<Metadata> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { robots: { index: false } };
+
+  const { cvId } = await params;
+  const cv = await prisma.cV.findUnique({
+    where: { id: cvId },
+    select: { userId: true, title: true },
+  });
+  if (!cv || cv.userId !== session.user.id) return { robots: { index: false } };
+
+  return { title: cv.title, robots: { index: false } };
+}
 
 /**
  * Bare full-page render of a CV template, used only as the target for headless
