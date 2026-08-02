@@ -331,7 +331,7 @@ export function AiAssistantModal({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={onOpenChange} modal="trap-focus">
         <DialogContent className="overflow-hidden p-0 sm:max-w-6xl" scrollable>
           <Tabs
             defaultValue="cover-letter"
@@ -374,7 +374,7 @@ export function AiAssistantModal({
             </div>
 
             {/* Main content */}
-            <div className="min-w-0 flex-1 overflow-y-auto bg-violet-500/[0.02] p-6 sm:p-8">
+            <div className="min-w-0 flex-1 bg-violet-500/[0.02] p-6 sm:p-8">
               {/* Surat Lamaran */}
               <TabsContent value="cover-letter" className="space-y-5">
                 <TabHeading
