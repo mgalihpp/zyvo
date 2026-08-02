@@ -25,7 +25,7 @@ export async function generateMetadata({
   });
   if (!cv || cv.userId !== session.user.id) return { robots: { index: false } };
 
-  return { title: cv.title, robots: { index: false } };
+  return { title: { absolute: cv.title }, robots: { index: false } };
 }
 
 /**
