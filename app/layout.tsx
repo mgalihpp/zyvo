@@ -69,10 +69,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = constructMetadata({
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ?? "",
-    other: {
-      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ?? "",
-    },
+    google: "RYMUPhw0xFALCYGVMLQNRRaL4P29wKs9DmSEslffMGA",
   },
 });
 
