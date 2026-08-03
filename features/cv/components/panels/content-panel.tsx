@@ -33,6 +33,7 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
@@ -202,6 +203,8 @@ export function ContentPanel() {
   const reorderEducation = useCvStore((s) => s.reorderEducation);
   const removeSkill = useCvStore((s) => s.removeSkill);
   const reorderSkill = useCvStore((s) => s.reorderSkill);
+  const showSkillLevels = useCvStore((s) => s.showSkillLevels);
+  const setShowSkillLevels = useCvStore((s) => s.setShowSkillLevels);
   const removeInterpersonal = useCvStore((s) => s.removeInterpersonal);
   const reorderInterpersonal = useCvStore((s) => s.reorderInterpersonal);
   const removeLanguage = useCvStore((s) => s.removeLanguage);
@@ -291,6 +294,21 @@ export function ContentPanel() {
           onRemove={removeSkill}
           onReorder={reorderSkill}
         />
+
+        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-2">
+          <label
+            htmlFor="show-skill-levels"
+            className="text-sm text-muted-foreground"
+          >
+            Tampilkan level keahlian
+          </label>
+          <Switch
+            id="show-skill-levels"
+            size="sm"
+            checked={showSkillLevels}
+            onCheckedChange={setShowSkillLevels}
+          />
+        </div>
 
         <SectionCard
           icon={HeartHandshakeIcon}
