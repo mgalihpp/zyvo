@@ -129,12 +129,17 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       {exp.role || "Posisi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {exp.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
+                      {exp.company}
+                    </p>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
-                    {join([exp.company, exp.location])}
-                  </p>
                   {exp.description ? (
                     <HtmlContent
                       className="mt-1 text-[var(--cv-color-text)]"
@@ -190,13 +195,22 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {edu.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[var(--cv-color-text)]">
+                      {join([edu.degree, edu.field], ", ")}
+                    </p>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-[var(--cv-color-text)]">
-                    {join([edu.degree, edu.field], ", ")}
-                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                  </p>
+                  {edu.gpa ? (
+                    <p className="text-[0.85em] text-[var(--cv-color-text)]">
+                      • IPK: {edu.gpa}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>

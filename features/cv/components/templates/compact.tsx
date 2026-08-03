@@ -145,6 +145,14 @@ export function CompactTemplate({ cv }: TemplateProps) {
                         {exp.role || "Posisi"}
                       </h3>
                       <span className="shrink-0 text-[0.78em] opacity-55">
+                        {exp.location}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="text-[0.82em] font-medium opacity-70">
+                        {exp.company}
+                      </p>
+                      <span className="shrink-0 text-[0.78em] opacity-55">
                         {formatDateRange(
                           exp.startDate,
                           exp.endDate,
@@ -152,9 +160,6 @@ export function CompactTemplate({ cv }: TemplateProps) {
                         )}
                       </span>
                     </div>
-                    <p className="text-[0.82em] font-medium opacity-70">
-                      {join([exp.company, exp.location])}
-                    </p>
                     {exp.description ? (
                       <HtmlContent
                         className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
@@ -177,13 +182,22 @@ export function CompactTemplate({ cv }: TemplateProps) {
                         {edu.school || "Institusi"}
                       </h3>
                       <span className="shrink-0 text-[0.78em] opacity-55">
+                        {edu.location}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="text-[0.82em]">
+                        {join([edu.degree, edu.field], ", ")}
+                      </p>
+                      <span className="shrink-0 text-[0.78em] opacity-55">
                         {formatDateRange(edu.startDate, edu.endDate)}
                       </span>
                     </div>
-                    <p className="text-[0.82em]">
-                      {join([edu.degree, edu.field], ", ")}
-                      {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                    </p>
+                    {edu.gpa ? (
+                      <p className="text-[0.78em] opacity-55">
+                        • IPK: {edu.gpa}
+                      </p>
+                    ) : null}
                   </div>
                 ))}
               </div>

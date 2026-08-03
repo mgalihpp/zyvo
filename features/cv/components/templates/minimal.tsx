@@ -48,17 +48,18 @@ export function MinimalTemplate({ cv }: TemplateProps) {
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {join([exp.role, exp.company], ", ") || "Posisi"}
+                    {exp.role || "Posisi"}
                   </h3>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    {exp.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">{exp.company}</p>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>
-                {exp.location ? (
-                  <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-60">
-                    {exp.location}
-                  </p>
-                ) : null}
                 {exp.description ? (
                   <HtmlContent
                     className="mt-1 text-[var(--cv-color-text)]"
@@ -81,13 +82,22 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                     {edu.school || "Institusi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    {edu.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">
+                    {join([edu.degree, edu.field], ", ")}
+                  </p>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(edu.startDate, edu.endDate)}
                   </span>
                 </div>
-                <p>
-                  {join([edu.degree, edu.field], ", ")}
-                  {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                </p>
+                {edu.gpa ? (
+                  <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    • IPK: {edu.gpa}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
