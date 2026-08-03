@@ -364,7 +364,7 @@ export const jobTrackerRouter = createTRPCRouter({
             content: `Perusahaan: ${app.company}\nPosisi: ${app.position}\nStatus lamaran: ${status}\nTanggal melamar: ${app.appliedAt.toISOString().slice(0, 10)}`,
           },
         ],
-        max_tokens: 500,
+        max_tokens: 1500,
       });
 
       const email = response.choices[0]?.message?.content ?? "";

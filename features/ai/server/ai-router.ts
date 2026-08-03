@@ -70,7 +70,7 @@ export const aiRouter = createTRPCRouter({
             content: `${improveActions[input.action]}\n\nTeks:\n${input.text}`,
           },
         ],
-        max_tokens: 500,
+        max_tokens: 1500,
       });
 
       const result = await collectStream(stream);
@@ -91,7 +91,7 @@ export const aiRouter = createTRPCRouter({
           { role: "user", content: input.cvSnapshot },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 400,
+        max_tokens: 1500,
       });
 
       const raw = response.choices[0]?.message?.content ?? "{}";
@@ -143,7 +143,7 @@ export const aiRouter = createTRPCRouter({
           { role: "system", content: chatSystemPrompt(input.cvSnapshot) },
           ...input.messages,
         ],
-        max_tokens: 800,
+        max_tokens: 2000,
       });
 
       const result = await collectStream(stream);
@@ -172,7 +172,7 @@ export const aiRouter = createTRPCRouter({
           },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 600,
+        max_tokens: 1500,
       });
 
       const raw = response.choices[0]?.message?.content ?? "{}";
@@ -224,7 +224,7 @@ export const aiRouter = createTRPCRouter({
           { role: "system", content: coverLetterSystemPrompt(input.tone) },
           { role: "user", content: userContent },
         ],
-        max_tokens: 800,
+        max_tokens: 2000,
       });
 
       const result = await collectStream(stream);
@@ -254,7 +254,7 @@ export const aiRouter = createTRPCRouter({
           },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 2000,
+        max_tokens: 6000,
       });
 
       const raw = response.choices[0]?.message?.content ?? "{}";
@@ -291,7 +291,7 @@ export const aiRouter = createTRPCRouter({
           { role: "user", content: input.text },
         ],
         response_format: { type: "json_object" },
-        max_tokens: 4000,
+        max_tokens: 6000,
       });
 
       const raw = response.choices[0]?.message?.content ?? "{}";
