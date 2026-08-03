@@ -242,6 +242,7 @@ export const createCvStore = (init?: CvStoreInit) =>
   createStore<CvState>((set, get) => ({
     ...(init?.content ?? emptyContent),
     colors: init?.content?.colors ?? emptyColors,
+    showSkillLevels: init?.content?.showSkillLevels ?? true,
     draftColors: null,
     cvId: init?.cvId ?? null,
     currentStep: 0,
