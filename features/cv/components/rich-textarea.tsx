@@ -2,6 +2,7 @@
 
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { ListIcon } from "lucide-react";
 import { useEffect } from "react";
 import { stripHtml } from "@/lib/html";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,7 @@ function RichToolbar({ editor }: { editor: Editor }) {
         active={editor.isActive("bulletList")}
         onMouseDown={run(() => editor.chain().focus().toggleBulletList().run())}
       >
-        <span>•</span>
+        <ListIcon className="size-4" />
       </ToolbarButton>
     </div>
   );

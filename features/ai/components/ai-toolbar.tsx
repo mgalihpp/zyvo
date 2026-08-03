@@ -2,6 +2,7 @@
 
 import {
   BriefcaseIcon,
+  ListIcon,
   PenLineIcon,
   ShrinkIcon,
   SparklesIcon,
@@ -51,6 +52,12 @@ const ACTIONS: {
     label: "Kembangkan",
     loadingText: "Mengembangkan...",
     Icon: PenLineIcon,
+  },
+  {
+    action: "bulletify",
+    label: "Poin-poin",
+    loadingText: "Membuat poin-poin...",
+    Icon: ListIcon,
   },
 ];
 

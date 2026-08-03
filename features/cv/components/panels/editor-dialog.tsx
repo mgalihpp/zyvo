@@ -135,7 +135,7 @@ export function EditorDialog() {
       // Keep focus trapped in the dialog but leave the page (body) scrollable.
       modal="trap-focus"
     >
-      <DialogContent className="sm:max-w-2xl" scrollable>
+      <DialogContent className="sm:max-w-4xl" scrollable>
         <DialogHeader>
           <DialogTitle className="text-base">
             {target?.mode === "add" ? `Tambah ${title}` : title}

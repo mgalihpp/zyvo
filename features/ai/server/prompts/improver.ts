@@ -9,4 +9,6 @@ export const improveActions: Record<string, string> = {
   shorten: "Persingkat menjadi maksimal 2 kalimat tanpa kehilangan inti.",
   expand: "Kembangkan dengan detail yang lebih spesifik dan kontekstual.",
   formalize: "Ubah ke gaya bahasa formal yang sesuai lingkungan profesional.",
+  bulletify:
+    "Tulis ulang menjadi daftar poin-poin (bullet) yang ringkas dan berdampak. Satu poin per baris.",
 };

@@ -46,7 +46,13 @@ export const aiRouter = createTRPCRouter({
     .input(
       z.object({
         text: z.string().max(3000),
-        action: z.enum(["improve", "shorten", "expand", "formalize"]),
+        action: z.enum([
+          "improve",
+          "shorten",
+          "expand",
+          "formalize",
+          "bulletify",
+        ]),
         fieldType: z.string().max(80),
       }),
     )
