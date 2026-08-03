@@ -171,6 +171,8 @@ export interface CvState extends CvContent {
   removeCustom: (index: number) => void;
   reorderCustom: (from: number, to: number) => void;
 
+  setShowSkillLevels: (show: boolean) => void;
+
   getContent: () => CvContent;
 
   /** Overwrites all content fields after a server-side restore. Does NOT bump
@@ -199,6 +201,7 @@ const emptyContent: CvContent = {
   organizations: [],
   projects: [],
   custom: [],
+  showSkillLevels: true,
 };
 
 /** Initial state a per-request store is seeded with (from SSR data). */
@@ -285,6 +288,8 @@ export const createCvStore = (init?: CvStoreInit) =>
         ...touch()(s),
       })),
     setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
+    setShowSkillLevels: (showSkillLevels) =>
+      set((s) => ({ showSkillLevels, ...touch()(s) })),
     setTypography: (patch) =>
       set((s) => ({
         typography: { ...s.typography, ...patch },
@@ -538,6 +543,7 @@ export const createCvStore = (init?: CvStoreInit) =>
         organizations: s.organizations,
         projects: s.projects,
         custom: s.custom,
+        showSkillLevels: s.showSkillLevels,
       };
     },
   }));

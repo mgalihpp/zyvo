@@ -109,7 +109,7 @@ export function FormalTemplate({ cv }: TemplateProps) {
               <strong>Keahlian:</strong>{" "}
               {join(
                 cv.skills.map((s) =>
-                  s.level
+                  cv.showSkillLevels && s.level
                     ? `${s.name} (${SKILL_LEVEL_LABELS[s.level] ?? `${s.level}/5`})`
                     : s.name,
                 ),
