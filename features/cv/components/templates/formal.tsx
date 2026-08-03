@@ -8,8 +8,16 @@ import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
  */
 export function FormalTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
-  const contactLine = join([p.email, p.phone, p.location]);
-  const linkLine = join([p.website, p.linkedin, p.github]);
+  const allContact = [
+    p.headline,
+    p.location,
+    p.email,
+    p.phone,
+    p.website,
+    p.linkedin,
+    p.github,
+  ].filter(Boolean);
+  const hasSkillsAndLanguages = cv.skills.length > 0 || cv.languages.length > 0;
 
   return (
     <CvPage className="p-10">
@@ -17,19 +25,9 @@ export function FormalTemplate({ cv }: TemplateProps) {
         <h1 className="text-[1.8em] font-bold text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
         </h1>
-        {p.headline ? (
-          <p className="mt-1 text-[0.92em] text-[var(--cv-color-text)] opacity-80">
-            {p.headline}
-          </p>
-        ) : null}
-        {contactLine ? (
+        {allContact.length > 0 ? (
           <p className="mt-2 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-            {contactLine}
-          </p>
-        ) : null}
-        {linkLine ? (
-          <p className="mt-1 text-[0.85em] text-[var(--cv-color-link)]">
-            {linkLine}
+            {allContact.join("  |  ")}
           </p>
         ) : null}
       </header>
@@ -96,40 +94,34 @@ export function FormalTemplate({ cv }: TemplateProps) {
         </Section>
       ) : null}
 
-      {cv.skills.length > 0 ? (
-        <Section title="Keahlian">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.skills.map((s) =>
-                s.level && s.level !== 3 ? `${s.name} (${s.level}/5)` : s.name,
-              ),
-              "  •  ",
-            )}
-          </p>
-        </Section>
-      ) : null}
-
-      {cv.interpersonal.length > 0 ? (
-        <Section title="Keahlian Interpersonal">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.interpersonal.map((s) => s.name),
-              "  •  ",
-            )}
-          </p>
-        </Section>
-      ) : null}
-
-      {cv.languages.length > 0 ? (
-        <Section title="Bahasa">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.languages.map((l) =>
-                l.level?.trim() ? `${l.name} (${l.level})` : l.name,
-              ),
-              "  •  ",
-            )}
-          </p>
+      {hasSkillsAndLanguages ? (
+        <Section title="Keahlian & Bahasa">
+          {cv.skills.length > 0 ? (
+            <p className="text-[var(--cv-color-text)]">
+              <strong>Keahlian:</strong>{" "}
+              {join(
+                cv.skills.map((s) =>
+                  s.level && s.level !== 3
+                    ? `${s.name} (${s.level}/5)`
+                    : s.name,
+                ),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
+          {cv.languages.length > 0 ? (
+            <p className="mt-1 text-[var(--cv-color-text)]">
+              <strong>Bahasa:</strong>{" "}
+              {join(
+                cv.languages.map((l) =>
+                  l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+                ),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
         </Section>
       ) : null}
 
