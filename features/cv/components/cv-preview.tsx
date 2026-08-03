@@ -44,6 +44,8 @@ export function CvPreview() {
   const organizations = useCvStore((s) => s.organizations);
   const projects = useCvStore((s) => s.projects);
   const custom = useCvStore((s) => s.custom);
+  const showSkillLevels = useCvStore((s) => s.showSkillLevels);
+  const showLanguageLevels = useCvStore((s) => s.showLanguageLevels);
   // A past version being previewed from the history panel, if any.
   const previewContent = useCvStore((s) => s.previewContent);
   const setPreviewContent = useCvStore((s) => s.setPreviewContent);
@@ -68,6 +70,8 @@ export function CvPreview() {
     organizations,
     projects,
     custom,
+    showSkillLevels,
+    showLanguageLevels,
   };
 
   // Version preview wins over the live draft (read-only look-back).
