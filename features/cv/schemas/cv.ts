@@ -159,6 +159,7 @@ export const cvContentSchema = z.object({
   projects: z.array(projectSchema).default([]),
   custom: z.array(customSchema).default([]),
   showSkillLevels: z.boolean().default(true),
+  showLanguageLevels: z.boolean().default(true),
 });
 
 export const cvUpdateSchema = cvContentSchema.partial();

@@ -125,7 +125,9 @@ export function FormalTemplate({ cv }: TemplateProps) {
               <strong>Bahasa:</strong>{" "}
               {join(
                 cv.languages.map((l) =>
-                  l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+                  cv.showLanguageLevels && l.level?.trim()
+                    ? `${l.name} (${l.level})`
+                    : l.name,
                 ),
                 ", ",
               )}

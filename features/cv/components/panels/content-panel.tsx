@@ -209,6 +209,8 @@ export function ContentPanel() {
   const reorderInterpersonal = useCvStore((s) => s.reorderInterpersonal);
   const removeLanguage = useCvStore((s) => s.removeLanguage);
   const reorderLanguage = useCvStore((s) => s.reorderLanguage);
+  const showLanguageLevels = useCvStore((s) => s.showLanguageLevels);
+  const setShowLanguageLevels = useCvStore((s) => s.setShowLanguageLevels);
   const removeCertification = useCvStore((s) => s.removeCertification);
   const reorderCertification = useCvStore((s) => s.reorderCertification);
   const removeOrganization = useCvStore((s) => s.removeOrganization);
@@ -345,6 +347,21 @@ export function ContentPanel() {
           onRemove={removeLanguage}
           onReorder={reorderLanguage}
         />
+
+        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-2">
+          <label
+            htmlFor="show-language-levels"
+            className="text-sm text-muted-foreground"
+          >
+            Tampilkan tingkat bahasa
+          </label>
+          <Switch
+            id="show-language-levels"
+            size="sm"
+            checked={showLanguageLevels}
+            onCheckedChange={setShowLanguageLevels}
+          />
+        </div>
 
         <SectionCard
           icon={FolderGitIcon}
