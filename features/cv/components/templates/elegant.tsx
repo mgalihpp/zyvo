@@ -122,7 +122,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                   .map((l, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{l.name}</span>
-                      {l.level ? (
+                      {cv.showLanguageLevels && l.level ? (
                         <span className="italic opacity-60">{l.level}</span>
                       ) : null}
                     </li>

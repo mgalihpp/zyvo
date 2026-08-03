@@ -48,16 +48,18 @@ export function ModernTemplate({ cv }: TemplateProps) {
                 .map((s, i) => (
                   <li key={i}>
                     <span className="text-[0.85em] opacity-90">{s.name}</span>
-                    <span
-                      className="mt-1 flex h-1 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/25"
-                      aria-hidden
-                    >
+                    {cv.showSkillLevels ? (
                       <span
-                        className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
-                        // level 5 (expert) = 100%, 1 (beginner) = 20%
-                        style={{ width: `${(s.level / 5) * 100}%` }}
-                      />
-                    </span>
+                        className="mt-1 flex h-1 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/25"
+                        aria-hidden
+                      >
+                        <span
+                          className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
+                          // level 5 (expert) = 100%, 1 (beginner) = 20%
+                          style={{ width: `${(s.level / 5) * 100}%` }}
+                        />
+                      </span>
+                    ) : null}
                   </li>
                 ))}
             </ul>
@@ -83,7 +85,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                 .map((l, i) => (
                   <li key={i} className="flex justify-between gap-2">
                     <span>{l.name}</span>
-                    {l.level ? (
+                    {cv.showLanguageLevels && l.level ? (
                       <span className="opacity-70">{l.level}</span>
                     ) : null}
                   </li>

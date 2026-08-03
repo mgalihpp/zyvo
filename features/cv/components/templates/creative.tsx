@@ -51,16 +51,18 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                 .map((s, i) => (
                   <li key={i}>
                     <span className="text-[0.83em]">{s.name}</span>
-                    <span
-                      className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/20"
-                      aria-hidden
-                    >
+                    {cv.showSkillLevels ? (
                       <span
-                        className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
-                        // level 5 (expert) = 100%, 1 (beginner) = 20%
-                        style={{ width: `${(s.level / 5) * 100}%` }}
-                      />
-                    </span>
+                        className="mt-1 flex h-1.5 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/20"
+                        aria-hidden
+                      >
+                        <span
+                          className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
+                          // level 5 (expert) = 100%, 1 (beginner) = 20%
+                          style={{ width: `${(s.level / 5) * 100}%` }}
+                        />
+                      </span>
+                    ) : null}
                   </li>
                 ))}
             </ul>
@@ -86,7 +88,7 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                 .map((l, i) => (
                   <li key={i} className="flex justify-between gap-2">
                     <span>{l.name}</span>
-                    {l.level ? (
+                    {cv.showLanguageLevels && l.level ? (
                       <span className="opacity-70">{l.level}</span>
                     ) : null}
                   </li>

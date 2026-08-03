@@ -102,7 +102,9 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                   .filter((l) => l.name.trim())
                   .map((l, i) => (
                     <li key={i}>
-                      {l.level?.trim() ? `${l.name} — ${l.level}` : l.name}
+                      {cv.showLanguageLevels && l.level?.trim()
+                        ? `${l.name} — ${l.level}`
+                        : l.name}
                     </li>
                   ))}
               </ul>

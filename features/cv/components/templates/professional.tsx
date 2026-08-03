@@ -165,7 +165,9 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
             <p className="text-[var(--cv-color-text)]">
               {join(
                 cv.languages.map((l) =>
-                  l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+                  cv.showLanguageLevels && l.level?.trim()
+                    ? `${l.name} (${l.level})`
+                    : l.name,
                 ),
                 "  •  ",
               )}

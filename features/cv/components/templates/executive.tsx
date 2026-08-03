@@ -121,7 +121,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                   .map((l, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{l.name}</span>
-                      {l.level ? (
+                      {cv.showLanguageLevels && l.level ? (
                         <span className="opacity-60">{l.level}</span>
                       ) : null}
                     </li>
