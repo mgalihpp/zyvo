@@ -35,6 +35,9 @@ const ElegantLazy = lazy(() =>
 const CompactLazy = lazy(() =>
   import("./compact").then((m) => ({ default: m.CompactTemplate })),
 );
+const FormalLazy = lazy(() =>
+  import("./formal").then((m) => ({ default: m.FormalTemplate })),
+);
 
 export const TEMPLATES: TemplateMeta[] = [
   {
@@ -105,6 +108,14 @@ export const TEMPLATES: TemplateMeta[] = [
     categories: ["professional", "two-column", "ats"],
     premium: true,
     lazyComponent: CompactLazy,
+  },
+  {
+    id: "formal",
+    name: "Formal",
+    description:
+      "Single-column formal layout dengan font serif & garis section.",
+    categories: ["ats", "professional", "one-column"],
+    lazyComponent: FormalLazy,
   },
 ];
 
