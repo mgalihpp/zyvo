@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -59,16 +60,22 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                       {exp.role || "Posisi"}
                     </h3>
                     <span className="shrink-0 text-[0.82em] italic opacity-55">
+                      {exp.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.88em] text-[var(--cv-color-accent)]">
+                      {exp.company}
+                    </p>
+                    <span className="shrink-0 text-[0.82em] italic opacity-55">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  <p className="text-[0.88em] text-[var(--cv-color-accent)]">
-                    {join([exp.company, exp.location])}
-                  </p>
                   {exp.description ? (
-                    <p className="mt-1.5 whitespace-pre-line text-[0.92em]">
-                      {exp.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1.5 text-[0.92em] text-[var(--cv-color-text)]"
+                      html={exp.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -86,13 +93,22 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                       {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.82em] italic opacity-55">
+                      {edu.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.88em]">
+                      {join([edu.degree, edu.field], ", ")}
+                    </p>
+                    <span className="shrink-0 text-[0.82em] italic opacity-55">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-[0.88em]">
-                    {join([edu.degree, edu.field], ", ")}
-                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                  </p>
+                  {edu.gpa ? (
+                    <p className="text-[0.82em] italic opacity-55">
+                      • IPK: {edu.gpa}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -120,7 +136,7 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                   .map((l, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{l.name}</span>
-                      {l.level ? (
+                      {cv.showLanguageLevels && l.level ? (
                         <span className="italic opacity-60">{l.level}</span>
                       ) : null}
                     </li>
@@ -199,9 +215,10 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {proj.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-0.5 text-[0.88em] text-[var(--cv-color-text)]"
+                      html={proj.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -231,9 +248,10 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {org.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-0.5 text-[0.88em] text-[var(--cv-color-text)]"
+                      html={org.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -261,9 +279,10 @@ export function ElegantTemplate({ cv }: TemplateProps) {
                     {item.title}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {item.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-0.5 text-[0.88em] text-[var(--cv-color-text)]"
+                      html={item.description}
+                    />
                   ) : null}
                 </div>
               ))}

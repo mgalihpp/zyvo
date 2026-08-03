@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { MODERN_PAGE_BACKGROUND } from "./page-backgrounds";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
@@ -47,16 +48,18 @@ export function ModernTemplate({ cv }: TemplateProps) {
                 .map((s, i) => (
                   <li key={i}>
                     <span className="text-[0.85em] opacity-90">{s.name}</span>
-                    <span
-                      className="mt-1 flex h-1 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/25"
-                      aria-hidden
-                    >
+                    {cv.showSkillLevels ? (
                       <span
-                        className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
-                        // level 5 (expert) = 100%, 1 (beginner) = 20%
-                        style={{ width: `${(s.level / 5) * 100}%` }}
-                      />
-                    </span>
+                        className="mt-1 flex h-1 overflow-hidden rounded-full bg-[var(--cv-color-on-accent)]/25"
+                        aria-hidden
+                      >
+                        <span
+                          className="h-full rounded-full bg-[var(--cv-color-on-accent)]/80"
+                          // level 5 (expert) = 100%, 1 (beginner) = 20%
+                          style={{ width: `${(s.level / 5) * 100}%` }}
+                        />
+                      </span>
+                    ) : null}
                   </li>
                 ))}
             </ul>
@@ -82,7 +85,7 @@ export function ModernTemplate({ cv }: TemplateProps) {
                 .map((l, i) => (
                   <li key={i} className="flex justify-between gap-2">
                     <span>{l.name}</span>
-                    {l.level ? (
+                    {cv.showLanguageLevels && l.level ? (
                       <span className="opacity-70">{l.level}</span>
                     ) : null}
                   </li>
@@ -126,16 +129,22 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       {exp.role || "Posisi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {exp.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
+                      {exp.company}
+                    </p>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  <p className="text-[0.85em] font-medium text-[var(--cv-color-text)] opacity-80">
-                    {join([exp.company, exp.location])}
-                  </p>
                   {exp.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {exp.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={exp.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -165,9 +174,10 @@ export function ModernTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {proj.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={proj.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -185,13 +195,22 @@ export function ModernTemplate({ cv }: TemplateProps) {
                       {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {edu.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[var(--cv-color-text)]">
+                      {join([edu.degree, edu.field], ", ")}
+                    </p>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-[var(--cv-color-text)]">
-                    {join([edu.degree, edu.field], ", ")}
-                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                  </p>
+                  {edu.gpa ? (
+                    <p className="text-[0.85em] text-[var(--cv-color-text)]">
+                      • IPK: {edu.gpa}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -220,9 +239,10 @@ export function ModernTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {org.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={org.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -239,9 +259,10 @@ export function ModernTemplate({ cv }: TemplateProps) {
                     {item.title || "Item"}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {item.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={item.description}
+                    />
                   ) : null}
                 </div>
               ))}

@@ -1,76 +1,54 @@
 import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
+const SKILL_LEVEL_LABELS: Record<number, string> = {
+  1: "Pemula",
+  2: "Dasar",
+  3: "Menengah",
+  4: "Mahir",
+  5: "Ahli",
+};
+
 /**
- * Classic ATS-friendly CV template. Single column, semantic headings, no
- * multi-column tricks that break ATS parsers. Rendered from live CV content.
+ * Formal single-column CV template. Centered header, serif typography,
+ * full-width section dividers. ATS-safe.
  *
  * Colors come from the `--cv-color-*` CSS vars set on the preview wrapper.
  */
-export function ClassicTemplate({ cv }: TemplateProps) {
+export function FormalTemplate({ cv }: TemplateProps) {
   const p = cv.personal;
-  const contactLine = join([p.email, p.phone, p.location]);
-  const linkLine = join([p.website, p.linkedin, p.github]);
+  const allContact = [
+    p.headline,
+    p.location,
+    p.email,
+    p.phone,
+    p.website,
+    p.linkedin,
+    p.github,
+  ].filter(Boolean);
+  const hasSkillsAndLanguages =
+    cv.skills.length > 0 ||
+    cv.interpersonal.length > 0 ||
+    cv.languages.length > 0;
 
   return (
     <CvPage className="p-10">
-      <header className="border-b border-[var(--cv-color-accent)] pb-4">
-        <h1 className="text-[1.6em] font-bold tracking-tight text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
+      <header className="text-center">
+        <h1 className="text-[1.8em] font-bold text-[var(--cv-color-heading)] font-[family-name:var(--cv-font-heading)]">
           {p.fullName || "Nama Anda"}
         </h1>
-        {p.headline ? (
-          <p className="mt-0.5 text-[0.92em] text-[var(--cv-color-text)] opacity-80">
-            {p.headline}
-          </p>
-        ) : null}
-        {contactLine ? (
+        {allContact.length > 0 ? (
           <p className="mt-2 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-            {contactLine}
-          </p>
-        ) : null}
-        {linkLine ? (
-          <p className="mt-1 text-[0.85em] text-[var(--cv-color-link)]">
-            {linkLine}
+            {allContact.join("  |  ")}
           </p>
         ) : null}
       </header>
 
       {cv.summary?.trim() ? (
-        <Section title="Ringkasan">
+        <Section title="Profil">
           <p className="whitespace-pre-line text-[var(--cv-color-text)]">
             {cv.summary}
           </p>
-        </Section>
-      ) : null}
-
-      {cv.experience.length > 0 ? (
-        <Section title="Pengalaman">
-          <div className="space-y-3">
-            {cv.experience.map((exp, i) => (
-              <div key={i} data-entry>
-                <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {exp.role || "Posisi"}
-                  </h3>
-                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                    {exp.location}
-                  </span>
-                </div>
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-[var(--cv-color-text)]">{exp.company}</p>
-                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                    {formatDateRange(exp.startDate, exp.endDate, exp.current)}
-                  </span>
-                </div>
-                {exp.description ? (
-                  <HtmlContent
-                    className="mt-1 text-[var(--cv-color-text)]"
-                    html={exp.description}
-                  />
-                ) : null}
-              </div>
-            ))}
-          </div>
         </Section>
       ) : null}
 
@@ -106,40 +84,77 @@ export function ClassicTemplate({ cv }: TemplateProps) {
         </Section>
       ) : null}
 
-      {cv.skills.length > 0 ? (
-        <Section title="Keahlian">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.skills.map((s) => s.name),
-              "  •  ",
-            )}
-          </p>
+      {cv.experience.length > 0 ? (
+        <Section title="Pengalaman">
+          <div className="space-y-3">
+            {cv.experience.map((exp, i) => (
+              <div key={i} data-entry>
+                <div className="flex items-baseline justify-between gap-3">
+                  <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                    {exp.role || "Posisi"}
+                  </h3>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                    {exp.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">{exp.company}</p>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                    {formatDateRange(exp.startDate, exp.endDate, exp.current)}
+                  </span>
+                </div>
+                {exp.description ? (
+                  <HtmlContent
+                    className="mt-1 text-[var(--cv-color-text)]"
+                    html={exp.description}
+                  />
+                ) : null}
+              </div>
+            ))}
+          </div>
         </Section>
       ) : null}
 
-      {cv.interpersonal.length > 0 ? (
-        <Section title="Keahlian Interpersonal">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.interpersonal.map((s) => s.name),
-              "  •  ",
-            )}
-          </p>
-        </Section>
-      ) : null}
-
-      {cv.languages.length > 0 ? (
-        <Section title="Bahasa">
-          <p className="text-[var(--cv-color-text)]">
-            {join(
-              cv.languages.map((l) =>
-                cv.showLanguageLevels && l.level?.trim()
-                  ? `${l.name} (${l.level})`
-                  : l.name,
-              ),
-              "  •  ",
-            )}
-          </p>
+      {hasSkillsAndLanguages ? (
+        <Section title="Keahlian & Bahasa">
+          {cv.skills.length > 0 ? (
+            <p className="text-[var(--cv-color-text)]">
+              <strong>Keahlian:</strong>{" "}
+              {join(
+                cv.skills.map((s) =>
+                  cv.showSkillLevels && s.level
+                    ? `${s.name} (${SKILL_LEVEL_LABELS[s.level] ?? `${s.level}/5`})`
+                    : s.name,
+                ),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
+          {cv.interpersonal.length > 0 ? (
+            <p className="mt-1 text-[var(--cv-color-text)]">
+              <strong>Keahlian Interpersonal:</strong>{" "}
+              {join(
+                cv.interpersonal.map((s) => s.name),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
+          {cv.languages.length > 0 ? (
+            <p className="mt-1 text-[var(--cv-color-text)]">
+              <strong>Bahasa:</strong>{" "}
+              {join(
+                cv.languages.map((l) =>
+                  cv.showLanguageLevels && l.level?.trim()
+                    ? `${l.name} (${l.level})`
+                    : l.name,
+                ),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
         </Section>
       ) : null}
 
@@ -284,7 +299,7 @@ function Section({
 }) {
   return (
     <section className="mt-5">
-      <h2 className="mb-2 text-[0.85em] font-bold uppercase tracking-widest text-[var(--cv-color-accent)] font-[family-name:var(--cv-font-heading)]">
+      <h2 className="mb-2 text-[0.85em] font-bold uppercase tracking-widest text-[var(--cv-color-accent)] border-b border-[var(--cv-color-accent)] pb-1 font-[family-name:var(--cv-font-heading)]">
         {title}
       </h2>
       {children}

@@ -10,6 +10,8 @@ export const SAMPLE_CV: CvContent = {
   templateId: "classic",
   typography: { ...emptyTypography },
   colors: { ...emptyColors },
+  showSkillLevels: true,
+  showLanguageLevels: true,
   personal: {
     fullName: "Cecily Bakker",
     headline: "Digital Marketing Specialist",
@@ -49,6 +51,7 @@ export const SAMPLE_CV: CvContent = {
       school: "University of Indonesia",
       degree: "B.A.",
       field: "Communications",
+      location: "Depok",
       startDate: "2015",
       endDate: "2019",
       gpa: "3.8",

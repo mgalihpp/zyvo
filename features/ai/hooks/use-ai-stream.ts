@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { toBulletHtml } from "@/features/ai/lib/bullets";
 import { trpc } from "@/lib/trpc/client";
 
-export type ImproveAction = "improve" | "shorten" | "expand" | "formalize";
+export type ImproveAction =
+  | "improve"
+  | "shorten"
+  | "expand"
+  | "formalize"
+  | "bulletify";
 
 /**
  * Hook for the AI content improver. Returns improved text directly.
@@ -42,7 +48,9 @@ export function useAiImprove(
         action,
         fieldType,
       });
-      onChange(result);
+      onChange(
+        action === "bulletify" ? toBulletHtml(result) : result,
+      );
     } catch {
       // error already set via onError
     }

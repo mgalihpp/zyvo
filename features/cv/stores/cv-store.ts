@@ -171,6 +171,9 @@ export interface CvState extends CvContent {
   removeCustom: (index: number) => void;
   reorderCustom: (from: number, to: number) => void;
 
+  setShowSkillLevels: (show: boolean) => void;
+  setShowLanguageLevels: (show: boolean) => void;
+
   getContent: () => CvContent;
 
   /** Overwrites all content fields after a server-side restore. Does NOT bump
@@ -199,6 +202,8 @@ const emptyContent: CvContent = {
   organizations: [],
   projects: [],
   custom: [],
+  showSkillLevels: true,
+  showLanguageLevels: true,
 };
 
 /** Initial state a per-request store is seeded with (from SSR data). */
@@ -239,6 +244,8 @@ export const createCvStore = (init?: CvStoreInit) =>
   createStore<CvState>((set, get) => ({
     ...(init?.content ?? emptyContent),
     colors: init?.content?.colors ?? emptyColors,
+    showSkillLevels: init?.content?.showSkillLevels ?? true,
+    showLanguageLevels: init?.content?.showLanguageLevels ?? true,
     draftColors: null,
     cvId: init?.cvId ?? null,
     currentStep: 0,
@@ -285,6 +292,10 @@ export const createCvStore = (init?: CvStoreInit) =>
         ...touch()(s),
       })),
     setSummary: (summary) => set((s) => ({ summary, ...touch()(s) })),
+    setShowSkillLevels: (showSkillLevels) =>
+      set((s) => ({ showSkillLevels, ...touch()(s) })),
+    setShowLanguageLevels: (showLanguageLevels) =>
+      set((s) => ({ showLanguageLevels, ...touch()(s) })),
     setTypography: (patch) =>
       set((s) => ({
         typography: { ...s.typography, ...patch },
@@ -538,6 +549,8 @@ export const createCvStore = (init?: CvStoreInit) =>
         organizations: s.organizations,
         projects: s.projects,
         custom: s.custom,
+        showSkillLevels: s.showSkillLevels,
+        showLanguageLevels: s.showLanguageLevels,
       };
     },
   }));

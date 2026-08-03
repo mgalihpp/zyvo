@@ -96,6 +96,8 @@ model CV {
   organizations Organization[]
   projects      Project[]
   custom        Custom[]
+  showSkillLevels    Boolean @default(true)
+  showLanguageLevels Boolean @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
@@ -157,6 +159,7 @@ type Education {
   school    String
   degree    String?
   field     String?
+  location  String?
   startDate String?
   endDate   String?
   gpa       String?

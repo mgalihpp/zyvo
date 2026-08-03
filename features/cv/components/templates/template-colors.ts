@@ -80,6 +80,14 @@ export const TEMPLATE_DEFAULT_COLORS: Record<string, CvColors> = {
     link: "#0d3b66",
     accent: "#0d3b66",
   },
+  formal: {
+    presetId: "neutral",
+    background: "#ffffff",
+    heading: "#1a1a2e",
+    text: "#333333",
+    link: "#1a1a2e",
+    accent: "#1a1a2e",
+  },
 };
 
 /** Default palette for a template id, falling back to the classic (neutral). */
@@ -107,6 +115,7 @@ const TEMPLATE_DEFAULT_FONTS: Record<
   creative: { fontHeading: "inter", fontBody: "inter" },
   elegant: { fontHeading: "lora", fontBody: "lora" },
   compact: { fontHeading: "roboto", fontBody: "roboto" },
+  formal: { fontHeading: "lora", fontBody: "lora" },
 };
 
 /** Default typography for a template id, falling back to base defaults. */

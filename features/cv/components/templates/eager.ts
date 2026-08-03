@@ -4,6 +4,7 @@ import { CompactTemplate } from "./compact";
 import { CreativeTemplate } from "./creative";
 import { ElegantTemplate } from "./elegant";
 import { ExecutiveTemplate } from "./executive";
+import { FormalTemplate } from "./formal";
 import { FreshGraduateTemplate } from "./fresh-graduate";
 import { DEFAULT_TEMPLATE_ID } from "./index";
 import { MinimalTemplate } from "./minimal";
@@ -28,6 +29,7 @@ const EAGER_TEMPLATES: Record<string, ComponentType<TemplateProps>> = {
   creative: CreativeTemplate,
   elegant: ElegantTemplate,
   compact: CompactTemplate,
+  formal: FormalTemplate,
 };
 
 /** Returns the eager renderer for `id`, falling back to the default template. */

@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -47,19 +48,23 @@ export function MinimalTemplate({ cv }: TemplateProps) {
               <div key={i} data-entry>
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-medium text-[var(--cv-color-heading)]">
-                    {join([exp.role, exp.company], ", ") || "Posisi"}
+                    {exp.role || "Posisi"}
                   </h3>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    {exp.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">{exp.company}</p>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>
-                {exp.location ? (
-                  <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-60">
-                    {exp.location}
-                  </p>
-                ) : null}
                 {exp.description ? (
-                  <p className="mt-1 whitespace-pre-line">{exp.description}</p>
+                  <HtmlContent
+                    className="mt-1 text-[var(--cv-color-text)]"
+                    html={exp.description}
+                  />
                 ) : null}
               </div>
             ))}
@@ -77,13 +82,22 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                     {edu.school || "Institusi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    {edu.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">
+                    {join([edu.degree, edu.field], ", ")}
+                  </p>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-60">
                     {formatDateRange(edu.startDate, edu.endDate)}
                   </span>
                 </div>
-                <p>
-                  {join([edu.degree, edu.field], ", ")}
-                  {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                </p>
+                {edu.gpa ? (
+                  <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-60">
+                    • IPK: {edu.gpa}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
@@ -106,9 +120,10 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                   ) : null}
                 </div>
                 {proj.description ? (
-                  <p className="mt-0.5 whitespace-pre-line">
-                    {proj.description}
-                  </p>
+                  <HtmlContent
+                    className="mt-1 text-[var(--cv-color-text)]"
+                    html={proj.description}
+                  />
                 ) : null}
               </div>
             ))}
@@ -143,7 +158,9 @@ export function MinimalTemplate({ cv }: TemplateProps) {
           <p>
             {join(
               cv.languages.map((l) =>
-                l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+                cv.showLanguageLevels && l.level?.trim()
+                  ? `${l.name} (${l.level})`
+                  : l.name,
               ),
               "  ·  ",
             )}
@@ -184,9 +201,10 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                   ) : null}
                 </div>
                 {org.description ? (
-                  <p className="mt-0.5 whitespace-pre-line">
-                    {org.description}
-                  </p>
+                  <HtmlContent
+                    className="mt-1 text-[var(--cv-color-text)]"
+                    html={org.description}
+                  />
                 ) : null}
               </div>
             ))}
@@ -203,9 +221,10 @@ export function MinimalTemplate({ cv }: TemplateProps) {
                   {item.title || "Item"}
                 </h3>
                 {item.description ? (
-                  <p className="mt-0.5 whitespace-pre-line">
-                    {item.description}
-                  </p>
+                  <HtmlContent
+                    className="mt-1 text-[var(--cv-color-text)]"
+                    html={item.description}
+                  />
                 ) : null}
               </div>
             ))}

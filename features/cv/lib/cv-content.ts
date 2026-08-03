@@ -33,6 +33,8 @@ export function toCvContent(cv: CvDoc): CvContent {
     colors: colorsSchema
       .catch(colorsSchema.parse({}))
       .parse(cv.colors ?? defaultColors),
+    showSkillLevels: cv.showSkillLevels ?? true,
+    showLanguageLevels: cv.showLanguageLevels ?? true,
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",
@@ -58,6 +60,7 @@ export function toCvContent(cv: CvDoc): CvContent {
       school: e.school,
       degree: e.degree ?? "",
       field: e.field ?? "",
+      location: e.location ?? "",
       startDate: e.startDate ?? "",
       endDate: e.endDate ?? "",
       gpa: e.gpa ?? "",

@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -58,16 +59,22 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                       {exp.role || "Posisi"}
                     </h3>
                     <span className="shrink-0 text-[0.82em] opacity-60">
+                      {exp.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.88em] font-medium opacity-75">
+                      {exp.company}
+                    </p>
+                    <span className="shrink-0 text-[0.82em] opacity-60">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  <p className="text-[0.88em] font-medium opacity-75">
-                    {join([exp.company, exp.location])}
-                  </p>
                   {exp.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[0.93em]">
-                      {exp.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={exp.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -85,13 +92,20 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                       {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.82em] opacity-60">
+                      {edu.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[0.88em]">
+                      {join([edu.degree, edu.field], ", ")}
+                    </p>
+                    <span className="shrink-0 text-[0.82em] opacity-60">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-[0.88em]">
-                    {join([edu.degree, edu.field], ", ")}
-                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                  </p>
+                  {edu.gpa ? (
+                    <p className="text-[0.85em] opacity-60">• IPK: {edu.gpa}</p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -119,7 +133,7 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                   .map((l, i) => (
                     <li key={i} className="flex justify-between">
                       <span>{l.name}</span>
-                      {l.level ? (
+                      {cv.showLanguageLevels && l.level ? (
                         <span className="opacity-60">{l.level}</span>
                       ) : null}
                     </li>
@@ -198,9 +212,10 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {proj.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={proj.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -230,9 +245,10 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {org.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={org.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -260,9 +276,10 @@ export function ExecutiveTemplate({ cv }: TemplateProps) {
                     {item.title}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {item.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={item.description}
+                    />
                   ) : null}
                 </div>
               ))}

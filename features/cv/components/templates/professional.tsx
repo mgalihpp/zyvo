@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -47,26 +48,24 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="font-semibold text-[var(--cv-color-heading)]">
                       {exp.role || "Posisi"}
-                      {exp.company ? (
-                        <span className="font-normal text-[var(--cv-color-accent)]">
-                          {" "}
-                          — {exp.company}
-                        </span>
-                      ) : null}
                     </h3>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {exp.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[var(--cv-color-accent)]">
+                      {exp.company}
+                    </p>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </span>
                   </div>
-                  {exp.location ? (
-                    <p className="text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                      {exp.location}
-                    </p>
-                  ) : null}
                   {exp.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {exp.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={exp.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -84,13 +83,22 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                       {edu.school || "Institusi"}
                     </h3>
                     <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                      {edu.location}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-[var(--cv-color-text)]">
+                      {join([edu.degree, edu.field], ", ")}
+                    </p>
+                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                       {formatDateRange(edu.startDate, edu.endDate)}
                     </span>
                   </div>
-                  <p className="text-[var(--cv-color-text)]">
-                    {join([edu.degree, edu.field], ", ")}
-                    {edu.gpa ? `  •  GPA ${edu.gpa}` : ""}
-                  </p>
+                  {edu.gpa ? (
+                    <p className="text-[0.85em] text-[var(--cv-color-text)]">
+                      • IPK: {edu.gpa}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -119,9 +127,10 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {proj.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-0.5 text-[var(--cv-color-text)]"
+                      html={proj.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -162,7 +171,9 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
             <p className="text-[var(--cv-color-text)]">
               {join(
                 cv.languages.map((l) =>
-                  l.level?.trim() ? `${l.name} (${l.level})` : l.name,
+                  cv.showLanguageLevels && l.level?.trim()
+                    ? `${l.name} (${l.level})`
+                    : l.name,
                 ),
                 "  •  ",
               )}
@@ -209,9 +220,10 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {org.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={org.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -228,9 +240,10 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                     {item.title || "Item"}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                      {item.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-0.5 text-[var(--cv-color-text)]"
+                      html={item.description}
+                    />
                   ) : null}
                 </div>
               ))}

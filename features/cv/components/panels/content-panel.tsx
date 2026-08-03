@@ -33,6 +33,7 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
@@ -202,10 +203,14 @@ export function ContentPanel() {
   const reorderEducation = useCvStore((s) => s.reorderEducation);
   const removeSkill = useCvStore((s) => s.removeSkill);
   const reorderSkill = useCvStore((s) => s.reorderSkill);
+  const showSkillLevels = useCvStore((s) => s.showSkillLevels);
+  const setShowSkillLevels = useCvStore((s) => s.setShowSkillLevels);
   const removeInterpersonal = useCvStore((s) => s.removeInterpersonal);
   const reorderInterpersonal = useCvStore((s) => s.reorderInterpersonal);
   const removeLanguage = useCvStore((s) => s.removeLanguage);
   const reorderLanguage = useCvStore((s) => s.reorderLanguage);
+  const showLanguageLevels = useCvStore((s) => s.showLanguageLevels);
+  const setShowLanguageLevels = useCvStore((s) => s.setShowLanguageLevels);
   const removeCertification = useCvStore((s) => s.removeCertification);
   const reorderCertification = useCvStore((s) => s.reorderCertification);
   const removeOrganization = useCvStore((s) => s.removeOrganization);
@@ -292,6 +297,21 @@ export function ContentPanel() {
           onReorder={reorderSkill}
         />
 
+        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-2">
+          <label
+            htmlFor="show-skill-levels"
+            className="text-sm text-muted-foreground"
+          >
+            Tampilkan level keahlian
+          </label>
+          <Switch
+            id="show-skill-levels"
+            size="sm"
+            checked={showSkillLevels}
+            onCheckedChange={setShowSkillLevels}
+          />
+        </div>
+
         <SectionCard
           icon={HeartHandshakeIcon}
           title="Keahlian Interpersonal"
@@ -327,6 +347,21 @@ export function ContentPanel() {
           onRemove={removeLanguage}
           onReorder={reorderLanguage}
         />
+
+        <div className="flex items-center justify-between rounded-lg border bg-card px-3 py-2">
+          <label
+            htmlFor="show-language-levels"
+            className="text-sm text-muted-foreground"
+          >
+            Tampilkan tingkat bahasa
+          </label>
+          <Switch
+            id="show-language-levels"
+            size="sm"
+            checked={showLanguageLevels}
+            onCheckedChange={setShowLanguageLevels}
+          />
+        </div>
 
         <SectionCard
           icon={FolderGitIcon}
