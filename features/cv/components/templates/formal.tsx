@@ -1,5 +1,13 @@
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
+const SKILL_LEVEL_LABELS: Record<number, string> = {
+  1: "Pemula",
+  2: "Dasar",
+  3: "Menengah",
+  4: "Mahir",
+  5: "Ahli",
+};
+
 /**
  * Formal single-column CV template. Centered header, serif typography,
  * full-width section dividers. ATS-safe.
@@ -101,8 +109,8 @@ export function FormalTemplate({ cv }: TemplateProps) {
               <strong>Keahlian:</strong>{" "}
               {join(
                 cv.skills.map((s) =>
-                  s.level && s.level !== 3
-                    ? `${s.name} (${s.level}/5)`
+                  s.level
+                    ? `${s.name} (${SKILL_LEVEL_LABELS[s.level] ?? `${s.level}/5`})`
                     : s.name,
                 ),
                 ", ",
