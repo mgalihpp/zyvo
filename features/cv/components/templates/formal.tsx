@@ -26,7 +26,10 @@ export function FormalTemplate({ cv }: TemplateProps) {
     p.linkedin,
     p.github,
   ].filter(Boolean);
-  const hasSkillsAndLanguages = cv.skills.length > 0 || cv.languages.length > 0;
+  const hasSkillsAndLanguages =
+    cv.skills.length > 0 ||
+    cv.interpersonal.length > 0 ||
+    cv.languages.length > 0;
 
   return (
     <CvPage className="p-10">
@@ -64,8 +67,12 @@ export function FormalTemplate({ cv }: TemplateProps) {
                 </div>
                 <p className="text-[var(--cv-color-text)]">
                   {join([edu.degree, edu.field], ", ")}
-                  {edu.gpa ? `  •  IPK: ${edu.gpa}` : ""}
                 </p>
+                {edu.gpa ? (
+                  <p className="text-[0.85em] text-[var(--cv-color-text)]">
+                    • IPK: {edu.gpa}
+                  </p>
+                ) : null}
               </div>
             ))}
           </div>
@@ -115,6 +122,16 @@ export function FormalTemplate({ cv }: TemplateProps) {
                     ? `${s.name} (${SKILL_LEVEL_LABELS[s.level] ?? `${s.level}/5`})`
                     : s.name,
                 ),
+                ", ",
+              )}
+              .
+            </p>
+          ) : null}
+          {cv.interpersonal.length > 0 ? (
+            <p className="mt-1 text-[var(--cv-color-text)]">
+              <strong>Keahlian Interpersonal:</strong>{" "}
+              {join(
+                cv.interpersonal.map((s) => s.name),
                 ", ",
               )}
               .
