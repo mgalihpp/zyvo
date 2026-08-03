@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -142,9 +143,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                     </p>
                     {exp.description ? (
-                      <p className="mt-1 whitespace-pre-line text-[var(--cv-color-text)]">
-                        {exp.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-1 text-[var(--cv-color-text)]"
+                        html={exp.description}
+                      />
                     ) : null}
                   </div>
                 ))}
@@ -166,9 +168,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       </p>
                     ) : null}
                     {proj.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                        {proj.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-1 text-[var(--cv-color-text)]"
+                        html={proj.description}
+                      />
                     ) : null}
                   </div>
                 ))}
@@ -190,9 +193,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       </p>
                     ) : null}
                     {org.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                        {org.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-1 text-[var(--cv-color-text)]"
+                        html={org.description}
+                      />
                     ) : null}
                   </div>
                 ))}
@@ -209,9 +213,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
                       {item.title || "Item"}
                     </h3>
                     {item.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[var(--cv-color-text)]">
-                        {item.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-1 text-[var(--cv-color-text)]"
+                        html={item.description}
+                      />
                     ) : null}
                   </div>
                 ))}

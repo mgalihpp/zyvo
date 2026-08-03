@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
 /**
@@ -155,9 +156,10 @@ export function CompactTemplate({ cv }: TemplateProps) {
                       {join([exp.company, exp.location])}
                     </p>
                     {exp.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[0.85em]">
-                        {exp.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
+                        html={exp.description}
+                      />
                     ) : null}
                   </div>
                 ))}
@@ -210,9 +212,10 @@ export function CompactTemplate({ cv }: TemplateProps) {
                       ) : null}
                     </div>
                     {proj.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[0.85em]">
-                        {proj.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
+                        html={proj.description}
+                      />
                     ) : null}
                   </div>
                 ))}
@@ -229,9 +232,10 @@ export function CompactTemplate({ cv }: TemplateProps) {
                       {item.title}
                     </h3>
                     {item.description ? (
-                      <p className="mt-0.5 whitespace-pre-line text-[0.85em]">
-                        {item.description}
-                      </p>
+                      <HtmlContent
+                        className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
+                        html={item.description}
+                      />
                     ) : null}
                   </div>
                 ))}

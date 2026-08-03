@@ -1,3 +1,4 @@
+import { HtmlContent } from "@/features/cv/components/html-content";
 import { CREATIVE_PAGE_BACKGROUND } from "./page-backgrounds";
 import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
 
@@ -134,9 +135,10 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     {join([exp.company, exp.location])}
                   </p>
                   {exp.description ? (
-                    <p className="mt-1 whitespace-pre-line text-[0.9em]">
-                      {exp.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={exp.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -166,9 +168,10 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {proj.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {proj.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={proj.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -221,9 +224,10 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     ) : null}
                   </div>
                   {org.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {org.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={org.description}
+                    />
                   ) : null}
                 </div>
               ))}
@@ -240,9 +244,10 @@ export function CreativeTemplate({ cv }: TemplateProps) {
                     {item.title}
                   </h3>
                   {item.description ? (
-                    <p className="mt-0.5 whitespace-pre-line text-[0.88em]">
-                      {item.description}
-                    </p>
+                    <HtmlContent
+                      className="mt-1 text-[var(--cv-color-text)]"
+                      html={item.description}
+                    />
                   ) : null}
                 </div>
               ))}
