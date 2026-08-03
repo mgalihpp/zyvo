@@ -62,12 +62,17 @@ export function FormalTemplate({ cv }: TemplateProps) {
                     {edu.school || "Institusi"}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                    {edu.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">
+                    {join([edu.degree, edu.field], ", ")}
+                  </p>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                     {formatDateRange(edu.startDate, edu.endDate)}
                   </span>
                 </div>
-                <p className="text-[var(--cv-color-text)]">
-                  {join([edu.degree, edu.field], ", ")}
-                </p>
                 {edu.gpa ? (
                   <p className="text-[0.85em] text-[var(--cv-color-text)]">
                     • IPK: {edu.gpa}
@@ -87,15 +92,14 @@ export function FormalTemplate({ cv }: TemplateProps) {
                 <div className="flex items-baseline justify-between gap-3">
                   <h3 className="font-semibold text-[var(--cv-color-heading)]">
                     {exp.role || "Posisi"}
-                    {exp.company ? (
-                      <span className="font-normal text-[var(--cv-color-text)]">
-                        {" "}
-                        — {exp.company}
-                      </span>
-                    ) : null}
                   </h3>
                   <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                    {exp.location ? `${exp.location}  ` : ""}
+                    {exp.location}
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[var(--cv-color-text)]">{exp.company}</p>
+                  <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
                     {formatDateRange(exp.startDate, exp.endDate, exp.current)}
                   </span>
                 </div>

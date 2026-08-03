@@ -159,6 +159,7 @@ type Education {
   school    String
   degree    String?
   field     String?
+  location  String?
   startDate String?
   endDate   String?
   gpa       String?

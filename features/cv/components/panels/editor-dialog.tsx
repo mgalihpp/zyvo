@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CircleMinusIcon,
+  InfoIcon,
   PlusIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AiToolbar } from "@/features/ai/components/ai-toolbar";
 import { RichTextarea } from "@/features/cv/components/rich-textarea";
 import {
@@ -86,6 +93,31 @@ const LEVEL_LABELS = [
   "Lanjutan",
   "Mahir",
 ] as const;
+
+/** Label with an optional info icon that shows a tooltip hint. */
+function LabelHint({ label, hint }: { label: string; hint?: string }) {
+  return (
+    <div className="flex items-center gap-1">
+      <FieldLabel>{label}</FieldLabel>
+      {hint ? (
+        <TooltipProvider delay={300}>
+          <Tooltip>
+            <TooltipTrigger
+              type="button"
+              aria-label={`Petunjuk ${label}`}
+              className="text-muted-foreground/70 transition-colors hover:text-foreground"
+            >
+              <InfoIcon className="size-3" />
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-64">
+              {hint}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : null}
+    </div>
+  );
+}
 
 /** Dialog that edits the section referenced by the store's editorTarget. */
 export function EditorDialog() {
@@ -166,12 +198,14 @@ function SummaryBody() {
       <div className="space-y-4">
         <TipsBanner />
         <Field>
-          <FieldLabel htmlFor="summary">Profil</FieldLabel>
+          <LabelHint
+            label="Profil"
+            hint="Paragraf singkat yang merangkum pengalaman, keunggulan, dan tujuan karier Anda."
+          />
           <RichTextarea
             value={summary ?? ""}
             onChange={(html) => setSummary(html)}
             maxLength={3000}
-            placeholder="Paragraf singkat yang merangkum pengalaman, keunggulan, dan tujuan karier Anda."
           />
         </Field>
         <AiToolbar
@@ -579,12 +613,14 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
         </Field>
       </div>
       <Field>
-        <FieldLabel>Deskripsi</FieldLabel>
+        <LabelHint
+          label="Deskripsi"
+          hint="Jelaskan tanggung jawab dan pencapaian Anda. Gunakan poin-poin atau kalimat singkat."
+        />
         <RichTextarea
           maxLength={2000}
           value={value.description ?? ""}
           onChange={(html) => onChange({ description: html })}
-          placeholder="Jelaskan tanggung jawab dan pencapaian Anda. Gunakan poin-poin atau kalimat singkat."
         />
         <AiToolbar
           fieldType="deskripsi pengalaman"
@@ -621,6 +657,14 @@ function EducationForm({ value, onChange }: FormProps<EducationInput>) {
           value={value.field ?? ""}
           onChange={(e) => onChange({ field: e.target.value })}
           placeholder="Sistem Informasi"
+        />
+      </Field>
+      <Field>
+        <FieldLabel>Lokasi</FieldLabel>
+        <Input
+          value={value.location ?? ""}
+          onChange={(e) => onChange({ location: e.target.value })}
+          placeholder="Jakarta"
         />
       </Field>
       <Field>
@@ -753,12 +797,14 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
         </Field>
       </div>
       <Field>
-        <FieldLabel>Deskripsi</FieldLabel>
+        <LabelHint
+          label="Deskripsi"
+          hint="Rincian singkat mengenai sertifikasi ini."
+        />
         <RichTextarea
           maxLength={2000}
           value={value.description ?? ""}
           onChange={(html) => onChange({ description: html })}
-          placeholder="Rincian singkat mengenai sertifikasi ini."
         />
         <AiToolbar
           fieldType="deskripsi sertifikasi"
@@ -798,12 +844,14 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
         />
       </Field>
       <Field>
-        <FieldLabel>Deskripsi</FieldLabel>
+        <LabelHint
+          label="Deskripsi"
+          hint="Jelaskan peran dan kontribusi Anda."
+        />
         <RichTextarea
           maxLength={2000}
           value={value.description ?? ""}
           onChange={(html) => onChange({ description: html })}
-          placeholder="Jelaskan peran dan kontribusi Anda."
         />
         <AiToolbar
           fieldType="deskripsi organisasi"
@@ -851,12 +899,14 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
         </Field>
       </div>
       <Field>
-        <FieldLabel>Deskripsi</FieldLabel>
+        <LabelHint
+          label="Deskripsi"
+          hint="Apa yang dilakukan proyek ini dan peran Anda di dalamnya."
+        />
         <RichTextarea
           maxLength={2000}
           value={value.description ?? ""}
           onChange={(html) => onChange({ description: html })}
-          placeholder="Apa yang dilakukan proyek ini dan peran Anda di dalamnya."
         />
         <AiToolbar
           fieldType="deskripsi proyek"
@@ -880,12 +930,11 @@ function CustomForm({ value, onChange }: FormProps<CustomInput>) {
         />
       </Field>
       <Field>
-        <FieldLabel>Deskripsi</FieldLabel>
+        <LabelHint label="Deskripsi" hint="Rincian tambahan." />
         <RichTextarea
           maxLength={2000}
           value={value.description ?? ""}
           onChange={(html) => onChange({ description: html })}
-          placeholder="Rincian tambahan."
         />
         <AiToolbar
           fieldType="deskripsi"
