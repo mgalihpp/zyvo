@@ -228,25 +228,16 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
             </Section>
           ) : null}
 
-          {cv.custom.length > 0 ? (
-            <Section title="Tambahan">
-              <div className="space-y-3">
-                {cv.custom.map((item, i) => (
-                  <div key={i} data-entry>
-                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {item.title || "Item"}
-                    </h3>
-                    {item.description ? (
-                      <HtmlContent
-                        className="mt-1 text-[var(--cv-color-text)]"
-                        html={item.description}
-                      />
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+          {cv.custom.map((item, i) => (
+            <Section key={`custom-${i}`} title={item.title || "Tambahan"}>
+              {item.description ? (
+                <HtmlContent
+                  className="mt-1 text-[var(--cv-color-text)]"
+                  html={item.description}
+                />
+              ) : null}
             </Section>
-          ) : null}
+          ))}
         </div>
       </div>
     </CvPage>

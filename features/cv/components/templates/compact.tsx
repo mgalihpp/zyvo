@@ -237,25 +237,16 @@ export function CompactTemplate({ cv }: TemplateProps) {
             </MainSection>
           ) : null}
 
-          {cv.custom.length > 0 ? (
-            <MainSection title="Tambahan">
-              <div className="space-y-2">
-                {cv.custom.map((item, i) => (
-                  <div key={i} data-entry>
-                    <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
-                      {item.title}
-                    </h3>
-                    {item.description ? (
-                      <HtmlContent
-                        className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
-                        html={item.description}
-                      />
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+          {cv.custom.map((item, i) => (
+            <MainSection key={`custom-${i}`} title={item.title || "Tambahan"}>
+              {item.description ? (
+                <HtmlContent
+                  className="mt-0.5 text-[0.85em] text-[var(--cv-color-text)]"
+                  html={item.description}
+                />
+              ) : null}
             </MainSection>
-          ) : null}
+          ))}
         </div>
       </div>
     </CvPage>

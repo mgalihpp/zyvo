@@ -41,6 +41,14 @@ const FormalLazy = lazy(() =>
 
 export const TEMPLATES: TemplateMeta[] = [
   {
+    id: "formal",
+    name: "Formal",
+    description:
+      "Single-column formal layout dengan font serif & garis section.",
+    categories: ["ats", "professional", "one-column"],
+    lazyComponent: FormalLazy,
+  },
+  {
     id: "classic",
     name: "Classic",
     description: "Satu kolom, ramah ATS, rapi dan netral.",
@@ -128,7 +136,7 @@ export const TEMPLATE_REGISTRY: TemplateRegistry = TEMPLATES.reduce(
 );
 
 /** Default template id used when a CV references an unknown/missing template. */
-export const DEFAULT_TEMPLATE_ID = "classic";
+export const DEFAULT_TEMPLATE_ID = "formal";
 
 export function getTemplate(id: string | undefined): TemplateMeta {
   return (

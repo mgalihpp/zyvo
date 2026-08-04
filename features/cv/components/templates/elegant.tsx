@@ -270,25 +270,17 @@ export function ElegantTemplate({ cv }: TemplateProps) {
           </Section>
         ) : null}
 
-        {cv.custom.length > 0 ? (
-          <Section title="Tambahan">
-            <div className="space-y-2">
-              {cv.custom.map((item, i) => (
-                <div key={i} data-entry>
-                  <h3 className="text-[0.9em] font-semibold text-[var(--cv-color-heading)]">
-                    {item.title}
-                  </h3>
-                  {item.description ? (
-                    <HtmlContent
-                      className="mt-0.5 text-[0.88em] text-[var(--cv-color-text)]"
-                      html={item.description}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
+        {cv.custom.map((item, i) => (
+          <Section key={`custom-${i}`} title={item.title || "Tambahan"}>
+            <div className="mx-auto mb-3 h-px w-full bg-[var(--cv-color-accent)]/20" />
+            {item.description ? (
+              <HtmlContent
+                className="mt-0.5 text-[0.88em] text-[var(--cv-color-text)]"
+                html={item.description}
+              />
+            ) : null}
           </Section>
-        ) : null}
+        ))}
       </div>
     </CvPage>
   );
