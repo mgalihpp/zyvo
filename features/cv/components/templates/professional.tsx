@@ -1,5 +1,11 @@
 import { HtmlContent } from "@/features/cv/components/html-content";
-import { CvPage, formatDateRange, join, type TemplateProps } from "./shared";
+import {
+  CvPage,
+  formatDateRange,
+  join,
+  orderedMainSections,
+  type TemplateProps,
+} from "./shared";
 
 /**
  * Professional template. A colored header band with the name and contact
@@ -32,111 +38,166 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
       </header>
 
       <div className="px-10 py-8">
-        {cv.summary?.trim() ? (
-          <Section title="Ringkasan">
-            <p className="whitespace-pre-line text-[var(--cv-color-text)]">
-              {cv.summary}
-            </p>
-          </Section>
-        ) : null}
-
-        {cv.experience.length > 0 ? (
-          <Section title="Pengalaman">
-            <div className="space-y-3">
-              {cv.experience.map((exp, i) => (
-                <div key={i} data-entry>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {exp.role || "Posisi"}
-                    </h3>
-                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                      {exp.location}
-                    </span>
+        {orderedMainSections(cv).map((id) => {
+          switch (id) {
+            case "summary":
+              return cv.summary?.trim() ? (
+                <Section key="summary" title="Ringkasan">
+                  <p className="whitespace-pre-line text-[var(--cv-color-text)]">
+                    {cv.summary}
+                  </p>
+                </Section>
+              ) : null;
+            case "experience":
+              return cv.experience.length > 0 ? (
+                <Section key="experience" title="Pengalaman">
+                  <div className="space-y-3">
+                    {cv.experience.map((exp, i) => (
+                      <div key={i} data-entry>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                            {exp.role || "Posisi"}
+                          </h3>
+                          <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                            {exp.location}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-[var(--cv-color-accent)]">
+                            {exp.company}
+                          </p>
+                          <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                            {formatDateRange(
+                              exp.startDate,
+                              exp.endDate,
+                              exp.current,
+                            )}
+                          </span>
+                        </div>
+                        {exp.description ? (
+                          <HtmlContent
+                            className="mt-1 text-[var(--cv-color-text)]"
+                            html={exp.description}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="text-[var(--cv-color-accent)]">
-                      {exp.company}
-                    </p>
-                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                      {formatDateRange(exp.startDate, exp.endDate, exp.current)}
-                    </span>
+                </Section>
+              ) : null;
+            case "education":
+              return cv.education.length > 0 ? (
+                <Section key="education" title="Pendidikan">
+                  <div className="space-y-3">
+                    {cv.education.map((edu, i) => (
+                      <div key={i} data-entry>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                            {edu.school || "Institusi"}
+                          </h3>
+                          <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                            {edu.location}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <p className="text-[var(--cv-color-text)]">
+                            {join([edu.degree, edu.field], ", ")}
+                          </p>
+                          <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                            {formatDateRange(edu.startDate, edu.endDate)}
+                          </span>
+                        </div>
+                        {edu.gpa ? (
+                          <p className="text-[0.85em] text-[var(--cv-color-text)]">
+                            • IPK: {edu.gpa}
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                  {exp.description ? (
-                    <HtmlContent
-                      className="mt-1 text-[var(--cv-color-text)]"
-                      html={exp.description}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </Section>
-        ) : null}
-
-        {cv.education.length > 0 ? (
-          <Section title="Pendidikan">
-            <div className="space-y-3">
-              {cv.education.map((edu, i) => (
-                <div key={i} data-entry>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {edu.school || "Institusi"}
-                    </h3>
-                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                      {edu.location}
-                    </span>
+                </Section>
+              ) : null;
+            case "projects":
+              return cv.projects.length > 0 ? (
+                <Section key="projects" title="Proyek">
+                  <div className="space-y-3">
+                    {cv.projects.map((proj, i) => (
+                      <div key={i} data-entry>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                            {proj.name || "Proyek"}
+                            {proj.type ? (
+                              <span className="font-normal text-[var(--cv-color-text)]">
+                                {" "}
+                                — {proj.type}
+                              </span>
+                            ) : null}
+                          </h3>
+                          {proj.date ? (
+                            <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                              {proj.date}
+                            </span>
+                          ) : null}
+                        </div>
+                        {proj.description ? (
+                          <HtmlContent
+                            className="mt-0.5 text-[var(--cv-color-text)]"
+                            html={proj.description}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="text-[var(--cv-color-text)]">
-                      {join([edu.degree, edu.field], ", ")}
-                    </p>
-                    <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                      {formatDateRange(edu.startDate, edu.endDate)}
-                    </span>
+                </Section>
+              ) : null;
+            case "organizations":
+              return cv.organizations.length > 0 ? (
+                <Section key="organizations" title="Organisasi">
+                  <div className="space-y-3">
+                    {cv.organizations.map((org, i) => (
+                      <div key={i} data-entry>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="font-semibold text-[var(--cv-color-heading)]">
+                            {org.role || "Posisi"}
+                            {org.name ? (
+                              <span className="font-normal text-[var(--cv-color-text)]">
+                                {" "}
+                                — {org.name}
+                              </span>
+                            ) : null}
+                          </h3>
+                          {org.date ? (
+                            <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
+                              {org.date}
+                            </span>
+                          ) : null}
+                        </div>
+                        {org.description ? (
+                          <HtmlContent
+                            className="mt-1 text-[var(--cv-color-text)]"
+                            html={org.description}
+                          />
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                  {edu.gpa ? (
-                    <p className="text-[0.85em] text-[var(--cv-color-text)]">
-                      • IPK: {edu.gpa}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </Section>
-        ) : null}
-
-        {cv.projects.length > 0 ? (
-          <Section title="Proyek">
-            <div className="space-y-3">
-              {cv.projects.map((proj, i) => (
-                <div key={i} data-entry>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {proj.name || "Proyek"}
-                      {proj.type ? (
-                        <span className="font-normal text-[var(--cv-color-text)]">
-                          {" "}
-                          — {proj.type}
-                        </span>
-                      ) : null}
-                    </h3>
-                    {proj.date ? (
-                      <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                        {proj.date}
-                      </span>
-                    ) : null}
-                  </div>
-                  {proj.description ? (
+                </Section>
+              ) : null;
+            case "custom":
+              return cv.custom.map((item, i) => (
+                <Section key={`custom-${i}`} title={item.title || "Tambahan"}>
+                  {item.description ? (
                     <HtmlContent
                       className="mt-0.5 text-[var(--cv-color-text)]"
-                      html={proj.description}
+                      html={item.description}
                     />
                   ) : null}
-                </div>
-              ))}
-            </div>
-          </Section>
-        ) : null}
+                </Section>
+              ));
+            default:
+              return null;
+          }
+        })}
 
         {cv.skills.length > 0 ? (
           <Section title="Keahlian">
@@ -193,59 +254,6 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
                     ? ` — ${join([c.issuer, c.date])}`
                     : ""}
                 </p>
-              ))}
-            </div>
-          </Section>
-        ) : null}
-
-        {cv.organizations.length > 0 ? (
-          <Section title="Organisasi">
-            <div className="space-y-3">
-              {cv.organizations.map((org, i) => (
-                <div key={i} data-entry>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                      {org.role || "Posisi"}
-                      {org.name ? (
-                        <span className="font-normal text-[var(--cv-color-text)]">
-                          {" "}
-                          — {org.name}
-                        </span>
-                      ) : null}
-                    </h3>
-                    {org.date ? (
-                      <span className="shrink-0 text-[0.85em] text-[var(--cv-color-text)] opacity-70">
-                        {org.date}
-                      </span>
-                    ) : null}
-                  </div>
-                  {org.description ? (
-                    <HtmlContent
-                      className="mt-1 text-[var(--cv-color-text)]"
-                      html={org.description}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </Section>
-        ) : null}
-
-        {cv.custom.length > 0 ? (
-          <Section title="Tambahan">
-            <div className="space-y-3">
-              {cv.custom.map((item, i) => (
-                <div key={i} data-entry>
-                  <h3 className="font-semibold text-[var(--cv-color-heading)]">
-                    {item.title || "Item"}
-                  </h3>
-                  {item.description ? (
-                    <HtmlContent
-                      className="mt-0.5 text-[var(--cv-color-text)]"
-                      html={item.description}
-                    />
-                  ) : null}
-                </div>
               ))}
             </div>
           </Section>
