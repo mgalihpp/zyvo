@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactCrop, {
   type Crop,
   centerCrop,
-  cropToCanvas,
-  cropToImg,
   type PixelCrop,
 } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
@@ -22,6 +20,37 @@ import {
 import { detectFaceCenter } from "@/features/cv/lib/face-detection";
 
 const MAX_SCALE = 2;
+const MAX_OUTPUT = 1024;
+
+function renderCropCanvas(
+  img: HTMLImageElement,
+  pixelCrop: PixelCrop,
+  scale: number,
+  rotate: number,
+  maxDim: number,
+): HTMLCanvasElement | null {
+  const scaleX = img.naturalWidth / img.width;
+  const scaleY = img.naturalHeight / img.height;
+  const cropW = pixelCrop.width * scaleX;
+  const cropH = pixelCrop.height * scaleY;
+  const fit = Math.min(1, maxDim / Math.max(cropW, cropH));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(cropW * fit));
+  canvas.height = Math.max(1, Math.round(cropH * fit));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.imageSmoothingQuality = "high";
+  const fw = img.naturalWidth / 2;
+  const fh = img.naturalHeight / 2;
+  ctx.scale(fit, fit);
+  ctx.translate(-pixelCrop.x * scaleX, -pixelCrop.y * scaleY);
+  ctx.translate(fw, fh);
+  ctx.rotate((rotate * Math.PI) / 180);
+  ctx.scale(scale, scale);
+  ctx.translate(-fw, -fh);
+  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+  return canvas;
+}
 
 export function PhotoCropDialog({
   src,
@@ -38,14 +67,18 @@ export function PhotoCropDialog({
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
-  const [preview, setPreview] = useState<string>();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
 
   const onImageLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       const img = e.currentTarget;
       const { width, height } = img;
-      setCrop(centerCrop({ unit: "%", width: 80 }, width, height));
+      const cropW = 80;
+      const cropH = (cropW * width) / height;
+      setCrop(
+        centerCrop({ unit: "%", width: cropW, height: cropH }, width, height),
+      );
       if (detectionDoneRef.current) return;
       detectionDoneRef.current = true;
       const renderedW = img.clientWidth || width;
@@ -66,35 +99,31 @@ export function PhotoCropDialog({
     [],
   );
 
-  const updatePreview = useCallback(
-    async (pixelCrop: PixelCrop) => {
-      if (!imgRef.current) return;
-      setPreview(await cropToImg(imgRef.current, pixelCrop, scale, rotate));
-    },
-    [scale, rotate],
-  );
-
-  const onComplete = useCallback(
-    (pixelCrop: PixelCrop) => {
-      setCompletedCrop(pixelCrop);
-      void updatePreview(pixelCrop);
-    },
-    [updatePreview],
-  );
-
-  useEffect(() => {
-    if (completedCrop) void updatePreview(completedCrop);
-  }, [completedCrop, updatePreview]);
+  const onComplete = useCallback((pixelCrop: PixelCrop) => {
+    setError(undefined);
+    setCompletedCrop(pixelCrop);
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!imgRef.current || !completedCrop) return;
     setSaving(true);
-    const canvas = document.createElement("canvas");
-    await cropToCanvas(imgRef.current, canvas, completedCrop, scale, rotate);
+    const canvas = renderCropCanvas(
+      imgRef.current,
+      completedCrop,
+      scale,
+      rotate,
+      MAX_OUTPUT,
+    );
+    if (!canvas) {
+      setSaving(false);
+      setError("Gagal memproses foto, coba foto lain.");
+      return;
+    }
     canvas.toBlob(
       (blob) => {
         setSaving(false);
         if (blob) onCrop(blob);
+        else setError("Gagal memproses foto, coba foto lain.");
       },
       "image/jpeg",
       0.92,
@@ -126,6 +155,7 @@ export function PhotoCropDialog({
                 src={src}
                 alt="Foto untuk dipotong"
                 onLoad={onImageLoad}
+                style={{ transform: `scale(${scale}) rotate(${rotate}deg)` }}
                 className="max-h-72 w-full object-contain"
               />
             </ReactCrop>
@@ -162,16 +192,8 @@ export function PhotoCropDialog({
             </label>
           </div>
 
-          {preview ? (
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground">Hasil:</span>
-              {/* biome-ignore lint/performance/noImgElement: crop preview needs plain img */}
-              <img
-                src={preview}
-                alt="Hasil potongan"
-                className="size-16 rounded-full object-cover ring-1 ring-border"
-              />
-            </div>
+          {error ? (
+            <span className="text-xs text-destructive">{error}</span>
           ) : null}
         </div>
 
