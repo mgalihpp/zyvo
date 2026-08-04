@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { detectFaceCenter } from "@/features/cv/lib/face-detection";
 
 const MAX_SCALE = 2;
 
@@ -32,6 +33,7 @@ export function PhotoCropDialog({
   onCrop: (blob: Blob) => void;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const detectionDoneRef = useRef(false);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [scale, setScale] = useState(1);
@@ -41,8 +43,25 @@ export function PhotoCropDialog({
 
   const onImageLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
-      const { width, height } = e.currentTarget;
+      const img = e.currentTarget;
+      const { width, height } = img;
       setCrop(centerCrop({ unit: "%", width: 80 }, width, height));
+      if (detectionDoneRef.current) return;
+      detectionDoneRef.current = true;
+      const renderedW = img.clientWidth || width;
+      const renderedH = img.clientHeight || height;
+      void (async () => {
+        const center = await detectFaceCenter(img, renderedW, renderedH);
+        if (!center) return;
+        setCrop((prev) => {
+          if (!prev) return prev;
+          const halfW = prev.width / 2;
+          const halfH = prev.height / 2;
+          const x = Math.min(100 - prev.width, Math.max(0, center.x - halfW));
+          const y = Math.min(100 - prev.height, Math.max(0, center.y - halfH));
+          return { ...prev, x, y };
+        });
+      })();
     },
     [],
   );
