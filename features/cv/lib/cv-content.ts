@@ -3,7 +3,11 @@ import {
   templateDefaultTypography,
 } from "@/features/cv/components/templates/template-colors";
 import type { CvContent } from "@/features/cv/schemas/cv";
-import { colorsSchema, typographySchema } from "@/features/cv/schemas/cv";
+import {
+  colorsSchema,
+  DEFAULT_SECTION_ORDER,
+  typographySchema,
+} from "@/features/cv/schemas/cv";
 import type { prisma } from "@/lib/db";
 
 type CvDoc = NonNullable<Awaited<ReturnType<typeof prisma.cV.findUnique>>>;
@@ -35,6 +39,8 @@ export function toCvContent(cv: CvDoc): CvContent {
       .parse(cv.colors ?? defaultColors),
     showSkillLevels: cv.showSkillLevels ?? true,
     showLanguageLevels: cv.showLanguageLevels ?? true,
+    sectionOrder: (cv.sectionOrder ??
+      DEFAULT_SECTION_ORDER) as typeof DEFAULT_SECTION_ORDER,
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",
