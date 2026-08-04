@@ -342,7 +342,9 @@ export const cvRouter = createTRPCRouter({
       personal: cv.personal ?? { ...emptyPersonal },
       colors: cv.colors ?? templateDefaultColors(cv.templateId),
       typography: cv.typography ?? templateDefaultTypography(cv.templateId),
-      sectionOrder: cv.sectionOrder ?? DEFAULT_SECTION_ORDER,
+      sectionOrder: cv.sectionOrder?.length
+        ? cv.sectionOrder
+        : DEFAULT_SECTION_ORDER,
     }));
   }),
 
@@ -355,7 +357,12 @@ export const cvRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
       }
 
-      return { ...cv, sectionOrder: cv.sectionOrder ?? DEFAULT_SECTION_ORDER };
+      return {
+        ...cv,
+        sectionOrder: cv.sectionOrder?.length
+          ? cv.sectionOrder
+          : DEFAULT_SECTION_ORDER,
+      };
     }),
 
   create: protectedProcedure
@@ -389,7 +396,9 @@ export const cvRouter = createTRPCRouter({
           organizations: input?.organizations ?? [],
           projects: input?.projects ?? [],
           custom: input?.custom ?? [],
-          sectionOrder: input?.sectionOrder ?? DEFAULT_SECTION_ORDER,
+          sectionOrder: input?.sectionOrder?.length
+            ? input.sectionOrder
+            : DEFAULT_SECTION_ORDER,
         },
         select: { id: true },
       });

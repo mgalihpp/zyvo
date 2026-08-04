@@ -20,6 +20,11 @@ describe("orderedMainSections", () => {
     expect(orderedMainSections(cv)).toEqual(["summary"]);
   });
 
+  it("defaults to DEFAULT_SECTION_ORDER when sectionOrder is an empty array", () => {
+    const cv = baseCv({ sectionOrder: [], summary: "x" });
+    expect(orderedMainSections(cv)).toEqual(["summary"]);
+  });
+
   it("follows user order", () => {
     const cv = baseCv({
       sectionOrder: ["projects", "summary"],

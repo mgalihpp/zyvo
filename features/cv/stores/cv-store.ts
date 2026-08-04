@@ -249,7 +249,9 @@ export type CvStore = ReturnType<typeof createCvStore>;
 export const createCvStore = (init?: CvStoreInit) =>
   createStore<CvState>((set, get) => ({
     ...(init?.content ?? emptyContent),
-    sectionOrder: init?.content?.sectionOrder ?? [...DEFAULT_SECTION_ORDER],
+    sectionOrder: init?.content?.sectionOrder?.length
+      ? init.content.sectionOrder
+      : [...DEFAULT_SECTION_ORDER],
     colors: init?.content?.colors ?? emptyColors,
     showSkillLevels: init?.content?.showSkillLevels ?? true,
     showLanguageLevels: init?.content?.showLanguageLevels ?? true,

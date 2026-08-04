@@ -89,11 +89,15 @@ function hasSectionContent(cv: CvContent, id: MainSectionId): boolean {
 }
 
 /** Main section ids in user order, filtered to those with content. Falls back
- *  to DEFAULT_SECTION_ORDER when the stored order is missing or contains
- *  unknown/duplicate ids. */
+ *  to DEFAULT_SECTION_ORDER when the stored order is missing, empty, or
+ *  contains unknown/duplicate ids. */
 export function orderedMainSections(cv: CvContent): MainSectionId[] {
+  const order =
+    cv.sectionOrder && cv.sectionOrder.length > 0
+      ? cv.sectionOrder
+      : DEFAULT_SECTION_ORDER;
   const seen = new Set<MainSectionId>();
-  for (const id of cv.sectionOrder ?? DEFAULT_SECTION_ORDER) {
+  for (const id of order) {
     if (!VALID_MAIN.has(id) || seen.has(id as MainSectionId)) continue;
     const section = id as MainSectionId;
     if (hasSectionContent(cv, section)) seen.add(section);

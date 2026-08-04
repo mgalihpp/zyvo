@@ -58,6 +58,11 @@ describe("toCvContent", () => {
     expect(content.sectionOrder).toEqual(DEFAULT_SECTION_ORDER);
   });
 
+  it("defaults sectionOrder when stored as an empty array", () => {
+    const content = toCvContent(mockCv({ sectionOrder: [] }));
+    expect(content.sectionOrder).toEqual(DEFAULT_SECTION_ORDER);
+  });
+
   it("preserves a stored sectionOrder", () => {
     const order: Array<"education" | "summary"> = ["education", "summary"];
     const content = toCvContent(mockCv({ sectionOrder: order }));

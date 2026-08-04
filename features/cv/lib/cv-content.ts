@@ -39,8 +39,9 @@ export function toCvContent(cv: CvDoc): CvContent {
       .parse(cv.colors ?? defaultColors),
     showSkillLevels: cv.showSkillLevels ?? true,
     showLanguageLevels: cv.showLanguageLevels ?? true,
-    sectionOrder: (cv.sectionOrder ??
-      DEFAULT_SECTION_ORDER) as typeof DEFAULT_SECTION_ORDER,
+    sectionOrder: (cv.sectionOrder?.length
+      ? cv.sectionOrder
+      : DEFAULT_SECTION_ORDER) as typeof DEFAULT_SECTION_ORDER,
     personal: {
       fullName: cv.personal?.fullName ?? "",
       headline: cv.personal?.headline ?? "",
