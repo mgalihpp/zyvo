@@ -117,14 +117,6 @@ export const TEMPLATES: TemplateMeta[] = [
     premium: true,
     lazyComponent: CompactLazy,
   },
-  {
-    id: "formal",
-    name: "Formal",
-    description:
-      "Single-column formal layout dengan font serif & garis section.",
-    categories: ["ats", "professional", "one-column"],
-    lazyComponent: FormalLazy,
-  },
 ];
 
 export const TEMPLATE_REGISTRY: TemplateRegistry = TEMPLATES.reduce(
