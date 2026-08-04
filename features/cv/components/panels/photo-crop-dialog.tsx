@@ -103,7 +103,7 @@ export function PhotoCropDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg" scrollable>
         <DialogHeader>
           <DialogTitle>Potong foto</DialogTitle>
           <DialogDescription>
