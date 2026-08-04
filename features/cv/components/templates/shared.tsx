@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { CvContent } from "@/features/cv/schemas/cv";
+import type { CvContent, MainSectionId } from "@/features/cv/schemas/cv";
+import { DEFAULT_SECTION_ORDER } from "@/features/cv/schemas/cv";
 
 export interface TemplateProps {
   cv: CvContent;
@@ -66,4 +67,40 @@ export function isEmptyCv(cv: CvContent) {
     cv.education.length === 0 &&
     cv.skills.length === 0
   );
+}
+
+const VALID_MAIN: ReadonlySet<string> = new Set(DEFAULT_SECTION_ORDER);
+
+function hasSectionContent(cv: CvContent, id: MainSectionId): boolean {
+  switch (id) {
+    case "summary":
+      return Boolean(cv.summary?.trim());
+    case "experience":
+      return cv.experience.length > 0;
+    case "education":
+      return cv.education.length > 0;
+    case "projects":
+      return cv.projects.length > 0;
+    case "organizations":
+      return cv.organizations.length > 0;
+    case "custom":
+      return cv.custom.length > 0;
+  }
+}
+
+/** Main section ids in user order, filtered to those with content. Falls back
+ *  to DEFAULT_SECTION_ORDER when the stored order is missing, empty, or
+ *  contains unknown/duplicate ids. */
+export function orderedMainSections(cv: CvContent): MainSectionId[] {
+  const order =
+    cv.sectionOrder && cv.sectionOrder.length > 0
+      ? cv.sectionOrder
+      : DEFAULT_SECTION_ORDER;
+  const seen = new Set<MainSectionId>();
+  for (const id of order) {
+    if (!VALID_MAIN.has(id) || seen.has(id as MainSectionId)) continue;
+    const section = id as MainSectionId;
+    if (hasSectionContent(cv, section)) seen.add(section);
+  }
+  return [...seen];
 }

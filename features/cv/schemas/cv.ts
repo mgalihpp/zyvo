@@ -86,6 +86,18 @@ export const customSchema = z.object({
   description: z.string().max(2000).optional().default(""),
 });
 
+/** The six user-reorderable main sections, in default render order. */
+export const MAIN_SECTION_IDS = [
+  "summary",
+  "experience",
+  "education",
+  "projects",
+  "organizations",
+  "custom",
+] as const;
+export type MainSectionId = (typeof MAIN_SECTION_IDS)[number];
+export const DEFAULT_SECTION_ORDER: MainSectionId[] = [...MAIN_SECTION_IDS];
+
 export const FONT_IDS = [
   "geist",
   "inter",
@@ -159,6 +171,9 @@ export const cvContentSchema = z.object({
   organizations: z.array(organizationSchema).default([]),
   projects: z.array(projectSchema).default([]),
   custom: z.array(customSchema).default([]),
+  sectionOrder: z
+    .array(z.enum(MAIN_SECTION_IDS))
+    .default(DEFAULT_SECTION_ORDER),
   showSkillLevels: z.boolean().default(true),
   showLanguageLevels: z.boolean().default(true),
 });

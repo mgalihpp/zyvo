@@ -96,6 +96,7 @@ model CV {
   organizations Organization[]
   projects      Project[]
   custom        Custom[]
+  sectionOrder  String[]
   showSkillLevels    Boolean @default(true)
   showLanguageLevels Boolean @default(true)
   createdAt     DateTime        @default(now())

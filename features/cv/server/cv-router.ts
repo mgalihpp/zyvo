@@ -14,6 +14,7 @@ import { isPremiumTemplate } from "@/features/cv/lib/premium-templates";
 import {
   cvCreateSchema,
   cvUpdateSchema,
+  DEFAULT_SECTION_ORDER,
   emptyPersonal,
 } from "@/features/cv/schemas/cv";
 import { createTRPCRouter, protectedProcedure } from "@/server/trpc/trpc";
@@ -329,6 +330,7 @@ export const cvRouter = createTRPCRouter({
         organizations: true,
         projects: true,
         custom: true,
+        sectionOrder: true,
       },
     });
     // Normalize legacy documents where `personal` was not yet stored (null)
@@ -340,6 +342,9 @@ export const cvRouter = createTRPCRouter({
       personal: cv.personal ?? { ...emptyPersonal },
       colors: cv.colors ?? templateDefaultColors(cv.templateId),
       typography: cv.typography ?? templateDefaultTypography(cv.templateId),
+      sectionOrder: cv.sectionOrder?.length
+        ? cv.sectionOrder
+        : DEFAULT_SECTION_ORDER,
     }));
   }),
 
@@ -352,7 +357,12 @@ export const cvRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "CV not found" });
       }
 
-      return cv;
+      return {
+        ...cv,
+        sectionOrder: cv.sectionOrder?.length
+          ? cv.sectionOrder
+          : DEFAULT_SECTION_ORDER,
+      };
     }),
 
   create: protectedProcedure
@@ -386,6 +396,9 @@ export const cvRouter = createTRPCRouter({
           organizations: input?.organizations ?? [],
           projects: input?.projects ?? [],
           custom: input?.custom ?? [],
+          sectionOrder: input?.sectionOrder?.length
+            ? input.sectionOrder
+            : DEFAULT_SECTION_ORDER,
         },
         select: { id: true },
       });

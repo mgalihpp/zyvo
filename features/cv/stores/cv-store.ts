@@ -12,6 +12,7 @@ import type {
   ExperienceInput,
   InterpersonalInput,
   LanguageInput,
+  MainSectionId,
   OrganizationInput,
   PersonalInput,
   ProjectInput,
@@ -19,6 +20,7 @@ import type {
   Typography,
 } from "@/features/cv/schemas/cv";
 import {
+  DEFAULT_SECTION_ORDER,
   emptyCertification,
   emptyColors,
   emptyCustom,
@@ -171,6 +173,9 @@ export interface CvState extends CvContent {
   removeCustom: (index: number) => void;
   reorderCustom: (from: number, to: number) => void;
 
+  sectionOrder: MainSectionId[];
+  moveSection: (from: number, to: number) => void;
+
   setShowSkillLevels: (show: boolean) => void;
   setShowLanguageLevels: (show: boolean) => void;
 
@@ -202,6 +207,7 @@ const emptyContent: CvContent = {
   organizations: [],
   projects: [],
   custom: [],
+  sectionOrder: [...DEFAULT_SECTION_ORDER],
   showSkillLevels: true,
   showLanguageLevels: true,
 };
@@ -243,6 +249,9 @@ export type CvStore = ReturnType<typeof createCvStore>;
 export const createCvStore = (init?: CvStoreInit) =>
   createStore<CvState>((set, get) => ({
     ...(init?.content ?? emptyContent),
+    sectionOrder: init?.content?.sectionOrder?.length
+      ? init.content.sectionOrder
+      : [...DEFAULT_SECTION_ORDER],
     colors: init?.content?.colors ?? emptyColors,
     showSkillLevels: init?.content?.showSkillLevels ?? true,
     showLanguageLevels: init?.content?.showLanguageLevels ?? true,
@@ -531,6 +540,12 @@ export const createCvStore = (init?: CvStoreInit) =>
         ...touch()(s),
       })),
 
+    moveSection: (from, to) =>
+      set((s) => ({
+        sectionOrder: moveItem(s.sectionOrder, from, to),
+        ...touch()(s),
+      })),
+
     getContent: () => {
       const s = get();
       return {
@@ -549,6 +564,7 @@ export const createCvStore = (init?: CvStoreInit) =>
         organizations: s.organizations,
         projects: s.projects,
         custom: s.custom,
+        sectionOrder: s.sectionOrder,
         showSkillLevels: s.showSkillLevels,
         showLanguageLevels: s.showLanguageLevels,
       };

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import {
   closestCenter,
   DndContext,
@@ -17,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   AwardIcon,
   BriefcaseIcon,
   CircleDashedIcon,
@@ -34,6 +37,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import type { MainSectionId } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +117,8 @@ function SectionCard({
   onEdit,
   onRemove,
   onReorder,
+  moveUp,
+  moveDown,
   emptyLabel,
 }: {
   icon: LucideIcon;
@@ -122,6 +128,8 @@ function SectionCard({
   onEdit: (index: number) => void;
   onRemove?: (index: number) => void;
   onReorder?: (from: number, to: number) => void;
+  moveUp?: () => void;
+  moveDown?: () => void;
   emptyLabel: string;
 }) {
   const sensors = useSensors(
@@ -144,6 +152,30 @@ function SectionCard({
       <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <Icon className="size-4 shrink-0 text-muted-foreground" />
         <h3 className="flex-1 truncate text-sm font-semibold">{title}</h3>
+        {moveUp || moveDown ? (
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={moveUp}
+              disabled={!moveUp}
+              aria-label={`Pindah ${title} ke atas`}
+            >
+              <ArrowUpIcon />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={moveDown}
+              disabled={!moveDown}
+              aria-label={`Pindah ${title} ke bawah`}
+            >
+              <ArrowDownIcon />
+            </Button>
+          </div>
+        ) : null}
         {onAdd ? (
           <Button
             type="button"
@@ -153,6 +185,8 @@ function SectionCard({
           >
             <PlusIcon />
           </Button>
+        ) : moveUp || moveDown ? (
+          <span className="size-6 shrink-0" aria-hidden />
         ) : null}
       </div>
 
@@ -220,7 +254,137 @@ export function ContentPanel() {
   const removeCustom = useCvStore((s) => s.removeCustom);
   const reorderCustom = useCvStore((s) => s.reorderCustom);
 
+  const sectionOrder = useCvStore((s) => s.sectionOrder);
+  const moveSection = useCvStore((s) => s.moveSection);
+  const setSummary = useCvStore((s) => s.setSummary);
+
   const openEditor = useCvStore((s) => s.openEditor);
+
+  function arrowHandlers(id: MainSectionId) {
+    const i = sectionOrder.indexOf(id);
+    if (i === -1) return { moveUp: undefined, moveDown: undefined };
+    return {
+      moveUp: i > 0 ? () => moveSection(i, i - 1) : undefined,
+      moveDown:
+        i < sectionOrder.length - 1 ? () => moveSection(i, i + 1) : undefined,
+    };
+  }
+
+  const mainCards: Record<MainSectionId, ReactElement> = {
+    summary: (
+      <SectionCard
+        icon={UserIcon}
+        title="Profil"
+        emptyLabel="Belum ada profil."
+        items={[{ id: "summary", label: "Profil" }]}
+        onEdit={() =>
+          openEditor({ section: "summary", mode: "edit", index: null })
+        }
+        onRemove={() => setSummary("")}
+        {...arrowHandlers("summary")}
+      />
+    ),
+    experience: (
+      <SectionCard
+        icon={BriefcaseIcon}
+        title="Pengalaman"
+        emptyLabel="Belum ada pengalaman."
+        items={experience.map((e, i) => ({
+          id: `exp-${i}`,
+          label: e.company || e.role || `Pengalaman ${i + 1}`,
+        }))}
+        onAdd={() =>
+          openEditor({ section: "experience", mode: "add", index: null })
+        }
+        onEdit={(i) =>
+          openEditor({ section: "experience", mode: "edit", index: i })
+        }
+        onRemove={removeExperience}
+        onReorder={reorderExperience}
+        {...arrowHandlers("experience")}
+      />
+    ),
+    education: (
+      <SectionCard
+        icon={GraduationCapIcon}
+        title="Pendidikan"
+        emptyLabel="Belum ada pendidikan."
+        items={education.map((e, i) => ({
+          id: `edu-${i}`,
+          label: e.school || `Pendidikan ${i + 1}`,
+        }))}
+        onAdd={() =>
+          openEditor({ section: "education", mode: "add", index: null })
+        }
+        onEdit={(i) =>
+          openEditor({ section: "education", mode: "edit", index: i })
+        }
+        onRemove={removeEducation}
+        onReorder={reorderEducation}
+        {...arrowHandlers("education")}
+      />
+    ),
+    projects: (
+      <SectionCard
+        icon={FolderGitIcon}
+        title="Proyek"
+        emptyLabel="Tidak Ada Proyek"
+        items={projects.map((p, i) => ({
+          id: `proj-${i}`,
+          label: p.name || `Proyek ${i + 1}`,
+        }))}
+        onAdd={() =>
+          openEditor({ section: "projects", mode: "add", index: null })
+        }
+        onEdit={(i) =>
+          openEditor({ section: "projects", mode: "edit", index: i })
+        }
+        onRemove={removeProject}
+        onReorder={reorderProject}
+        {...arrowHandlers("projects")}
+      />
+    ),
+    organizations: (
+      <SectionCard
+        icon={UsersRoundIcon}
+        title="Organisasi"
+        emptyLabel="Tidak Ada Organisasi"
+        items={organizations.map((o, i) => ({
+          id: `org-${i}`,
+          label: o.name || `Organisasi ${i + 1}`,
+        }))}
+        onAdd={() =>
+          openEditor({ section: "organizations", mode: "add", index: null })
+        }
+        onEdit={(i) =>
+          openEditor({ section: "organizations", mode: "edit", index: i })
+        }
+        onRemove={removeOrganization}
+        onReorder={reorderOrganization}
+        {...arrowHandlers("organizations")}
+      />
+    ),
+    custom: (
+      <SectionCard
+        icon={CircleDashedIcon}
+        title="Kustom"
+        emptyLabel="Tidak Ada Kustom"
+        items={custom.map((c, i) => ({
+          id: `custom-${i}`,
+          label: c.title || `Kustom ${i + 1}`,
+        }))}
+        onAdd={() =>
+          openEditor({ section: "custom", mode: "add", index: null })
+        }
+        onEdit={(i) =>
+          openEditor({ section: "custom", mode: "edit", index: i })
+        }
+        onRemove={removeCustom}
+        onReorder={reorderCustom}
+        {...arrowHandlers("custom")}
+      />
+    ),
+  };
 
   return (
     <div>
@@ -232,52 +396,9 @@ export function ContentPanel() {
       </div>
 
       <div className="space-y-4 p-4">
-        {/* Profil / summary — singleton, always present and not removable */}
-        <SectionCard
-          icon={UserIcon}
-          title="Profil"
-          emptyLabel="Belum ada profil."
-          items={[{ id: "summary", label: "Profil" }]}
-          onEdit={() =>
-            openEditor({ section: "summary", mode: "edit", index: null })
-          }
-        />
-
-        <SectionCard
-          icon={BriefcaseIcon}
-          title="Pengalaman"
-          emptyLabel="Belum ada pengalaman."
-          items={experience.map((e, i) => ({
-            id: `exp-${i}`,
-            label: e.company || e.role || `Pengalaman ${i + 1}`,
-          }))}
-          onAdd={() =>
-            openEditor({ section: "experience", mode: "add", index: null })
-          }
-          onEdit={(i) =>
-            openEditor({ section: "experience", mode: "edit", index: i })
-          }
-          onRemove={removeExperience}
-          onReorder={reorderExperience}
-        />
-
-        <SectionCard
-          icon={GraduationCapIcon}
-          title="Pendidikan"
-          emptyLabel="Belum ada pendidikan."
-          items={education.map((e, i) => ({
-            id: `edu-${i}`,
-            label: e.school || `Pendidikan ${i + 1}`,
-          }))}
-          onAdd={() =>
-            openEditor({ section: "education", mode: "add", index: null })
-          }
-          onEdit={(i) =>
-            openEditor({ section: "education", mode: "edit", index: i })
-          }
-          onRemove={removeEducation}
-          onReorder={reorderEducation}
-        />
+        {sectionOrder.map((id) => (
+          <div key={id}>{mainCards[id]}</div>
+        ))}
 
         <SectionCard
           icon={StarIcon}
@@ -364,24 +485,6 @@ export function ContentPanel() {
         </div>
 
         <SectionCard
-          icon={FolderGitIcon}
-          title="Proyek"
-          emptyLabel="Tidak Ada Proyek"
-          items={projects.map((p, i) => ({
-            id: `proj-${i}`,
-            label: p.name || `Proyek ${i + 1}`,
-          }))}
-          onAdd={() =>
-            openEditor({ section: "projects", mode: "add", index: null })
-          }
-          onEdit={(i) =>
-            openEditor({ section: "projects", mode: "edit", index: i })
-          }
-          onRemove={removeProject}
-          onReorder={reorderProject}
-        />
-
-        <SectionCard
           icon={AwardIcon}
           title="Sertifikasi"
           emptyLabel="Tidak Ada Sertifikasi"
@@ -397,42 +500,6 @@ export function ContentPanel() {
           }
           onRemove={removeCertification}
           onReorder={reorderCertification}
-        />
-
-        <SectionCard
-          icon={UsersRoundIcon}
-          title="Organisasi"
-          emptyLabel="Tidak Ada Organisasi"
-          items={organizations.map((o, i) => ({
-            id: `org-${i}`,
-            label: o.name || `Organisasi ${i + 1}`,
-          }))}
-          onAdd={() =>
-            openEditor({ section: "organizations", mode: "add", index: null })
-          }
-          onEdit={(i) =>
-            openEditor({ section: "organizations", mode: "edit", index: i })
-          }
-          onRemove={removeOrganization}
-          onReorder={reorderOrganization}
-        />
-
-        <SectionCard
-          icon={CircleDashedIcon}
-          title="Kustom"
-          emptyLabel="Tidak Ada Kustom"
-          items={custom.map((c, i) => ({
-            id: `custom-${i}`,
-            label: c.title || `Kustom ${i + 1}`,
-          }))}
-          onAdd={() =>
-            openEditor({ section: "custom", mode: "add", index: null })
-          }
-          onEdit={(i) =>
-            openEditor({ section: "custom", mode: "edit", index: i })
-          }
-          onRemove={removeCustom}
-          onReorder={reorderCustom}
         />
       </div>
     </div>

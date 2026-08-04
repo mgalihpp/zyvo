@@ -1,5 +1,9 @@
 import type { CvContent } from "@/features/cv/schemas/cv";
-import { emptyColors, emptyTypography } from "@/features/cv/schemas/cv";
+import {
+  DEFAULT_SECTION_ORDER,
+  emptyColors,
+  emptyTypography,
+} from "@/features/cv/schemas/cv";
 
 /**
  * Static sample CV used to render template thumbnails in the picker. Kept small
@@ -12,6 +16,7 @@ export const SAMPLE_CV: CvContent = {
   colors: { ...emptyColors },
   showSkillLevels: true,
   showLanguageLevels: true,
+  sectionOrder: [...DEFAULT_SECTION_ORDER],
   personal: {
     fullName: "Cecily Bakker",
     headline: "Digital Marketing Specialist",

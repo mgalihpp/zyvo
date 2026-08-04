@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { templateDefaultColors } from "./../components/templates/template-colors";
-import { cvCreateSchema } from "../schemas/cv";
+import { cvCreateSchema, DEFAULT_SECTION_ORDER } from "../schemas/cv";
 import { toCvContent } from "./cv-content";
 
 function mockCv(overrides: Record<string, unknown> = {}) {
@@ -51,6 +51,22 @@ describe("toCvContent", () => {
     const content = toCvContent(mockCv());
     expect(content.typography.fontHeading).toBe("inter");
     expect(content.typography.fontBody).toBe("inter");
+  });
+
+  it("defaults sectionOrder when the document predates it", () => {
+    const content = toCvContent(mockCv());
+    expect(content.sectionOrder).toEqual(DEFAULT_SECTION_ORDER);
+  });
+
+  it("defaults sectionOrder when stored as an empty array", () => {
+    const content = toCvContent(mockCv({ sectionOrder: [] }));
+    expect(content.sectionOrder).toEqual(DEFAULT_SECTION_ORDER);
+  });
+
+  it("preserves a stored sectionOrder", () => {
+    const order: Array<"education" | "summary"> = ["education", "summary"];
+    const content = toCvContent(mockCv({ sectionOrder: order }));
+    expect(content.sectionOrder).toEqual(order);
   });
 });
 
