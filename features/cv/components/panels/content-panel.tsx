@@ -17,6 +17,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   AwardIcon,
   BriefcaseIcon,
   CircleDashedIcon,
@@ -34,6 +36,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import type { MainSectionId } from "@/features/cv/schemas/cv";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +116,8 @@ function SectionCard({
   onEdit,
   onRemove,
   onReorder,
+  moveUp,
+  moveDown,
   emptyLabel,
 }: {
   icon: LucideIcon;
@@ -122,6 +127,8 @@ function SectionCard({
   onEdit: (index: number) => void;
   onRemove?: (index: number) => void;
   onReorder?: (from: number, to: number) => void;
+  moveUp?: () => void;
+  moveDown?: () => void;
   emptyLabel: string;
 }) {
   const sensors = useSensors(
@@ -144,6 +151,30 @@ function SectionCard({
       <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <Icon className="size-4 shrink-0 text-muted-foreground" />
         <h3 className="flex-1 truncate text-sm font-semibold">{title}</h3>
+        {moveUp || moveDown ? (
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={moveUp}
+              disabled={!moveUp}
+              aria-label={`Pindah ${title} ke atas`}
+            >
+              <ArrowUpIcon />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={moveDown}
+              disabled={!moveDown}
+              aria-label={`Pindah ${title} ke bawah`}
+            >
+              <ArrowDownIcon />
+            </Button>
+          </div>
+        ) : null}
         {onAdd ? (
           <Button
             type="button"
@@ -220,7 +251,20 @@ export function ContentPanel() {
   const removeCustom = useCvStore((s) => s.removeCustom);
   const reorderCustom = useCvStore((s) => s.reorderCustom);
 
+  const sectionOrder = useCvStore((s) => s.sectionOrder);
+  const moveSection = useCvStore((s) => s.moveSection);
+
   const openEditor = useCvStore((s) => s.openEditor);
+
+  function arrowHandlers(id: MainSectionId) {
+    const i = sectionOrder.indexOf(id);
+    if (i === -1) return { moveUp: undefined, moveDown: undefined };
+    return {
+      moveUp: i > 0 ? () => moveSection(i, i - 1) : undefined,
+      moveDown:
+        i < sectionOrder.length - 1 ? () => moveSection(i, i + 1) : undefined,
+    };
+  }
 
   return (
     <div>
@@ -241,6 +285,7 @@ export function ContentPanel() {
           onEdit={() =>
             openEditor({ section: "summary", mode: "edit", index: null })
           }
+          {...arrowHandlers("summary")}
         />
 
         <SectionCard
@@ -259,6 +304,7 @@ export function ContentPanel() {
           }
           onRemove={removeExperience}
           onReorder={reorderExperience}
+          {...arrowHandlers("experience")}
         />
 
         <SectionCard
@@ -277,6 +323,7 @@ export function ContentPanel() {
           }
           onRemove={removeEducation}
           onReorder={reorderEducation}
+          {...arrowHandlers("education")}
         />
 
         <SectionCard
@@ -379,6 +426,7 @@ export function ContentPanel() {
           }
           onRemove={removeProject}
           onReorder={reorderProject}
+          {...arrowHandlers("projects")}
         />
 
         <SectionCard
@@ -415,6 +463,7 @@ export function ContentPanel() {
           }
           onRemove={removeOrganization}
           onReorder={reorderOrganization}
+          {...arrowHandlers("organizations")}
         />
 
         <SectionCard
@@ -433,6 +482,7 @@ export function ContentPanel() {
           }
           onRemove={removeCustom}
           onReorder={reorderCustom}
+          {...arrowHandlers("custom")}
         />
       </div>
     </div>
