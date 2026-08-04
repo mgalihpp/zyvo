@@ -3,7 +3,9 @@ import { toBulletHtml } from "./bullets";
 
 describe("toBulletHtml", () => {
   it("wraps each line as a bullet, stripping markers", () => {
-    expect(toBulletHtml("- Rintis fitur A\n• Kelola tim\n* Optimalkan biaya")).toBe(
+    expect(
+      toBulletHtml("- Rintis fitur A\n• Kelola tim\n* Optimalkan biaya"),
+    ).toBe(
       "<ul><li>Rintis fitur A</li><li>Kelola tim</li><li>Optimalkan biaya</li></ul>",
     );
   });

@@ -48,9 +48,7 @@ export function useAiImprove(
         action,
         fieldType,
       });
-      onChange(
-        action === "bulletify" ? toBulletHtml(result) : result,
-      );
+      onChange(action === "bulletify" ? toBulletHtml(result) : result);
     } catch {
       // error already set via onError
     }
