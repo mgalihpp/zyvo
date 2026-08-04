@@ -12,6 +12,7 @@ import type {
   ExperienceInput,
   InterpersonalInput,
   LanguageInput,
+  MainSectionId,
   OrganizationInput,
   PersonalInput,
   ProjectInput,
@@ -19,6 +20,7 @@ import type {
   Typography,
 } from "@/features/cv/schemas/cv";
 import {
+  DEFAULT_SECTION_ORDER,
   emptyCertification,
   emptyColors,
   emptyCustom,
@@ -32,8 +34,6 @@ import {
   emptySkill,
   emptyTypography,
 } from "@/features/cv/schemas/cv";
-import type { MainSectionId } from "@/features/cv/schemas/cv";
-import { DEFAULT_SECTION_ORDER } from "@/features/cv/schemas/cv";
 
 export type SaveStatus = "idle" | "dirty" | "saving" | "saved" | "error";
 
