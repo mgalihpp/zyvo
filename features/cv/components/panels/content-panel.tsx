@@ -185,6 +185,8 @@ function SectionCard({
           >
             <PlusIcon />
           </Button>
+        ) : moveUp || moveDown ? (
+          <span className="size-6 shrink-0" aria-hidden />
         ) : null}
       </div>
 
