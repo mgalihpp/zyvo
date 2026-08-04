@@ -168,6 +168,36 @@ function ExportSkeleton() {
   );
 }
 
+/** Fallback for the lazy AI panel: tab list + usage dot + score-card layout. */
+function AiSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center gap-1 p-4 pb-0">
+        <div className="flex min-w-0 flex-1 gap-1 rounded-md bg-muted p-1">
+          <Skeleton className="h-8 flex-1 rounded-sm bg-background" />
+          <Skeleton className="h-8 flex-1 rounded-sm bg-background" />
+        </div>
+        <Skeleton className="size-4 shrink-0 rounded-full" />
+      </div>
+      <div className="space-y-4 p-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-8 w-36 rounded-md" />
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {["a", "b", "c", "d"].map((id) => (
+            <div key={id} className="flex flex-col items-center gap-1.5">
+              <Skeleton className="size-16 rounded-full" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-20 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
 /** Fallback for the lazy history panel: header + a stack of version rows. */
 function HistorySkeleton() {
   return (
@@ -236,11 +266,7 @@ function ActivePanel() {
             title="Asisten AI"
             note="Analisis, skor, dan perbaikan CV dengan AI."
           />
-          <Suspense
-            fallback={
-              <div className="p-4 text-sm text-muted-foreground">Memuat...</div>
-            }
-          >
+          <Suspense fallback={<AiSkeleton />}>
             <AiPanel />
           </Suspense>
         </div>
