@@ -1,21 +1,54 @@
 "use client";
 
 import { Loader2, UserRound } from "lucide-react";
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useUploadThing } from "@/features/cv/lib/uploadthing";
 import { useCvStore } from "@/features/cv/stores/cv-store-provider";
+import { PhotoCropDialog } from "./photo-crop-dialog";
+
+const MAX_BYTES = 2 * 1024 * 1024;
 
 export function PhotoField() {
   const photo = useCvStore((s) => s.personal.photo);
   const setPersonal = useCvStore((s) => s.setPersonal);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [pendingFile, setPendingFile] = useState<string>();
+  const [error, setError] = useState<string>();
+
   const { startUpload, isUploading } = useUploadThing("cvPhoto", {
     onClientUploadComplete: (res) => {
       if (res[0]) setPersonal({ photo: res[0].ufsUrl });
     },
   });
+
+  const onPick = useCallback((file: File | undefined) => {
+    setError(undefined);
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Pilih file gambar (JPG, PNG, WebP).");
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setError("Ukuran foto maksimal 2MB.");
+      return;
+    }
+    setPendingFile(URL.createObjectURL(file));
+  }, []);
+
+  const onCrop = useCallback(
+    async (blob: Blob) => {
+      setPendingFile(undefined);
+      await startUpload([new File([blob], "foto.jpg", { type: "image/jpeg" })]);
+    },
+    [startUpload],
+  );
+
+  const onCancelCrop = useCallback(() => {
+    if (pendingFile) URL.revokeObjectURL(pendingFile);
+    setPendingFile(undefined);
+  }, [pendingFile]);
 
   return (
     <div className="flex items-center gap-3">
@@ -42,9 +75,10 @@ export function PhotoField() {
           type="file"
           accept="image/*"
           className="sr-only"
-          onChange={(e) =>
-            e.target.files?.length && void startUpload([e.target.files[0]])
-          }
+          onChange={(e) => {
+            onPick(e.target.files?.[0]);
+            e.target.value = "";
+          }}
         />
       </button>
 
@@ -74,7 +108,18 @@ export function PhotoField() {
             </span>
           </>
         )}
+        {error ? (
+          <span className="text-xs text-destructive">{error}</span>
+        ) : null}
       </div>
+
+      {pendingFile ? (
+        <PhotoCropDialog
+          src={pendingFile}
+          onCancel={onCancelCrop}
+          onCrop={onCrop}
+        />
+      ) : null}
     </div>
   );
 }
