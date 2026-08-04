@@ -117,7 +117,7 @@ export function PhotoCropDialog({
               crop={crop}
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               onComplete={onComplete}
-              aspect={undefined}
+              aspect={1}
               ruleOfThirds
             >
               {/* biome-ignore lint/performance/noImgElement: crop preview needs plain img */}
