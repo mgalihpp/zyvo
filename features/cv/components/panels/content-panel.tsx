@@ -253,6 +253,7 @@ export function ContentPanel() {
 
   const sectionOrder = useCvStore((s) => s.sectionOrder);
   const moveSection = useCvStore((s) => s.moveSection);
+  const setSummary = useCvStore((s) => s.setSummary);
 
   const openEditor = useCvStore((s) => s.openEditor);
 
@@ -276,7 +277,8 @@ export function ContentPanel() {
       </div>
 
       <div className="space-y-4 p-4">
-        {/* Profil / summary — singleton, always present and not removable */}
+        {/* Profil / summary — singleton card; the section itself is not
+            removable but its content can be cleared. */}
         <SectionCard
           icon={UserIcon}
           title="Profil"
@@ -285,6 +287,7 @@ export function ContentPanel() {
           onEdit={() =>
             openEditor({ section: "summary", mode: "edit", index: null })
           }
+          onRemove={() => setSummary("")}
           {...arrowHandlers("summary")}
         />
 
