@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/tooltip";
 import { AiToolbar } from "@/features/ai/components/ai-toolbar";
 import { RichTextarea } from "@/features/cv/components/rich-textarea";
+import { missingRequiredFields } from "@/features/cv/lib/required-fields";
 import {
   type CertificationInput,
   type CustomInput,
@@ -232,6 +233,7 @@ function SummaryBody() {
 interface FormProps<T> {
   value: T;
   onChange: (patch: Partial<T>) => void;
+  errors?: readonly string[];
 }
 
 type ListSection = Exclude<EditorSection, "summary">;
@@ -309,6 +311,36 @@ function useSectionConfig(section: ListSection) {
   return config[section];
 }
 
+const REQUIRED_FIELDS: Record<ListSection, readonly string[]> = {
+  experience: ["company", "role"],
+  education: ["school"],
+  skills: ["name"],
+  interpersonal: ["name"],
+  languages: ["name"],
+  certifications: ["name"],
+  organizations: ["name"],
+  projects: ["name"],
+  custom: ["title"],
+};
+
+const REQUIRED_LABELS: Record<string, string> = {
+  company: "Perusahaan",
+  role: "Posisi",
+  school: "Institusi",
+  name: "Nama",
+  title: "Judul",
+};
+
+function missingFields(section: ListSection, value: Record<string, unknown>) {
+  return missingRequiredFields(value, REQUIRED_FIELDS[section]);
+}
+
+function fieldError(errors: readonly string[] | undefined, field: string) {
+  return errors?.includes(field)
+    ? `${REQUIRED_LABELS[field] ?? field} wajib diisi.`
+    : undefined;
+}
+
 function SectionBody({
   section,
   mode,
@@ -329,8 +361,18 @@ function SectionBody({
   // stable id so React can key the rows correctly across add/remove.
   const [drafts, setDrafts] = useState<
     { id: number; value: Record<string, unknown> }[]
-  >(() => [{ id: 0, value: { ...cfg.empty } }]);
+  >(() => [
+    {
+      id: 0,
+      value: {
+        ...(editing && index !== null
+          ? (cfg.item[index] ?? cfg.empty)
+          : cfg.empty),
+      },
+    },
+  ]);
   const [nextId, setNextId] = useState(1);
+  const [errors, setErrors] = useState<Record<number, string[]>>({});
 
   const storeItem = editing ? cfg.item[index] : undefined;
 
@@ -340,17 +382,25 @@ function SectionBody({
   const Form = cfg.Form;
   const sectionTitle = SECTION_TITLES[section];
 
-  // ── Edit mode: single live form bound to the store item. ──────────────────
+  // ── Edit mode: validate and commit one draft on confirmation. ─────────────
   if (editing && index !== null) {
+    const draft = drafts[0];
+
     return (
       <>
         <div className="space-y-4">
           {banner}
           <Form
             // biome-ignore lint/suspicious/noExplicitAny: item matches form shape
-            value={storeItem as any}
+            value={draft.value as any}
+            errors={errors[0]}
             // biome-ignore lint/suspicious/noExplicitAny: patch matches item shape
-            onChange={(patch: any) => cfg.update(index, patch)}
+            onChange={(patch: any) => {
+              setDrafts((prev) => [
+                { ...prev[0], value: { ...prev[0].value, ...patch } },
+              ]);
+              setErrors({});
+            }}
           />
         </div>
 
@@ -358,7 +408,16 @@ function SectionBody({
           <Button
             type="button"
             className="w-full"
-            onClick={closeEditor}
+            onClick={() => {
+              const missing = missingFields(section, draft.value);
+              if (missing.length > 0) {
+                setErrors({ 0: missing });
+                return;
+              }
+              // biome-ignore lint/suspicious/noExplicitAny: draft matches item shape
+              cfg.update(index, draft.value as any);
+              closeEditor();
+            }}
             size="lg"
           >
             Simpan
@@ -375,6 +434,12 @@ function SectionBody({
         d.id === id ? { ...d, value: { ...d.value, ...patch } } : d,
       ),
     );
+    setErrors((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   }
 
   function addDraft() {
@@ -387,6 +452,16 @@ function SectionBody({
   }
 
   function handleConfirm() {
+    const nextErrors: Record<number, string[]> = {};
+    for (const draft of drafts) {
+      const missing = missingFields(section, draft.value);
+      if (missing.length > 0) nextErrors[draft.id] = missing;
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     for (const d of drafts) {
       // biome-ignore lint/suspicious/noExplicitAny: draft matches item shape
       cfg.add(d.value as any);
@@ -406,6 +481,7 @@ function SectionBody({
                 <Form
                   // biome-ignore lint/suspicious/noExplicitAny: draft matches form shape
                   value={d.value as any}
+                  errors={errors[d.id]}
                   onChange={(patch: Record<string, unknown>) =>
                     updateDraft(d.id, patch)
                   }
@@ -558,7 +634,11 @@ function DateField({
   );
 }
 
-function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
+function ExperienceForm({
+  value,
+  onChange,
+  errors,
+}: FormProps<ExperienceInput>) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -566,17 +646,21 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
           <FieldLabel>Posisi</FieldLabel>
           <Input
             value={value.role}
+            aria-invalid={!!fieldError(errors, "role")}
             onChange={(e) => onChange({ role: e.target.value })}
             placeholder="Frontend Engineer"
           />
+          <FieldError>{fieldError(errors, "role")}</FieldError>
         </Field>
         <Field>
           <FieldLabel>Perusahaan</FieldLabel>
           <Input
             value={value.company}
+            aria-invalid={!!fieldError(errors, "company")}
             onChange={(e) => onChange({ company: e.target.value })}
             placeholder="Acme Inc."
           />
+          <FieldError>{fieldError(errors, "company")}</FieldError>
         </Field>
         <DateField
           label="Mulai"
@@ -632,16 +716,18 @@ function ExperienceForm({ value, onChange }: FormProps<ExperienceInput>) {
   );
 }
 
-function EducationForm({ value, onChange }: FormProps<EducationInput>) {
+function EducationForm({ value, onChange, errors }: FormProps<EducationInput>) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field>
         <FieldLabel>Institusi</FieldLabel>
         <Input
           value={value.school}
+          aria-invalid={!!fieldError(errors, "school")}
           onChange={(e) => onChange({ school: e.target.value })}
           placeholder="Universitas Indonesia"
         />
+        <FieldError>{fieldError(errors, "school")}</FieldError>
       </Field>
       <Field>
         <FieldLabel>Gelar</FieldLabel>
@@ -691,7 +777,7 @@ function EducationForm({ value, onChange }: FormProps<EducationInput>) {
   );
 }
 
-function SkillForm({ value, onChange }: FormProps<SkillInput>) {
+function SkillForm({ value, onChange, errors }: FormProps<SkillInput>) {
   const level = value.level ?? 3;
   return (
     <div className="grid items-start gap-4 sm:grid-cols-2">
@@ -699,9 +785,11 @@ function SkillForm({ value, onChange }: FormProps<SkillInput>) {
         <FieldLabel>Keahlian</FieldLabel>
         <Input
           value={value.name}
+          aria-invalid={!!fieldError(errors, "name")}
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder="Web design"
         />
+        <FieldError>{fieldError(errors, "name")}</FieldError>
       </Field>
       <Field>
         <FieldLabel>
@@ -725,29 +813,37 @@ function SkillForm({ value, onChange }: FormProps<SkillInput>) {
   );
 }
 
-function InterpersonalForm({ value, onChange }: FormProps<InterpersonalInput>) {
+function InterpersonalForm({
+  value,
+  onChange,
+  errors,
+}: FormProps<InterpersonalInput>) {
   return (
     <Field>
       <FieldLabel>Keahlian Interpersonal</FieldLabel>
       <Input
         value={value.name}
+        aria-invalid={!!fieldError(errors, "name")}
         onChange={(e) => onChange({ name: e.target.value })}
         placeholder="Komunikasi"
       />
+      <FieldError>{fieldError(errors, "name")}</FieldError>
     </Field>
   );
 }
 
-function LanguageForm({ value, onChange }: FormProps<LanguageInput>) {
+function LanguageForm({ value, onChange, errors }: FormProps<LanguageInput>) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field>
         <FieldLabel>Bahasa</FieldLabel>
         <Input
           value={value.name}
+          aria-invalid={!!fieldError(errors, "name")}
           onChange={(e) => onChange({ name: e.target.value })}
           placeholder="Bahasa Inggris"
         />
+        <FieldError>{fieldError(errors, "name")}</FieldError>
       </Field>
       <Field>
         <FieldLabel>Tingkat</FieldLabel>
@@ -761,7 +857,11 @@ function LanguageForm({ value, onChange }: FormProps<LanguageInput>) {
   );
 }
 
-function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
+function CertificationForm({
+  value,
+  onChange,
+  errors,
+}: FormProps<CertificationInput>) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -769,9 +869,11 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
           <FieldLabel>Nama</FieldLabel>
           <Input
             value={value.name}
+            aria-invalid={!!fieldError(errors, "name")}
             onChange={(e) => onChange({ name: e.target.value })}
             placeholder="AWS Certified Developer"
           />
+          <FieldError>{fieldError(errors, "name")}</FieldError>
         </Field>
         <Field>
           <FieldLabel>Diterima Dari</FieldLabel>
@@ -816,7 +918,11 @@ function CertificationForm({ value, onChange }: FormProps<CertificationInput>) {
   );
 }
 
-function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
+function OrganizationForm({
+  value,
+  onChange,
+  errors,
+}: FormProps<OrganizationInput>) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -824,9 +930,11 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
           <FieldLabel>Nama</FieldLabel>
           <Input
             value={value.name}
+            aria-invalid={!!fieldError(errors, "name")}
             onChange={(e) => onChange({ name: e.target.value })}
             placeholder="Himpunan Mahasiswa"
           />
+          <FieldError>{fieldError(errors, "name")}</FieldError>
         </Field>
         <DateField
           label="Tanggal"
@@ -863,7 +971,7 @@ function OrganizationForm({ value, onChange }: FormProps<OrganizationInput>) {
   );
 }
 
-function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
+function ProjectForm({ value, onChange, errors }: FormProps<ProjectInput>) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -871,9 +979,11 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
           <FieldLabel>Nama</FieldLabel>
           <Input
             value={value.name}
+            aria-invalid={!!fieldError(errors, "name")}
             onChange={(e) => onChange({ name: e.target.value })}
             placeholder="Website Portofolio"
           />
+          <FieldError>{fieldError(errors, "name")}</FieldError>
         </Field>
         <Field>
           <FieldLabel>Jenis</FieldLabel>
@@ -918,16 +1028,18 @@ function ProjectForm({ value, onChange }: FormProps<ProjectInput>) {
   );
 }
 
-function CustomForm({ value, onChange }: FormProps<CustomInput>) {
+function CustomForm({ value, onChange, errors }: FormProps<CustomInput>) {
   return (
     <div className="space-y-4">
       <Field>
         <FieldLabel>Judul</FieldLabel>
         <Input
           value={value.title}
+          aria-invalid={!!fieldError(errors, "title")}
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="Penghargaan / Publikasi / dll."
         />
+        <FieldError>{fieldError(errors, "title")}</FieldError>
       </Field>
       <Field>
         <LabelHint label="Deskripsi" hint="Rincian tambahan." />
