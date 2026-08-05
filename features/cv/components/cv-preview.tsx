@@ -154,7 +154,7 @@ export function CvPreview() {
              * WYSIWYG vs the PDF and never reflows narrower when the editor
              * panel opens. */}
             <div
-              className="w-[794px]"
+              className="w-[794px] select-none"
               style={cvRootStyle({
                 typography: content.typography,
                 colors: content.colors,

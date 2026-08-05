@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactElement } from "react";
 import {
   closestCenter,
   DndContext,
@@ -35,6 +34,7 @@ import {
   UserIcon,
   UsersRoundIcon,
 } from "lucide-react";
+import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import type { MainSectionId } from "@/features/cv/schemas/cv";
