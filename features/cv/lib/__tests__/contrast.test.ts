@@ -7,7 +7,6 @@ import {
   passesAA,
   passesAALarge,
   readableOn,
-  relativeLuminance,
 } from "@/features/cv/lib/contrast";
 
 describe("hexToRgb", () => {

@@ -278,9 +278,9 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal[data-reveal="shown"] {
     opacity: 1;
-    animation: none !important;
+    animation: none;
   }
 }
 

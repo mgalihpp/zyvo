@@ -269,6 +269,7 @@ function OnboardingWizardInner({
       router.push("/dashboard");
       return;
     }
+    // biome-ignore lint/suspicious/noDocumentCookie: one-off skip flag, not an auth/session cookie
     document.cookie = `${ONBOARDING_SKIP_COOKIE}=1; path=/; max-age=31536000`;
     router.push("/dashboard");
   }

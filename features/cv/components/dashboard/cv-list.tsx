@@ -91,7 +91,9 @@ function CvCard({
   return (
     <div className="group flex flex-col gap-2">
       {/* Portrait thumbnail */}
-      <div
+      <button
+        type="button"
+        aria-label={`Buka CV ${cv.title}`}
         className="group/thumb relative cursor-pointer overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md hover:ring-2 hover:ring-primary/30"
         onClick={onEdit}
       >
@@ -105,7 +107,7 @@ function CvCard({
             LIHAT CV &nbsp;&rarr;
           </span>
         </div>
-      </div>
+      </button>
 
       {/* Meta row below thumbnail */}
       <div className="flex items-start justify-between gap-1 px-0.5">

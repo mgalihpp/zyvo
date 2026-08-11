@@ -212,7 +212,7 @@ export function TypographyMock() {
     setOpen(true);
     const id = setTimeout(() => setOpen(false), 1100);
     return () => clearTimeout(id);
-  }, [selected]);
+  }, []);
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">

@@ -103,7 +103,6 @@ export function Hero() {
         >
           <span className="flex items-center gap-0.5 text-amber-300">
             {Array.from({ length: 5 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: static decorative rating
               <StarIcon key={i} className="size-3.5 fill-current" />
             ))}
           </span>

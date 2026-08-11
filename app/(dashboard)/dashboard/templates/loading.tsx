@@ -30,7 +30,6 @@ export default function TemplatesLoading() {
       {/* Grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }, (_, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
           <TemplateCardSkeleton key={i} />
         ))}
       </div>

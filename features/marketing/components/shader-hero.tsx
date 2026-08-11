@@ -60,21 +60,26 @@ export function ShaderHero({ className }: { className?: string }) {
       }
     }
 
-    function compile(type: number, src: string) {
-      const shader = gl!.createShader(type);
+    function compile(
+      context: WebGLRenderingContext,
+      type: number,
+      src: string,
+    ) {
+      const shader = context.createShader(type);
       if (!shader) return null;
-      gl!.shaderSource(shader, src);
-      gl!.compileShader(shader);
+      context.shaderSource(shader, src);
+      context.compileShader(shader);
       return shader;
     }
 
     const program = gl.createProgram();
-    const vs = compile(gl.VERTEX_SHADER, VERTEX_SHADER);
-    const fs = compile(gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
+    const vs = compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
     if (!program || !vs || !fs) return;
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
     gl.linkProgram(program);
+    // biome-ignore lint/correctness/useHookAtTopLevel: WebGL method, not a React hook
     gl.useProgram(program);
 
     const buffer = gl.createBuffer();
