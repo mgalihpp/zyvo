@@ -54,10 +54,11 @@ export function FormalTemplate({ cv }: TemplateProps) {
         switch (id) {
           case "summary":
             return cv.summary?.trim() ? (
-              <Section key="summary" title="Profil">
-                <p className="whitespace-pre-line text-[var(--cv-color-text)]">
-                  {cv.summary}
-                </p>
+              <Section key="summary" title="Ringkasan">
+                <HtmlContent
+                  className="whitespace-pre-line text-[var(--cv-color-text)]"
+                  html={cv.summary}
+                />
               </Section>
             ) : null;
           case "education":

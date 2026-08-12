@@ -139,10 +139,11 @@ export function CompactTemplate({ cv }: TemplateProps) {
             switch (id) {
               case "summary":
                 return cv.summary?.trim() ? (
-                  <MainSection key="summary" title="Profil">
-                    <p className="whitespace-pre-line text-[0.9em]">
-                      {cv.summary}
-                    </p>
+                  <MainSection key="summary" title="Ringkasan">
+                    <HtmlContent
+                      className="whitespace-pre-line text-[0.9em]"
+                      html={cv.summary}
+                    />
                   </MainSection>
                 ) : null;
               case "experience":

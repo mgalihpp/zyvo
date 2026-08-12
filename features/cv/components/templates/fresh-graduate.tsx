@@ -43,9 +43,10 @@ export function FreshGraduateTemplate({ cv }: TemplateProps) {
 
       {cv.summary?.trim() ? (
         <Section title="About Me">
-          <p className="whitespace-pre-line text-[var(--cv-color-text)]">
-            {cv.summary}
-          </p>
+          <HtmlContent
+            className="whitespace-pre-line text-[var(--cv-color-text)]"
+            html={cv.summary}
+          />
         </Section>
       ) : null}
 

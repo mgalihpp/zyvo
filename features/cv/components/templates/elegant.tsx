@@ -53,9 +53,10 @@ export function ElegantTemplate({ cv }: TemplateProps) {
             case "summary":
               return cv.summary?.trim() ? (
                 <Section key="summary" title="Tentang Saya">
-                  <p className="whitespace-pre-line text-center italic opacity-80">
-                    {cv.summary}
-                  </p>
+                  <HtmlContent
+                    className="whitespace-pre-line text-center italic opacity-80"
+                    html={cv.summary}
+                  />
                 </Section>
               ) : null;
             case "experience":

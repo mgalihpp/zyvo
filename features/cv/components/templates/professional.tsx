@@ -43,9 +43,10 @@ export function ProfessionalTemplate({ cv }: TemplateProps) {
             case "summary":
               return cv.summary?.trim() ? (
                 <Section key="summary" title="Ringkasan">
-                  <p className="whitespace-pre-line text-[var(--cv-color-text)]">
-                    {cv.summary}
-                  </p>
+                  <HtmlContent
+                    className="whitespace-pre-line text-[var(--cv-color-text)]"
+                    html={cv.summary}
+                  />
                 </Section>
               ) : null;
             case "experience":

@@ -45,8 +45,11 @@ export function MinimalTemplate({ cv }: TemplateProps) {
         switch (id) {
           case "summary":
             return cv.summary?.trim() ? (
-              <Section key="summary" title="Profil">
-                <p className="whitespace-pre-line">{cv.summary}</p>
+              <Section key="summary" title="Ringkasan">
+                <HtmlContent
+                  className="whitespace-pre-line"
+                  html={cv.summary}
+                />
               </Section>
             ) : null;
           case "experience":

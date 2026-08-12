@@ -124,8 +124,11 @@ export function CreativeTemplate({ cv }: TemplateProps) {
           switch (id) {
             case "summary":
               return cv.summary?.trim() ? (
-                <MainSection key="summary" title="Profil">
-                  <p className="whitespace-pre-line">{cv.summary}</p>
+                <MainSection key="summary" title="Ringkasan">
+                  <HtmlContent
+                    className="whitespace-pre-line"
+                    html={cv.summary}
+                  />
                 </MainSection>
               ) : null;
             case "experience":
